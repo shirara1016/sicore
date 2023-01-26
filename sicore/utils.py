@@ -42,3 +42,13 @@ class OneVec:
             vec[i - 1: j] = 1
 
         return vec
+
+
+def construct_projection_matrix(basis):
+    basis = np.array(basis)
+    V = np.linalg.qr(basis.T)[0]
+    P = np.dot(V, V.T)
+    if np.sum(np.abs(np.dot(P, P) - P)) > 1e-5 or np.sum(np.abs(P.T - P)) > 1e-5:
+        raise Exception(
+            "The projection matrix is not constructed correctly")
+    return P

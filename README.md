@@ -68,6 +68,7 @@ $ pip uninstall sicore
 **その他の便利な機能**
 - OneVec：特定の場所が1，それ以外が0のベクトルを生成
 - polytope_to_interval()：二次形式の選択イベントを切断区間へと変換する関数
+- construct_projection_matrix()：基底からそれらが張る部分空間への射影行列を生成
 
 ## その他
 テストの実行：
