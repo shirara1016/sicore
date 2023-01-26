@@ -413,11 +413,11 @@ class SelectiveInferenceNorm(InferenceNorm):
             truncated_intervals + [[e, INF]], tol=self.tol)
 
         norm_sup_intervals = standardize(
-            sup_intervals, 0, self.eta_sigma_eta)
+            sup_intervals, self.popmean, self.eta_sigma_eta)
         norm_inf_intervals = standardize(
-            inf_intervals, 0, self.eta_sigma_eta)
+            inf_intervals, self.popmean, self.eta_sigma_eta)
 
-        stat_std = standardize(self.stat, 0, self.eta_sigma_eta)
+        stat_std = standardize(self.stat, self.popmean, self.eta_sigma_eta)
 
         sup_F = tn_cdf(stat_std, norm_sup_intervals,
                        dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
@@ -440,6 +440,7 @@ class SelectiveInferenceNorm(InferenceNorm):
         model_selector: Callable[[Any], bool],
         significance_level: float = 0.05,
         tail: str = 'double',
+        popmean: float = 0,
         tol: float = 1e-10,
         step: float = 1e-10,
         check_only_reject_or_not: bool = False,
@@ -470,6 +471,8 @@ class SelectiveInferenceNorm(InferenceNorm):
             tail (str, optional):
                 'double' for double-tailed test, 'right' for right-tailed test, and
                 'left' for left-tailed test. Defaults to 'double'.
+            popmean (float, optional):
+                Mean of the null distribution. Defaults to 0.
             tol (float, optional):
                 Tolerance error parameter. Defaults to 1e-10.
             step (float, optional):
@@ -515,28 +518,29 @@ class SelectiveInferenceNorm(InferenceNorm):
 
         if over_conditioning:
             result = self._over_conditioned_inference(
-                algorithm, significance_level, tail, retain_selected_model,
+                algorithm, significance_level, tail, popmean, retain_selected_model,
                 tol, dps, max_dps, out_log)
             return result
 
         elif check_only_reject_or_not:
             result = self._rejectability_only_inference(
-                algorithm, model_selector, significance_level, tail, choose_method,
-                retain_selected_model, retain_mappings, tol, step,
+                algorithm, model_selector, significance_level, tail, popmean,
+                choose_method, retain_selected_model, retain_mappings, tol, step,
                 dps, max_dps, out_log)
 
         else:
             result = self._parametric_inference(
-                algorithm, model_selector, significance_level, tail, line_search, max_tail,
+                algorithm, model_selector, significance_level, tail, popmean, line_search, max_tail,
                 retain_selected_model, retain_mappings, tol, step, dps, max_dps, out_log)
 
         return result
 
     def _parametric_inference(
-            self, algorithm, model_selector, significance_level, tail,
+            self, algorithm, model_selector, significance_level, tail, popmean,
             line_search, max_tail, retain_selected_model, retain_mappings,
             tol, step, dps, max_dps, out_log):
 
+        self.popmean = popmean
         self.tol = tol
         self.step = step
         self.dps = dps
@@ -587,10 +591,10 @@ class SelectiveInferenceNorm(InferenceNorm):
 
             z = self._next_search_data(line_search)
 
-        stat_std = standardize(self.stat, 0, self.eta_sigma_eta)
+        stat_std = standardize(self.stat, popmean, self.eta_sigma_eta)
         truncated_intervals = union_all(result_intervals, tol=self.tol)
         norm_intervals = standardize(
-            truncated_intervals, 0, self.eta_sigma_eta)
+            truncated_intervals, popmean, self.eta_sigma_eta)
         F = tn_cdf(stat_std, norm_intervals,
                    dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
         p_value = calc_pvalue(F, tail=tail)
@@ -605,10 +609,11 @@ class SelectiveInferenceNorm(InferenceNorm):
             search_count, detect_count, selected_model, mappings)
 
     def _rejectability_only_inference(
-            self, algorithm, model_selector, significance_level, tail, choose_method,
-            retain_selected_model, retain_mappings, tol, step,
+            self, algorithm, model_selector, significance_level, tail, popmean,
+            choose_method, retain_selected_model, retain_mappings, tol, step,
             dps, max_dps, out_log):
 
+        self.popmean = popmean
         self.tol = tol
         self.step = step
         self.dps = dps
@@ -668,15 +673,18 @@ class SelectiveInferenceNorm(InferenceNorm):
             z = self.determine_next_search_data(choose_method, z_l, z_r)
 
         return SelectiveInferenceResult(
-            standardize(self.stat, 0, self.eta_sigma_eta), significance_level,
+            standardize(self.stat, popmean,
+                        self.eta_sigma_eta), significance_level,
             None, inf_p, sup_p, reject_or_not,
-            standardize(union_all(truncated_intervals), 0, self.eta_sigma_eta),
+            standardize(union_all(truncated_intervals),
+                        popmean, self.eta_sigma_eta),
             search_count, detect_count, selected_model, mappings)
 
     def _over_conditioned_inference(
-            self, algorithm, significance_level, tail, retain_selected_model,
-            tol, dps, max_dps, out_log):
+            self, algorithm, significance_level, tail, popmean,
+            retain_selected_model, tol, dps, max_dps, out_log):
 
+        self.popmean = popmean
         self.tol = tol
         self.dps = dps
         self.max_dps = max_dps
@@ -686,8 +694,8 @@ class SelectiveInferenceNorm(InferenceNorm):
         interval = np.asarray(interval)
         intervals = _interval_to_intervals(interval)
 
-        stat_std = standardize(self.stat, 0, self.eta_sigma_eta)
-        norm_intervals = standardize(intervals, 0, self.eta_sigma_eta)
+        stat_std = standardize(self.stat, popmean, self.eta_sigma_eta)
+        norm_intervals = standardize(intervals, popmean, self.eta_sigma_eta)
         F = tn_cdf(stat_std, norm_intervals,
                    dps=self.dps, max_dps=max_dps, out_log=out_log)
         p_value = calc_pvalue(F, tail=tail)
