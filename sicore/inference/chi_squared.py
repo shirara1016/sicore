@@ -534,3 +534,176 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
                 retain_selected_model, retain_mappings, tol, step, dps, max_dps, out_log)
 
         return result
+
+    def _parametric_inference(
+            self, algorithm, model_selector, significance_level, tail,
+            line_search, max_tail, retain_selected_model, retain_mappings,
+            tol, step, dps, max_dps, out_log):
+
+        self.tol = tol
+        self.step = step
+        self.dps = dps
+        self.max_dps = max_dps
+        self.out_log = out_log
+        self.searched_intervals = union_all(
+            [[NINF, 1e-10], [float(max_tail), INF]], tol=self.tol)
+
+        mappings = dict() if retain_mappings else None
+        result_intervals = list()
+
+        search_count = 0
+        detect_count = 0
+
+        z = self._next_search_data(line_search)
+        while True:
+
+            if z is None:
+                break
+
+            search_count += 1
+            if search_count > 1e6:
+                raise Exception(
+                    'The number of searches exceeds 100,000 times, suggesting an infinite loop.')
+
+            model, interval = algorithm(self.z, self.c, z)
+            interval = np.asarray(interval)
+            intervals = _interval_to_intervals(interval)
+
+            if retain_mappings:
+                for interval in intervals:
+                    interval = tuple(interval)
+                    if interval in mappings:
+                        raise Exception(
+                            "An interval appeared a second time. Usually, numerical error "
+                            "causes this exception. Consider increasing the tol parameter "
+                            "or decreasing max_tail parameter to avoid it.")
+                    mappings[interval] = model
+
+            if model_selector(model):
+                selected_model = model if retain_selected_model else None
+                result_intervals += intervals
+                detect_count += 1
+
+            self.searched_intervals = union_all(
+                self.searched_intervals + intervals, tol=self.tol)
+
+            z = self._next_search_data(line_search)
+
+        stat_chisq = float(self.stat) ** 2
+        truncated_intervals = union_all(result_intervals, tol=self.tol)
+        chi_intervals = intersection(truncated_intervals, [[1e-5, INF]])
+        chisq_intervals = np.power(chi_intervals, 2)
+        F = tc2_cdf_mpmath(stat_chisq, chisq_intervals, self.degree,
+                           dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
+        p_value = calc_pvalue(F, tail=tail)
+
+        inf_F, sup_F = self.calc_range_of_cdf_value(
+            truncated_intervals, [[1e-5, float(max_tail)]])
+        inf_p, sup_p = calc_p_range(inf_F, sup_F, tail=tail)
+
+        return SelectiveInferenceResult(
+            stat_chisq, significance_level, p_value, inf_p, sup_p,
+            (p_value <= significance_level), chisq_intervals,
+            search_count, detect_count, selected_model, mappings)
+
+    def _rejectability_only_inference(
+            self, algorithm, model_selector, significance_level, tail, choose_method,
+            retain_selected_model, retain_mappings, tol, step,
+            dps, max_dps, out_log):
+
+        self.tol = tol
+        self.step = step
+        self.dps = dps
+        self.max_dps = max_dps
+        self.out_log = out_log
+        self.searched_intervals = list()
+
+        mappings = dict() if retain_mappings else None
+        truncated_intervals = list()
+
+        search_count = 0
+        detect_count = 0
+
+        z = self.stat
+        while True:
+            search_count += 1
+            if search_count > 1e6:
+                raise Exception(
+                    'The number of searches exceeds 100,000 times, suggesting an infinite loop.')
+
+            model, interval = algorithm(self.z, self.c, z)
+            interval = np.asarray(interval)
+            intervals = _interval_to_intervals(interval)
+
+            if retain_mappings:
+                for interval in intervals:
+                    interval = tuple(interval)
+                    if interval in mappings:
+                        raise Exception(
+                            "An interval appeared a second time. Usually, numerical error "
+                            "causes this exception. Consider increasing the tol parameter "
+                            "or decreasing max_tail parameter to avoid it."
+                        )
+                    mappings[interval] = model
+
+            if model_selector(model):
+                selected_model = model if retain_selected_model else None
+                truncated_intervals += intervals
+                detect_count += 1
+
+            self.searched_intervals = union_all(
+                self.searched_intervals + intervals, tol=tol)
+
+            inf_F, sup_F = self.calc_range_of_cdf_value(
+                truncated_intervals, self.searched_intervals)
+            inf_p, sup_p = calc_p_range(inf_F, sup_F, tail=tail)
+
+            if sup_p <= significance_level:
+                reject_or_not = True
+                break
+            if inf_p > significance_level:
+                reject_or_not = False
+                break
+
+            z_l = self.left_end - self.step
+            z_r = self.right_end + self.step
+            z = self.determine_next_search_data(choose_method, z_l, z_r)
+            if z <= 1e-5:
+                z = z_r
+
+        truncated_intervals = union_all(truncated_intervals, tol=self.tol)
+        chi_intervals = intersection(truncated_intervals, [[1e-5, INF]])
+        chisq_intervals = np.power(chi_intervals, 2)
+
+        return SelectiveInferenceResult(
+            float(self.stat) ** 2, significance_level,
+            None, inf_p, sup_p, reject_or_not, chisq_intervals,
+            search_count, detect_count, selected_model, mappings)
+
+    def _over_conditioned_inference(
+            self, algorithm, significance_level, tail, retain_selected_model,
+            tol, dps, max_dps, out_log):
+
+        self.tol = tol
+        self.dps = dps
+        self.max_dps = max_dps
+        self.out_log = out_log
+
+        model, interval = algorithm(self.z, self.c, self.stat)
+        interval = np.asarray(interval)
+        intervals = _interval_to_intervals(interval)
+
+        stat_chisq = float(self.stat) ** 2
+        chi_intervals = intersection(intervals, [[1e-5, INF]])
+        chisq_intervals = np.power(chi_intervals, 2)
+        F = tc2_cdf_mpmath(stat_chisq, chisq_intervals, self.degree,
+                           dps=self.dps, max_dps=max_dps, out_log=out_log)
+        p_value = calc_pvalue(F, tail=tail)
+
+        inf_F, sup_F = self.calc_range_of_cdf_value(intervals, intervals)
+        inf_p, sup_p = calc_p_range(inf_F, sup_F, tail=tail)
+
+        return SelectiveInferenceResult(
+            stat_chisq, significance_level, p_value, inf_p, sup_p,
+            (p_value <= significance_level), chisq_intervals, 1, 1,
+            None, model if retain_selected_model else None)
