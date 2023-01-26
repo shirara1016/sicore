@@ -3,8 +3,11 @@ import numpy as np
 from scipy.linalg import fractional_matrix_power
 from ..utils import is_int_or_float
 from ..intervals import intersection, not_, poly_lt_zero, union_all, _interval_to_intervals
-from ..cdf_mpmath import chi2_cdf_mpmath, tc2_cdf_mpmath, tn_cdf_mpmath as tn_cdf
+from ..cdf_mpmath import chi2_cdf_mpmath, tc2_cdf_mpmath
 from .base import *
+
+from scipy.stats import chi2
+from typing import Callable, List, Dict, Tuple, Type
 
 
 class InferenceChiSquared(ABC):
@@ -14,20 +17,24 @@ class InferenceChiSquared(ABC):
     Args:
         data (array-like): Observation data of length `N`.
         var (float, array-like): Value of known variance, or `N`*`N` covariance matrix.
-        basis (array-like): List of basis vector of length `N`.
+        P (array-like): Projection matrix.
+        degree (int): degree of freedom.
+        use_sparse (boolean, optional): Whether to use sparse matrix or not. Defaults to False.
         use_tf (boolean, optional): Whether to use tensorflow or not. Defaults to False.
     """
 
-    def __init__(self, data, var, basis, use_tf=False):
+    def __init__(self, data, var, P, degree, use_sparse=False, use_tf=False):
         self.data = data
-        basis = np.array(basis)
-        V = np.linalg.qr(basis.T)[0]
-        P = np.dot(V, V.T)
         if np.sum(np.abs(np.dot(P, P) - P)) > 1e-5 or np.sum(np.abs(P.T - P)) > 1e-5:
             raise Exception(
                 "The projection matrix is not constructed correctly")
         self.length = len(data)
-        self.degree = len(basis)
+        self.degree = degree
+
+        if use_sparse:
+            raise Exception(
+                "use_sparse is not available in the current implementation")
+
         if is_int_or_float(var):
             self.cov = var * np.identity(self.length)
         else:
@@ -49,9 +56,9 @@ class InferenceChiSquared(ABC):
                 tf.tensordot(self.inv_sqrt_cov, self.P_data, axes=1), ord=2)
 
         else:
-            self.P_data = np.dot(P, data)
+            self.P_data = P @ data
             self.stat = np.linalg.norm(
-                np.dot(self.inv_sqrt_cov, self.P_data), ord=2)
+                self.inv_sqrt_cov @ self.P_data, ord=2)
 
     @abstractmethod
     def test(self, *args, **kwargs):
@@ -93,12 +100,14 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
     Args:
         data (array-like): Observation data of length `N`.
         var (float, array-like): Value of known variance, or `N`*`N` covariance matrix.
-        basis (array-like): List of basis vector of length `N`.
+        P (array-like): Projection matrix.
+        degree (int): degree of freedom.
+        use_sparse (boolean, optional): Whether to use sparse matrix or not. Defaults to False.
         use_tf (boolean, optional): Whether to use tensorflow or not. Defaults to False.
     """
 
-    def __init__(self, data, var, basis, use_tf=False):
-        super().__init__(data, var, basis, use_tf)
+    def __init__(self, data, var, P, degree, use_sparse=False, use_tf=False):
+        super().__init__(data, var, P, degree, use_sparse, use_tf)
         self.c = self.P_data / self.stat  # `b` vector in para si.
         self.z = self.data - self.P_data  # `a` vector in para si.
         self.intervals = [[NINF, INF]]
@@ -384,3 +393,317 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
                     z = z_l
             else:
                 z = z_r
+
+    def calc_range_of_cdf_value(self, truncated_intervals, searched_intervals):
+
+        lb = 1e-5
+        unsearched_intervals = not_(searched_intervals)
+        s = intersection(unsearched_intervals, [
+            NINF, float(self.stat)])[-1][1]
+        e = intersection(unsearched_intervals, [
+            float(self.stat), INF])[0][0]
+
+        self.left_end = s
+        self.right_end = e
+
+        sup_intervals = union_all(
+            truncated_intervals + [[NINF, s]], tol=self.tol)
+        inf_intervals = union_all(
+            truncated_intervals + [[e, INF]], tol=self.tol)
+
+        chi_sup_intervals = intersection(
+            sup_intervals, [[lb, INF]])
+        chi_inf_intervals = intersection(
+            inf_intervals, [[lb, INF]])
+
+        chisq_sup_intervals = np.power(chi_sup_intervals, 2)
+        chisq_inf_intervals = np.power(chi_inf_intervals, 2)
+
+        stat_chisq = float(self.stat) ** 2
+
+        sup_F = tc2_cdf_mpmath(stat_chisq, chisq_sup_intervals, self.degree,
+                               dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
+        inf_F = tc2_cdf_mpmath(stat_chisq, chisq_inf_intervals, self.degree,
+                               dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
+
+        return inf_F, sup_F
+
+    def determine_next_search_data(self, choose_method, *args):
+        if choose_method == 'near_stat':
+            def method(z): return -np.abs(z - float(self.stat))
+        if choose_method == 'high_pdf':
+            def method(z): return chi2.pdf(z ** 2, self.degree)
+        if choose_method == 'random':
+            return random.choice(args)
+        return max(args, key=method)
+
+    def inference(
+        self,
+        algorithm: Callable[[np.ndarray, np.ndarray, float], Tuple[List[List[float]], Any]],
+        model_selector: Callable[[Any], bool],
+        significance_level: float = 0.05,
+        tail: str = 'right',
+        tol: float = 1e-10,
+        step: float = 1e-10,
+        check_only_reject_or_not: bool = False,
+        over_conditioning: bool = False,
+        line_search: bool = True,
+        max_tail: float = 1e3,
+        choose_method: str = 'high_pdf',
+        retain_selected_model: bool = False,
+        retain_mappings: bool = False,
+        dps: int | str = 'auto',
+        max_dps: int = 5000,
+        out_log: str = 'test_log.log'
+    ) -> Type[SelectiveInferenceResult]:
+        """Perform Selective Inference. This is unified interface for SI.
+
+        Args:
+            algorithm (Callable[[np.ndarray, np.ndarray, float], Tuple[List[List[float]], Any]]):
+                Callable function which takes two vectors (`a`, `b`)
+                and a scalar `z` that can satisfy `data = a + b * z`
+                as arguments, and returns the selected model (any) and
+                the truncation intervals (array-like). A closure function might be
+                helpful to implement this.
+            model_selector (Callable[[Any], bool]):
+                Callable function which takes a selected model (any) as single argument, and
+                returns True if the model is used for the testing, and False otherwise.
+            significance_level (float, optional):
+                Significance level for the testing. Defaults to 0.05.
+            tail (str, optional):
+                'double' for double-tailed test, 'right' for right-tailed test, and
+                'left' for left-tailed test. Defaults to 'double'.
+            tol (float, optional):
+                Tolerance error parameter. Defaults to 1e-10.
+            step (float, optional):
+                Step width for line search. Defaults to 1e-10.
+            check_only_reject_or_not (bool, optional):
+                Inference only for rejectness. Defaults to False.
+            over_conditioning (bool, optional):
+                Over conditioning Inference. Defaults to False.
+            line_search (bool, optional):
+                Wheter to perform a line search or a random search. Defaults to True.
+            max_tail (float, optional):
+                Maximum tail value to be parametrically searched when neither option
+                check_only_rejecto_or_not nor over_coditionig is enabled. Defaults to 1e3.
+            choose_method (str, optional):
+                When check_only_reject_or_not is activated, 'near_stat' and 'high_pdf'
+                can be specified in the algorithm to select the search
+                direction. Defaults to 'near_stat'.
+            retain_selected_model (bool, optional):
+                Whether retain selected model as returns or not. Defaults to False.
+            retain_mappings (bool, optional):
+                Whether retain mappings as returns or not. Defaults to False.
+            dps (int | str, optional):
+                dps value for mpmath. Set 'auto' to select dps
+                automatically. Defaults to 'auto'.
+            max_dps (int, optional):
+                Maximum dps value for mpmath. This option is valid
+                when `dps` is set to 'auto'. Defaults to 5000.
+            out_log (str, optional):
+                Name for log file of mpmath. Defaults to 'test_log.log'.
+        Raises:
+            Exception:
+                The two options, check_only_reject_or_not and over-conditioning,
+                cannot be activated at the same time.
+
+        Returns:
+            Type[SelectiveInferenceResult]
+        """
+
+        if over_conditioning and check_only_reject_or_not:
+            raise Exception(
+                'The two options, check_only_reject_or_not and over-conditioning, cannot be activated at the same time.'
+            )
+
+        if over_conditioning:
+            result = self._over_conditioned_inference(
+                algorithm, significance_level, tail, retain_selected_model,
+                tol, dps, max_dps, out_log)
+            return result
+
+        elif check_only_reject_or_not:
+            result = self._rejectability_only_inference(
+                algorithm, model_selector, significance_level, tail, choose_method,
+                retain_selected_model, retain_mappings, tol, step,
+                dps, max_dps, out_log)
+
+        else:
+            result = self._parametric_inference(
+                algorithm, model_selector, significance_level, tail, line_search, max_tail,
+                retain_selected_model, retain_mappings, tol, step, dps, max_dps, out_log)
+
+        return result
+
+    def _parametric_inference(
+            self, algorithm, model_selector, significance_level, tail,
+            line_search, max_tail, retain_selected_model, retain_mappings,
+            tol, step, dps, max_dps, out_log):
+
+        self.tol = tol
+        self.step = step
+        self.dps = dps
+        self.max_dps = max_dps
+        self.out_log = out_log
+        self.searched_intervals = union_all(
+            [[NINF, 1e-10], [float(max_tail), INF]], tol=self.tol)
+
+        mappings = dict() if retain_mappings else None
+        result_intervals = list()
+
+        search_count = 0
+        detect_count = 0
+
+        z = self._next_search_data(line_search)
+        while True:
+
+            if z is None:
+                break
+
+            search_count += 1
+            if search_count > 1e6:
+                raise Exception(
+                    'The number of searches exceeds 100,000 times, suggesting an infinite loop.')
+
+            model, interval = algorithm(self.z, self.c, z)
+            interval = np.asarray(interval)
+            intervals = _interval_to_intervals(interval)
+
+            if retain_mappings:
+                for interval in intervals:
+                    interval = tuple(interval)
+                    if interval in mappings:
+                        raise Exception(
+                            "An interval appeared a second time. Usually, numerical error "
+                            "causes this exception. Consider increasing the tol parameter "
+                            "or decreasing max_tail parameter to avoid it.")
+                    mappings[interval] = model
+
+            if model_selector(model):
+                selected_model = model if retain_selected_model else None
+                result_intervals += intervals
+                detect_count += 1
+
+            self.searched_intervals = union_all(
+                self.searched_intervals + intervals, tol=self.tol)
+
+            z = self._next_search_data(line_search)
+
+        stat_chisq = float(self.stat) ** 2
+        truncated_intervals = union_all(result_intervals, tol=self.tol)
+        chi_intervals = intersection(truncated_intervals, [[1e-5, INF]])
+        chisq_intervals = np.power(chi_intervals, 2)
+        F = tc2_cdf_mpmath(stat_chisq, chisq_intervals, self.degree,
+                           dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
+        p_value = calc_pvalue(F, tail=tail)
+
+        inf_F, sup_F = self.calc_range_of_cdf_value(
+            truncated_intervals, [[1e-5, float(max_tail)]])
+        inf_p, sup_p = calc_p_range(inf_F, sup_F, tail=tail)
+
+        return SelectiveInferenceResult(
+            stat_chisq, significance_level, p_value, inf_p, sup_p,
+            (p_value <= significance_level), chisq_intervals,
+            search_count, detect_count, selected_model, mappings)
+
+    def _rejectability_only_inference(
+            self, algorithm, model_selector, significance_level, tail, choose_method,
+            retain_selected_model, retain_mappings, tol, step,
+            dps, max_dps, out_log):
+
+        self.tol = tol
+        self.step = step
+        self.dps = dps
+        self.max_dps = max_dps
+        self.out_log = out_log
+        self.searched_intervals = list()
+
+        mappings = dict() if retain_mappings else None
+        truncated_intervals = list()
+
+        search_count = 0
+        detect_count = 0
+
+        z = self.stat
+        while True:
+            search_count += 1
+            if search_count > 1e6:
+                raise Exception(
+                    'The number of searches exceeds 100,000 times, suggesting an infinite loop.')
+
+            model, interval = algorithm(self.z, self.c, z)
+            interval = np.asarray(interval)
+            intervals = _interval_to_intervals(interval)
+
+            if retain_mappings:
+                for interval in intervals:
+                    interval = tuple(interval)
+                    if interval in mappings:
+                        raise Exception(
+                            "An interval appeared a second time. Usually, numerical error "
+                            "causes this exception. Consider increasing the tol parameter "
+                            "or decreasing max_tail parameter to avoid it."
+                        )
+                    mappings[interval] = model
+
+            if model_selector(model):
+                selected_model = model if retain_selected_model else None
+                truncated_intervals += intervals
+                detect_count += 1
+
+            self.searched_intervals = union_all(
+                self.searched_intervals + intervals, tol=tol)
+
+            inf_F, sup_F = self.calc_range_of_cdf_value(
+                truncated_intervals, self.searched_intervals)
+            inf_p, sup_p = calc_p_range(inf_F, sup_F, tail=tail)
+
+            if sup_p <= significance_level:
+                reject_or_not = True
+                break
+            if inf_p > significance_level:
+                reject_or_not = False
+                break
+
+            z_l = self.left_end - self.step
+            z_r = self.right_end + self.step
+            z = self.determine_next_search_data(choose_method, z_l, z_r)
+            if z <= 1e-5:
+                z = z_r
+
+        truncated_intervals = union_all(truncated_intervals, tol=self.tol)
+        chi_intervals = intersection(truncated_intervals, [[1e-5, INF]])
+        chisq_intervals = np.power(chi_intervals, 2)
+
+        return SelectiveInferenceResult(
+            float(self.stat) ** 2, significance_level,
+            None, inf_p, sup_p, reject_or_not, chisq_intervals,
+            search_count, detect_count, selected_model, mappings)
+
+    def _over_conditioned_inference(
+            self, algorithm, significance_level, tail, retain_selected_model,
+            tol, dps, max_dps, out_log):
+
+        self.tol = tol
+        self.dps = dps
+        self.max_dps = max_dps
+        self.out_log = out_log
+
+        model, interval = algorithm(self.z, self.c, self.stat)
+        interval = np.asarray(interval)
+        intervals = _interval_to_intervals(interval)
+
+        stat_chisq = float(self.stat) ** 2
+        chi_intervals = intersection(intervals, [[1e-5, INF]])
+        chisq_intervals = np.power(chi_intervals, 2)
+        F = tc2_cdf_mpmath(stat_chisq, chisq_intervals, self.degree,
+                           dps=self.dps, max_dps=max_dps, out_log=out_log)
+        p_value = calc_pvalue(F, tail=tail)
+
+        inf_F, sup_F = self.calc_range_of_cdf_value(intervals, intervals)
+        inf_p, sup_p = calc_p_range(inf_F, sup_F, tail=tail)
+
+        return SelectiveInferenceResult(
+            stat_chisq, significance_level, p_value, inf_p, sup_p,
+            (p_value <= significance_level), chisq_intervals, 1, 1,
+            None, model if retain_selected_model else None)

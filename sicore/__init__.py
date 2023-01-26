@@ -3,7 +3,7 @@ Core package for selective inference.
 """
 from . import intervals, utils
 from .intervals import polytope_to_interval
-from .utils import OneVec
+from .utils import OneVec, construct_projection_matrix
 from .cdf_mpmath import tc2_cdf_mpmath as tc2_cdf
 from .cdf_mpmath import tf_cdf_mpmath as tf_cdf
 from .cdf_mpmath import tn_cdf_mpmath as tn_cdf
@@ -72,5 +72,6 @@ __all__ = [
     "intervals",
     "utils",
     "polytope_to_interval",
+    "construct_projection_matrix",
     "OneVec"
 ]
