@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 import math
 import numpy as np
+from scipy import sparse
 from ..utils import is_int_or_float
 from ..intervals import intersection, not_, poly_lt_zero, union_all, _interval_to_intervals
 from ..cdf_mpmath import tn_cdf_mpmath as tn_cdf
@@ -18,10 +19,15 @@ class InferenceNorm(ABC):
         data (array-like): Observation data of length `N`.
         var (float, array-like): Value of known variance, or `N`*`N` covariance matrix.
         eta (array-like): Contrast vector of length `N`.
+        use_sparse (boolean, optional): Whether to use sparse matrix or not. Defaults to False.
         use_tf (boolean, optional): Whether to use tensorflow or not. Defaults to False.
     """
 
-    def __init__(self, data, var, eta, use_tf=False):
+    def __init__(
+            self, data, var, eta, use_sparse=False, use_tf=False):
+        if use_sparse and use_tf:
+            raise Exception(
+                'Cannot activate two options, use_sparse and use_tf, at the same time')
         self.data = data
         self.eta = eta
         self.length = len(data)
@@ -44,12 +50,19 @@ class InferenceNorm(ABC):
 
         else:
             if is_int_or_float(var):
-                self.cov = var * np.identity(self.length)
+                if use_sparse:
+                    self.cov = var * sparse.identity(self.length)
+                else:
+                    self.cov = var * np.identity(self.length)
             else:
-                self.cov = np.asarray(var)
-            self.stat = np.dot(eta, data)
-            self.sigma_eta = np.dot(self.cov, eta)
-            self.eta_sigma_eta = np.dot(eta, self.sigma_eta)
+                if use_sparse:
+                    self.cov = sparse.csr_matrix(var)
+                else:
+                    self.cov = np.asarray(var)
+
+            self.stat = eta @ data
+            self.sigma_eta = self.cov @ eta
+            self.eta_sigma_eta = eta @ self.sigma_eta
 
     @abstractmethod
     def test(self, *args, **kwargs):
@@ -65,6 +78,7 @@ class NaiveInferenceNorm(InferenceNorm):
         data (array-like): Observation data of length `N`.
         var (float, array-like): Value of known variance, or `N`*`N`covariance matrix.
         eta (array-like): Contrast vector of length `N`.
+        use_sparse (boolean, optional): Whether to use sparse matrix or not. Defaults to False.
         use_tf (boolean, optional): Whether to use tensorflow or not. Defaults to False.
     """
 
@@ -94,11 +108,12 @@ class SelectiveInferenceNorm(InferenceNorm):
         data (array-like): Observation data of length `N`.
         var (float, array-like): Value of known variance, or `N`*`N` covariance matrix.
         eta (array-like): Contrast vector of length `N`.
+        use_sparse (boolean, optional): Whether to use sparse matrix or not. Defaults to False.
         use_tf (boolean, optional): Whether to use tensorflow or not. Defaults to False.
     """
 
-    def __init__(self, data, var, eta, use_tf=False):
-        super().__init__(data, var, eta, use_tf)
+    def __init__(self, data, var, eta, use_sparse=False, use_tf=False):
+        super().__init__(data, var, eta, use_sparse, use_tf)
         self.c = self.sigma_eta / self.eta_sigma_eta  # `b` vector in para si.
         self.z = data - self.stat * self.c  # `a` vecotr in para si.
         self.intervals = [[NINF, INF]]
@@ -381,13 +396,16 @@ class SelectiveInferenceNorm(InferenceNorm):
             else:
                 z = z_r
 
-    def calc_range_of_cdf_value(self, stat, truncated_intervals, searched_intervals):
+    def calc_range_of_cdf_value(self, truncated_intervals, searched_intervals):
 
         unsearched_intervals = not_(searched_intervals)
         s = intersection(unsearched_intervals, [
-            NINF, float(stat)])[-1][-1]
+            NINF, float(self.stat)])[-1][-1]
         e = intersection(unsearched_intervals, [
-            float(stat), INF])[0][0]
+            float(self.stat), INF])[0][0]
+
+        self.left_end = s
+        self.right_end = e
 
         sup_intervals = union_all(
             truncated_intervals + [[NINF, s]], tol=self.tol)
@@ -399,9 +417,11 @@ class SelectiveInferenceNorm(InferenceNorm):
         norm_inf_intervals = standardize(
             inf_intervals, 0, self.eta_sigma_eta)
 
-        sup_F = tn_cdf(stat, norm_sup_intervals,
+        stat_std = standardize(self.stat, 0, self.eta_sigma_eta)
+
+        sup_F = tn_cdf(stat_std, norm_sup_intervals,
                        dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
-        inf_F = tn_cdf(stat, norm_inf_intervals,
+        inf_F = tn_cdf(stat_std, norm_inf_intervals,
                        dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
         return inf_F, sup_F
 
@@ -433,6 +453,60 @@ class SelectiveInferenceNorm(InferenceNorm):
         max_dps: int = 5000,
         out_log: str = 'test_log.log'
     ) -> Type[SelectiveInferenceResult]:
+        """Perform Selective Inference. This is unified interface for SI.
+
+        Args:
+            algorithm (Callable[[np.ndarray, np.ndarray, float], Tuple[List[List[float]], Any]]):
+                Callable function which takes two vectors (`a`, `b`)
+                and a scalar `z` that can satisfy `data = a + b * z`
+                as arguments, and returns the selected model (any) and
+                the truncation intervals (array-like). A closure function might be
+                helpful to implement this.
+            model_selector (Callable[[Any], bool]):
+                Callable function which takes a selected model (any) as single argument, and
+                returns True if the model is used for the testing, and False otherwise.
+            significance_level (float, optional):
+                Significance level for the testing. Defaults to 0.05.
+            tail (str, optional):
+                'double' for double-tailed test, 'right' for right-tailed test, and
+                'left' for left-tailed test. Defaults to 'double'.
+            tol (float, optional):
+                Tolerance error parameter. Defaults to 1e-10.
+            step (float, optional):
+                Step width for line search. Defaults to 1e-10.
+            check_only_reject_or_not (bool, optional):
+                Inference only for rejectness. Defaults to False.
+            over_conditioning (bool, optional):
+                Over conditioning Inference. Defaults to False.
+            line_search (bool, optional):
+                Wheter to perform a line search or a random search. Defaults to True.
+            max_tail (float, optional):
+                Maximum tail value to be parametrically searched when neither option
+                check_only_rejecto_or_not nor over_coditionig is enabled. Defaults to 1e3.
+            choose_method (str, optional):
+                When check_only_reject_or_not is activated, 'near_stat' and 'high_pdf'
+                can be specified in the algorithm to select the search
+                direction. Defaults to 'near_stat'.
+            retain_selected_model (bool, optional):
+                Whether retain selected model as returns or not. Defaults to False.
+            retain_mappings (bool, optional):
+                Whether retain mappings as returns or not. Defaults to False.
+            dps (int | str, optional):
+                dps value for mpmath. Set 'auto' to select dps
+                automatically. Defaults to 'auto'.
+            max_dps (int, optional):
+                Maximum dps value for mpmath. This option is valid
+                when `dps` is set to 'auto'. Defaults to 5000.
+            out_log (str, optional):
+                Name for log file of mpmath. Defaults to 'test_log.log'.
+        Raises:
+            Exception:
+                The two options, check_only_reject_or_not and over-conditioning,
+                cannot be activated at the same time.
+
+        Returns:
+            Type[SelectiveInferenceResult]
+        """
 
         if over_conditioning and check_only_reject_or_not:
             raise Exception(
@@ -445,11 +519,12 @@ class SelectiveInferenceNorm(InferenceNorm):
                 tol, dps, max_dps, out_log)
             return result
 
-        if check_only_reject_or_not:
+        elif check_only_reject_or_not:
             result = self._rejectability_only_inference(
                 algorithm, model_selector, significance_level, tail, choose_method,
                 retain_selected_model, retain_mappings, tol, step,
                 dps, max_dps, out_log)
+
         else:
             result = self._parametric_inference(
                 algorithm, model_selector, significance_level, tail, line_search, max_tail,
@@ -458,29 +533,25 @@ class SelectiveInferenceNorm(InferenceNorm):
         return result
 
     def _parametric_inference(
-        self, algorithm, model_selector, significance_level=0.05, tail='double',
-        line_search=True, max_tail=1000, retain_selected_model=False, retain_mappings=False,
-        tol=1e-10, step=1e-10, dps='auto', max_dps=5000, out_log='test_log.log'
-    ):
+            self, algorithm, model_selector, significance_level, tail,
+            line_search, max_tail, retain_selected_model, retain_mappings,
+            tol, step, dps, max_dps, out_log):
 
         self.tol = tol
+        self.step = step
         self.dps = dps
         self.max_dps = max_dps
         self.out_log = out_log
-
         self.searched_intervals = union_all(
-            [[NINF, -float(max_tail)], [float(max_tail), INF]], tol=self.tol
-        )
-        self.step = step
+            [[NINF, -float(max_tail)], [float(max_tail), INF]], tol=self.tol)
+
         mappings = dict() if retain_mappings else None
         result_intervals = list()
 
         search_count = 0
         detect_count = 0
 
-        stat = standardize(self.stat, 0, self.eta_sigma_eta)
         z = self._next_search_data(line_search)
-
         while True:
 
             if z is None:
@@ -512,47 +583,51 @@ class SelectiveInferenceNorm(InferenceNorm):
                 detect_count += 1
 
             self.searched_intervals = union_all(
-                self.searched_intervals + intervals, tol=tol)
+                self.searched_intervals + intervals, tol=self.tol)
 
             z = self._next_search_data(line_search)
 
+        stat_std = standardize(self.stat, 0, self.eta_sigma_eta)
         truncated_intervals = union_all(result_intervals, tol=self.tol)
-
-        p_value = self.test(truncated_intervals, dps=dps,
-                            max_dps=max_dps, out_log=out_log)
+        norm_intervals = standardize(
+            truncated_intervals, 0, self.eta_sigma_eta)
+        F = tn_cdf(stat_std, norm_intervals,
+                   dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
+        p_value = calc_pvalue(F, tail=tail)
 
         inf_F, sup_F = self.calc_range_of_cdf_value(
-            stat, truncated_intervals, [[-float(max_tail), float(max_tail)]])
+            truncated_intervals, [[-float(max_tail), float(max_tail)]])
         inf_p, sup_p = calc_p_range(inf_F, sup_F, tail=tail)
 
         return SelectiveInferenceResult(
-            stat, significance_level, p_value, inf_p, sup_p,
-            (p_value <= significance_level),
-            standardize(truncated_intervals, 0, self.eta_sigma_eta),
+            stat_std, significance_level, p_value, inf_p, sup_p,
+            (p_value <= significance_level), norm_intervals,
             search_count, detect_count, selected_model, mappings)
 
     def _rejectability_only_inference(
-        self, algorithm, model_selector, significance_level=0.05, tail='double', choose_method='near_stat',
-        retain_selected_model=False, retain_mappings=False, tol=1e-10, step=1e-10,
-        dps='auto', max_dps=5000, out_log='test_log.log'
-    ):
+            self, algorithm, model_selector, significance_level, tail, choose_method,
+            retain_selected_model, retain_mappings, tol, step,
+            dps, max_dps, out_log):
+
         self.tol = tol
         self.step = step
+        self.dps = dps
+        self.max_dps = max_dps
+        self.out_log = out_log
         self.searched_intervals = list()
-        truncated_intervals = list()
+
         mappings = dict() if retain_mappings else None
+        truncated_intervals = list()
 
         search_count = 0
         detect_count = 0
 
-        stat = standardize(self.stat, 0, self.eta_sigma_eta)
-
         z = self.stat
         while True:
+            search_count += 1
             if search_count > 1e6:
                 raise Exception(
                     'The number of searches exceeds 100,000 times, suggesting an infinite loop.')
-            search_count += 1
 
             model, interval = algorithm(self.z, self.c, z)
             interval = np.asarray(interval)
@@ -575,29 +650,10 @@ class SelectiveInferenceNorm(InferenceNorm):
                 detect_count += 1
 
             self.searched_intervals = union_all(
-                self.searched_intervals + intervals, tol=self.tol)
+                self.searched_intervals + intervals, tol=tol)
 
-            unsearched_intervals = not_(self.searched_intervals)
-            s = intersection(unsearched_intervals, [
-                             NINF, float(self.stat)])[-1][1]
-            e = intersection(unsearched_intervals, [
-                             float(self.stat), INF])[0][0]
-
-            sup_intervals = union_all(
-                truncated_intervals + [[NINF, s]], tol=self.tol)
-            inf_intervals = union_all(
-                truncated_intervals + [[e, INF]], tol=self.tol)
-
-            norm_sup_intervals = standardize(
-                sup_intervals, 0, self.eta_sigma_eta)
-            norm_inf_intervals = standardize(
-                inf_intervals, 0, self.eta_sigma_eta)
-
-            sup_F = tn_cdf(stat, norm_sup_intervals,
-                           dps=dps, max_dps=max_dps, out_log=out_log)
-            inf_F = tn_cdf(stat, norm_inf_intervals,
-                           dps=dps, max_dps=max_dps, out_log=out_log)
-
+            inf_F, sup_F = self.calc_range_of_cdf_value(
+                truncated_intervals, self.searched_intervals)
             inf_p, sup_p = calc_p_range(inf_F, sup_F, tail=tail)
 
             if sup_p <= significance_level:
@@ -607,60 +663,41 @@ class SelectiveInferenceNorm(InferenceNorm):
                 reject_or_not = False
                 break
 
-            z_l = s - self.step
-            z_r = e + self.step
-
+            z_l = self.left_end - self.step
+            z_r = self.right_end + self.step
             z = self.determine_next_search_data(choose_method, z_l, z_r)
 
         return SelectiveInferenceResult(
-            stat, significance_level, None, inf_p, sup_p, reject_or_not,
+            standardize(self.stat, 0, self.eta_sigma_eta), significance_level,
+            None, inf_p, sup_p, reject_or_not,
             standardize(union_all(truncated_intervals), 0, self.eta_sigma_eta),
             search_count, detect_count, selected_model, mappings)
 
     def _over_conditioned_inference(
-        self, algorithm, significance_level=0.05, tail='double', retain_selected_model=False,
-        tol=1e-10, dps='auto', max_dps=5000, out_log='test_log.log'
-    ):
+            self, algorithm, significance_level, tail, retain_selected_model,
+            tol, dps, max_dps, out_log):
 
         self.tol = tol
         self.dps = dps
         self.max_dps = max_dps
         self.out_log = out_log
 
-        stat = standardize(self.stat, 0, self.eta_sigma_eta)
-
         model, interval = algorithm(self.z, self.c, self.stat)
         interval = np.asarray(interval)
         intervals = _interval_to_intervals(interval)
 
-        p_value = self.test(intervals)
+        stat_std = standardize(self.stat, 0, self.eta_sigma_eta)
+        norm_intervals = standardize(intervals, 0, self.eta_sigma_eta)
+        F = tn_cdf(stat_std, norm_intervals,
+                   dps=self.dps, max_dps=max_dps, out_log=out_log)
+        p_value = calc_pvalue(F, tail=tail)
 
-        unsearched_intervals = not_(intervals)
-        s = intersection(unsearched_intervals, [
-            NINF, float(self.stat)])[-1][1]
-        e = intersection(unsearched_intervals, [
-            float(self.stat), INF])[0][0]
-
-        sup_intervals = union_all(
-            intervals + [[NINF, s]], tol=self.tol)
-        inf_intervals = union_all(
-            intervals + [[e, INF]], tol=self.tol)
-
-        norm_sup_intervals = standardize(
-            sup_intervals, 0, self.eta_sigma_eta)
-        norm_inf_intervals = standardize(
-            inf_intervals, 0, self.eta_sigma_eta)
-
-        sup_F = tn_cdf(stat, norm_sup_intervals,
-                       dps=dps, max_dps=max_dps, out_log=out_log)
-        inf_F = tn_cdf(stat, norm_inf_intervals,
-                       dps=dps, max_dps=max_dps, out_log=out_log)
+        inf_F, sup_F = self.calc_range_of_cdf_value(intervals, intervals)
         inf_p, sup_p = calc_p_range(inf_F, sup_F, tail=tail)
 
         return SelectiveInferenceResult(
-            stat, significance_level, p_value, inf_p, sup_p,
-            (p_value <= significance_level),
-            standardize(intervals, 0, self.eta_sigma_eta), 1, 1,
+            stat_std, significance_level, p_value, inf_p, sup_p,
+            (p_value <= significance_level), norm_intervals, 1, 1,
             None, model if retain_selected_model else None)
 
 

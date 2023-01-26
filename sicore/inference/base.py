@@ -86,7 +86,7 @@ def calc_p_range(inf_F, sup_F, tail='double'):
     elif tail == 'left':
         sup_p = float(sup_F)
         inf_p = float(inf_F)
-    return (inf_p, sup_p)
+    return (max(inf_p, 0), min(sup_p, 1))
 
 
 def standardize(x, mean=0, var=1):
