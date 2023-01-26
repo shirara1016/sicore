@@ -3,8 +3,11 @@ import numpy as np
 from scipy.linalg import fractional_matrix_power
 from ..utils import is_int_or_float
 from ..intervals import intersection, not_, poly_lt_zero, union_all, _interval_to_intervals
-from ..cdf_mpmath import chi2_cdf_mpmath, tc2_cdf_mpmath, tn_cdf_mpmath as tn_cdf
+from ..cdf_mpmath import chi2_cdf_mpmath, tc2_cdf_mpmath
 from .base import *
+
+from scipy.stats import chi2
+from typing import Callable, List, Dict, Tuple, Type
 
 
 class InferenceChiSquared(ABC):
@@ -14,20 +17,24 @@ class InferenceChiSquared(ABC):
     Args:
         data (array-like): Observation data of length `N`.
         var (float, array-like): Value of known variance, or `N`*`N` covariance matrix.
-        basis (array-like): List of basis vector of length `N`.
+        P (array-like): Projection matrix.
+        degree (int): degree of freedom.
+        use_sparse (boolean, optional): Whether to use sparse matrix or not. Defaults to False.
         use_tf (boolean, optional): Whether to use tensorflow or not. Defaults to False.
     """
 
-    def __init__(self, data, var, basis, use_tf=False):
+    def __init__(self, data, var, P, degree, use_sparse=False, use_tf=False):
         self.data = data
-        basis = np.array(basis)
-        V = np.linalg.qr(basis.T)[0]
-        P = np.dot(V, V.T)
         if np.sum(np.abs(np.dot(P, P) - P)) > 1e-5 or np.sum(np.abs(P.T - P)) > 1e-5:
             raise Exception(
                 "The projection matrix is not constructed correctly")
         self.length = len(data)
-        self.degree = len(basis)
+        self.degree = degree
+
+        if use_sparse:
+            raise Exception(
+                "use_sparse is not available in the current implementation")
+
         if is_int_or_float(var):
             self.cov = var * np.identity(self.length)
         else:
@@ -49,9 +56,9 @@ class InferenceChiSquared(ABC):
                 tf.tensordot(self.inv_sqrt_cov, self.P_data, axes=1), ord=2)
 
         else:
-            self.P_data = np.dot(P, data)
+            self.P_data = P @ data
             self.stat = np.linalg.norm(
-                np.dot(self.inv_sqrt_cov, self.P_data), ord=2)
+                self.inv_sqrt_cov @ self.P_data, ord=2)
 
     @abstractmethod
     def test(self, *args, **kwargs):
@@ -93,12 +100,14 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
     Args:
         data (array-like): Observation data of length `N`.
         var (float, array-like): Value of known variance, or `N`*`N` covariance matrix.
-        basis (array-like): List of basis vector of length `N`.
+        P (array-like): Projection matrix.
+        degree (int): degree of freedom.
+        use_sparse (boolean, optional): Whether to use sparse matrix or not. Defaults to False.
         use_tf (boolean, optional): Whether to use tensorflow or not. Defaults to False.
     """
 
-    def __init__(self, data, var, basis, use_tf=False):
-        super().__init__(data, var, basis, use_tf)
+    def __init__(self, data, var, P, degree, use_sparse=False, use_tf=False):
+        super().__init__(data, var, P, degree, use_sparse, use_tf)
         self.c = self.P_data / self.stat  # `b` vector in para si.
         self.z = self.data - self.P_data  # `a` vector in para si.
         self.intervals = [[NINF, INF]]
@@ -384,3 +393,49 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
                     z = z_l
             else:
                 z = z_r
+
+    def calc_range_of_cdf_value(self, truncated_intervals, searched_intervals):
+
+        lb = 1e-5
+        unsearched_intervals = not_(searched_intervals)
+        s = intersection(unsearched_intervals, [
+            NINF, float(self.stat)])[-1][1]
+        e = intersection(unsearched_intervals, [
+            float(self.stat), INF])[0][0]
+
+        self.left_end = s
+        self.right_end = e
+
+        sup_intervals = union_all(
+            truncated_intervals + [[NINF, s]], tol=self.tol)
+        inf_intervals = union_all(
+            truncated_intervals + [[e, INF]], tol=self.tol)
+
+        chi_sup_intervals = intersection(
+            sup_intervals, [[lb, INF]])
+        chi_inf_intervals = intersection(
+            inf_intervals, [[lb, INF]])
+
+        chisq_sup_intervals = np.power(chi_sup_intervals, 2)
+        chisq_inf_intervals = np.power(chi_inf_intervals, 2)
+
+        stat_chisq = float(self.stat) ** 2
+
+        sup_F = tc2_cdf_mpmath(stat_chisq, chisq_sup_intervals, self.degree,
+                               dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
+        inf_F = tc2_cdf_mpmath(stat_chisq, chisq_inf_intervals, self.degree,
+                               dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
+
+        return inf_F, sup_F
+
+    def determine_next_search_data(self, choose_method, *args):
+        if choose_method == 'near_stat':
+            def method(z): return -np.abs(z - float(self.stat))
+        if choose_method == 'high_pdf':
+            def method(z): return chi2.pdf(z ** 2, self.degree)
+        if choose_method == 'random':
+            return random.choice(args)
+        return max(args, key=method)
+
+    def inference():
+        pass
