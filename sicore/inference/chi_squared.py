@@ -36,6 +36,13 @@ class InferenceChiSquared(ABC):
         use_torch: bool = False
     ):
 
+        if use_sparse and (use_tf or use_torch):
+            raise Exception(
+                'Sparse matrix cannot be used with the deep learning framework at the same time.')
+        if use_tf and use_torch:
+            raise Exception(
+                'Only one of tensorflow and pytorch is available.')
+
         self.data = data  # unnecessary
         self.length = len(data)  # unnecessary
         self.P = P  # unnecessary
@@ -45,7 +52,8 @@ class InferenceChiSquared(ABC):
             try:
                 import tensorflow as tf
             except ModuleNotFoundError:
-                raise Exception('use_tf is activated, but package not found.')
+                raise Exception(
+                    'The option use_tf is activated, but tensorflow was not found.')
 
             assert isinstance(data, tf.Tensor)
             assert isinstance(P, tf.Tensor)
@@ -69,7 +77,7 @@ class InferenceChiSquared(ABC):
                 import torch
             except ModuleNotFoundError:
                 raise Exception(
-                    'use_torch is activated, but package not found')
+                    'The option use_torch is activated, but pytorch was not found.')
 
             assert isinstance(data, torch.Tensor)
             assert isinstance(P, torch.Tensor)

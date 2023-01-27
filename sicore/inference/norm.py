@@ -33,9 +33,12 @@ class InferenceNorm(ABC):
             use_torch: bool = False
     ):
 
-        if use_sparse and use_tf:
+        if use_sparse and (use_tf or use_torch):
             raise Exception(
-                'Cannot activate two options, use_sparse and use_tf, at the same time')
+                'Sparse matrix cannot be used with the deep learning framework at the same time.')
+        if use_tf and use_torch:
+            raise Exception(
+                'Only one of tensorflow and pytorch is available.')
 
         self.data = data  # unnecessary
         self.length = len(data)  # unnecessary
@@ -45,7 +48,8 @@ class InferenceNorm(ABC):
             try:
                 import tensorflow as tf
             except ModuleNotFoundError:
-                raise Exception('use_tf is activated, but package not found.')
+                raise Exception(
+                    'The option use_tf is activated, but tensorflow was not found.')
 
             assert isinstance(data, tf.Tensor)
             assert isinstance(eta, tf.Tensor)
@@ -66,7 +70,7 @@ class InferenceNorm(ABC):
                 import torch
             except ModuleNotFoundError:
                 raise Exception(
-                    'use_torch is activated, but package not found')
+                    'The option use_torch is activated, but pytorch was not found.')
 
             assert isinstance(data, torch.Tensor)
             assert isinstance(eta, torch.Tensor)
