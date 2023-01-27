@@ -8,7 +8,7 @@ from ..cdf_mpmath import tn_cdf_mpmath as tn_cdf
 from .base import *
 
 from scipy.stats import norm
-from typing import Callable, List, Dict, Tuple, Type
+from typing import Callable, List, Tuple, Type
 
 
 class InferenceNorm(ABC):
@@ -24,10 +24,19 @@ class InferenceNorm(ABC):
     """
 
     def __init__(
-            self, data, var, eta, use_sparse=False, use_tf=False):
+            self,
+            data: np.ndarray,
+            var: float | np.ndarray,
+            eta: np.ndarray,
+            use_sparse: bool = False,
+            use_tf: bool = False,
+            use_torch: bool = False
+    ) -> None:
+
         if use_sparse and use_tf:
             raise Exception(
                 'Cannot activate two options, use_sparse and use_tf, at the same time')
+
         self.data = data
         self.eta = eta
         self.length = len(data)
@@ -36,32 +45,57 @@ class InferenceNorm(ABC):
             try:
                 import tensorflow as tf
             except ModuleNotFoundError:
-                raise Exception('use_tf is True, but package not found.')
+                raise Exception('use_tf is activated, but package not found.')
 
             assert isinstance(data, tf.Tensor)
+            assert isinstance(eta, tf.Tensor)
 
-            if is_int_or_float(var):
-                self.cov = var * tf.linalg.diag(tf.ones_like(data))
-            else:
-                self.cov = tf.constant(var)
             self.stat = tf.tensordot(eta, data, axes=1)
-            self.sigma_eta = tf.tensordot(self.cov, eta, axes=1)
+            if is_int_or_float(var):
+                self.sigma_eta = var * eta
+            elif len(var.shape) == 1:
+                vars = tf.constant(var, dtype=data.dtype)
+                self.sigma_eta = vars * eta
+            elif len(var.shape) == 2:
+                cov = tf.constant(var, dtype=data.dtype)
+                self.sigma_eta = tf.tensordot(cov, eta, axes=1)
             self.eta_sigma_eta = tf.tensordot(eta, self.sigma_eta, axes=1)
 
-        else:
-            if is_int_or_float(var):
-                if use_sparse:
-                    self.cov = var * sparse.identity(self.length)
-                else:
-                    self.cov = var * np.identity(self.length)
-            else:
-                if use_sparse:
-                    self.cov = sparse.csr_matrix(var)
-                else:
-                    self.cov = np.asarray(var)
+        elif use_torch:
+            try:
+                import torch
+            except ModuleNotFoundError:
+                raise Exception(
+                    'use_torch is activated, but package not found')
 
+            assert isinstance(data, torch.Tensor)
+            assert isinstance(eta, torch.Tensor)
+
+            self.stat = torch.dot(eta, data)
+            if is_int_or_float(var):
+                self.sigma_eta = var * eta
+            elif len(var.shape) == 1:
+                vars = torch.tensor(var, dtype=data.dtype)
+                self.sigma_eta = vars * eta
+            elif len(var.shape) == 2:
+                cov = torch.tensor(var, dtype=data.dtype)
+                self.sigma_eta = torch.mv(cov, eta)
+            self.eta_sigma_eta = torch.dot(eta, self.sigma_eta)
+
+        else:
+            data, eta = np.array(data), np.array(eta)
             self.stat = eta @ data
-            self.sigma_eta = self.cov @ eta
+            if is_int_or_float(var):
+                self.sigma_eta = var * eta
+            elif len(var.shape) == 1:
+                vars = np.array(var)
+                self.sigma_eta = vars * eta
+            elif len(var.shape) == 2:
+                if use_sparse:
+                    cov = sparse.csr_matrix(var)
+                else:
+                    cov = np.array(var)
+                self.sigma_eta = cov @ eta
             self.eta_sigma_eta = eta @ self.sigma_eta
 
     @abstractmethod
