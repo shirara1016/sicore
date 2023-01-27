@@ -6,8 +6,10 @@ from ..intervals import intersection, not_, poly_lt_zero, union_all, _interval_t
 from ..cdf_mpmath import chi2_cdf_mpmath, tc2_cdf_mpmath
 from .base import *
 
+from scipy import sparse
+
 from scipy.stats import chi2
-from typing import Callable, List, Dict, Tuple, Type
+from typing import Callable, List, Tuple, Type
 
 
 class InferenceChiSquared(ABC):
@@ -23,17 +25,21 @@ class InferenceChiSquared(ABC):
         use_tf (boolean, optional): Whether to use tensorflow or not. Defaults to False.
     """
 
-    def __init__(self, data, var, P, degree, use_sparse=False, use_tf=False):
-        self.data = data
-        if np.sum(np.abs(np.dot(P, P) - P)) > 1e-5 or np.sum(np.abs(P.T - P)) > 1e-5:
-            raise Exception(
-                "The projection matrix is not constructed correctly")
-        self.length = len(data)
-        self.degree = degree
+    def __init__(
+        self,
+        data: np.ndarray,
+        var: float | np.ndarray,
+        P: np.ndarray | sparse.spmatrix,
+        degree: int,
+        use_sparse: bool = False,
+        use_tf: bool = False,
+        use_torch: bool = False
+    ):
 
-        if use_sparse:
-            raise Exception(
-                "use_sparse is not available in the current implementation")
+        self.data = data  # unnecessary
+        self.length = len(data)  # unnecessary
+        self.P = P  # unnecessary
+        self.degree = degree
 
         if is_int_or_float(var):
             self.cov = var * np.identity(self.length)
@@ -45,20 +51,62 @@ class InferenceChiSquared(ABC):
             try:
                 import tensorflow as tf
             except ModuleNotFoundError:
-                raise Exception('use_tf is True, but package not found.')
+                raise Exception('use_tf is activated, but package not found.')
 
             assert isinstance(data, tf.Tensor)
+            assert isinstance(P, tf.Tensor)
 
-            self.inv_sqrt_cov = tf.constant(
-                self.inv_sqrt_cov, dtype=tf.float64)
             self.P_data = tf.tensordot(P, data, axes=1)
-            self.stat = tf.norm(
-                tf.tensordot(self.inv_sqrt_cov, self.P_data, axes=1), ord=2)
+            if is_int_or_float(var):
+                whitend_P_data = (var ** -0.5) * self.P_data
+            elif len(var.shape) == 1:
+                vars = tf.constant(var, dtype=data.dtype)
+                whitend_P_data = tf.pow(vars, -0.5) * self.P_data
+            elif len(var.shape) == 2:
+                cov = np.array(var)
+                inv_sqrt_cov = fractional_matrix_power(cov, -0.5)
+                inv_sqrt_cov = tf.constant(inv_sqrt_cov, dtype=data.dtype)
+                whitend_P_data = tf.tensordot(
+                    inv_sqrt_cov, self.P_data, axes=1)
+            self.stat = tf.norm(whitend_P_data, ord=2)
+
+        elif use_torch:
+            try:
+                import torch
+            except ModuleNotFoundError:
+                raise Exception(
+                    'use_torch is activated, but package not found')
+
+            assert isinstance(data, torch.Tensor)
+            assert isinstance(P, torch.Tensor)
+
+            self.P_data = torch.mv(P, data)
+            if is_int_or_float(var):
+                whitend_P_data = (var ** -0.5) * self.P_data
+            elif len(var.shape) == 1:
+                vars = torch.tensor(var, dtype=data.dtype)
+                whitend_P_data = torch.pow(vars, -0.5) * self.P_data
+            elif len(var.shape) == 2:
+                cov = np.array(var)
+                inv_sqrt_cov = fractional_matrix_power(cov, -0.5)
+                inv_sqrt_cov = torch.tensor(inv_sqrt_cov, dtype=data.dtype)
+                whitend_P_data = torch.mv(inv_sqrt_cov, self.P_data)
+            self.stat = torch.linalg.norm(whitend_P_data, ord=2)
 
         else:
+            data = np.array(data)
+            P = sparse.csr_matrix(P) if use_sparse else np.array(P)
             self.P_data = P @ data
-            self.stat = np.linalg.norm(
-                self.inv_sqrt_cov @ self.P_data, ord=2)
+            if is_int_or_float(var):
+                whitend_P_data = (var ** -0.5) * self.P_data
+            elif len(var.shape) == 1:
+                vars = np.array(var)
+                whitend_P_data = np.power(vars, -0.5) * self.P_data
+            elif len(var.shape) == 2:
+                cov = np.array(var)
+                inv_sqrt_cov = fractional_matrix_power(cov, -0.5)
+                whitend_P_data = inv_sqrt_cov @ self.P_data
+            self.stat = np.linalg.norm(whitend_P_data, ord=2)
 
     @abstractmethod
     def test(self, *args, **kwargs):
@@ -109,7 +157,7 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
     def __init__(self, data, var, P, degree, use_sparse=False, use_tf=False):
         super().__init__(data, var, P, degree, use_sparse, use_tf)
         self.c = self.P_data / self.stat  # `b` vector in para si.
-        self.z = self.data - self.P_data  # `a` vector in para si.
+        self.z = data - self.P_data  # `a` vector in para si.
         self.intervals = [[NINF, INF]]
         self.searched_intervals = None
         self.mappings = None  # {interval1: model1, interval2: model2, ...}

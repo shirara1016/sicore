@@ -26,20 +26,20 @@ class InferenceNorm(ABC):
     def __init__(
             self,
             data: np.ndarray,
-            var: float | np.ndarray,
+            var: float | np.ndarray | sparse.spmatrix,
             eta: np.ndarray,
             use_sparse: bool = False,
             use_tf: bool = False,
             use_torch: bool = False
-    ) -> None:
+    ):
 
         if use_sparse and use_tf:
             raise Exception(
                 'Cannot activate two options, use_sparse and use_tf, at the same time')
 
-        self.data = data
-        self.eta = eta
-        self.length = len(data)
+        self.data = data  # unnecessary
+        self.length = len(data)  # unnecessary
+        self.eta = eta  # unnecessary
 
         if use_tf:
             try:
@@ -91,10 +91,7 @@ class InferenceNorm(ABC):
                 vars = np.array(var)
                 self.sigma_eta = vars * eta
             elif len(var.shape) == 2:
-                if use_sparse:
-                    cov = sparse.csr_matrix(var)
-                else:
-                    cov = np.array(var)
+                cov = sparse.csr_matrix(var) if use_sparse else np.array(var)
                 self.sigma_eta = cov @ eta
             self.eta_sigma_eta = eta @ self.sigma_eta
 
