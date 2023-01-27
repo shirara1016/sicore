@@ -41,12 +41,6 @@ class InferenceChiSquared(ABC):
         self.P = P  # unnecessary
         self.degree = degree
 
-        if is_int_or_float(var):
-            self.cov = var * np.identity(self.length)
-        else:
-            self.cov = np.asarray(var)
-        self.inv_sqrt_cov = fractional_matrix_power(self.cov, -0.5)
-
         if use_tf:
             try:
                 import tensorflow as tf
