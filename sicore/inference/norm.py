@@ -293,7 +293,7 @@ class SelectiveInferenceNorm(InferenceNorm):
             return result
 
         elif check_only_reject_or_not:
-            result = self._rejectability_only_inference(
+            result = self._rejection_judge_inference(
                 algorithm, model_selector, significance_level, tail, popmean,
                 choose_method, retain_selected_model, retain_mappings, tol, step,
                 dps, max_dps, out_log)
@@ -353,6 +353,153 @@ class SelectiveInferenceNorm(InferenceNorm):
         if choose_method == 'random':
             return random.choice(args)
         return max(args, key=method)
+
+    def _precision_guaranteed_inference(
+            self, algorithm, model_selector, significance_level, tail, popmean,
+            choose_method, retain_selected_model, retain_mappings, tol, step,
+            dps, max_dps, out_log):
+
+        self.popmean = popmean
+        self.tol = tol
+        self.step = step
+        self.dps = dps
+        self.max_dps = max_dps
+        self.out_log = out_log
+        self.searched_intervals = list()
+
+        self.th = 1e-4
+
+        mappings = dict() if retain_mappings else None
+        truncated_intervals = list()
+
+        search_count = 0
+        detect_count = 0
+
+        z = self.stat
+        while True:
+            search_count += 1
+            if search_count > 1e6:
+                raise Exception(
+                    'The number of searches exceeds 100,000 times, suggesting an infinite loop.')
+
+            model, interval = algorithm(self.z, self.c, z)
+            interval = np.asarray(interval)
+            intervals = _interval_to_intervals(interval)
+
+            if retain_mappings:
+                for interval in intervals:
+                    interval = tuple(interval)
+                    if interval in mappings:
+                        raise Exception(
+                            "An interval appeared a second time. Usually, numerical error "
+                            "causes this exception. Consider increasing the tol parameter "
+                            "or decreasing max_tail parameter to avoid it."
+                        )
+                    mappings[interval] = model
+
+            if model_selector(model):
+                selected_model = model if retain_selected_model else None
+                truncated_intervals += intervals
+                detect_count += 1
+
+            self.searched_intervals = union_all(
+                self.searched_intervals + intervals, tol=tol)
+
+            inf_F, sup_F = self.calc_range_of_cdf_value(
+                truncated_intervals, self.searched_intervals)
+            inf_p, sup_p = calc_p_range(inf_F, sup_F, tail=tail)
+
+            if np.abs(sup_p - inf_p) < self.th:
+                break
+
+            z_l = self.left_end - self.step
+            z_r = self.right_end + self.step
+            z = self.determine_next_search_data(choose_method, z_l, z_r)
+
+        stat_std = standardize(self.stat, popmean, self.eta_sigma_eta)
+        truncated_intervals = union_all(truncated_intervals, tol=self.tol)
+        norm_intervals = standardize(
+            truncated_intervals, popmean, self.eta_sigma_eta)
+        F = tn_cdf(stat_std, norm_intervals,
+                   dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
+        p_value = calc_pvalue(F, tail=tail)
+
+        return SelectiveInferenceResult(
+            stat_std, significance_level, p_value, inf_p, sup_p,
+            (p_value <= significance_level), norm_intervals,
+            search_count, detect_count, selected_model, mappings)
+
+    def _rejection_judge_inference(
+            self, algorithm, model_selector, significance_level, tail, popmean,
+            choose_method, retain_selected_model, retain_mappings, tol, step,
+            dps, max_dps, out_log):
+
+        self.popmean = popmean
+        self.tol = tol
+        self.step = step
+        self.dps = dps
+        self.max_dps = max_dps
+        self.out_log = out_log
+        self.searched_intervals = list()
+
+        mappings = dict() if retain_mappings else None
+        truncated_intervals = list()
+
+        search_count = 0
+        detect_count = 0
+
+        z = self.stat
+        while True:
+            search_count += 1
+            if search_count > 1e6:
+                raise Exception(
+                    'The number of searches exceeds 100,000 times, suggesting an infinite loop.')
+
+            model, interval = algorithm(self.z, self.c, z)
+            interval = np.asarray(interval)
+            intervals = _interval_to_intervals(interval)
+
+            if retain_mappings:
+                for interval in intervals:
+                    interval = tuple(interval)
+                    if interval in mappings:
+                        raise Exception(
+                            "An interval appeared a second time. Usually, numerical error "
+                            "causes this exception. Consider increasing the tol parameter "
+                            "or decreasing max_tail parameter to avoid it."
+                        )
+                    mappings[interval] = model
+
+            if model_selector(model):
+                selected_model = model if retain_selected_model else None
+                truncated_intervals += intervals
+                detect_count += 1
+
+            self.searched_intervals = union_all(
+                self.searched_intervals + intervals, tol=tol)
+
+            inf_F, sup_F = self.calc_range_of_cdf_value(
+                truncated_intervals, self.searched_intervals)
+            inf_p, sup_p = calc_p_range(inf_F, sup_F, tail=tail)
+
+            if sup_p <= significance_level:
+                reject_or_not = True
+                break
+            if inf_p > significance_level:
+                reject_or_not = False
+                break
+
+            z_l = self.left_end - self.step
+            z_r = self.right_end + self.step
+            z = self.determine_next_search_data(choose_method, z_l, z_r)
+
+        return SelectiveInferenceResult(
+            standardize(self.stat, popmean,
+                        self.eta_sigma_eta), significance_level,
+            None, inf_p, sup_p, reject_or_not,
+            standardize(union_all(truncated_intervals),
+                        popmean, self.eta_sigma_eta),
+            search_count, detect_count, selected_model, mappings)
 
     def _parametric_inference(
             self, algorithm, model_selector, significance_level, tail, popmean,
@@ -425,78 +572,6 @@ class SelectiveInferenceNorm(InferenceNorm):
         return SelectiveInferenceResult(
             stat_std, significance_level, p_value, inf_p, sup_p,
             (p_value <= significance_level), norm_intervals,
-            search_count, detect_count, selected_model, mappings)
-
-    def _rejectability_only_inference(
-            self, algorithm, model_selector, significance_level, tail, popmean,
-            choose_method, retain_selected_model, retain_mappings, tol, step,
-            dps, max_dps, out_log):
-
-        self.popmean = popmean
-        self.tol = tol
-        self.step = step
-        self.dps = dps
-        self.max_dps = max_dps
-        self.out_log = out_log
-        self.searched_intervals = list()
-
-        mappings = dict() if retain_mappings else None
-        truncated_intervals = list()
-
-        search_count = 0
-        detect_count = 0
-
-        z = self.stat
-        while True:
-            search_count += 1
-            if search_count > 1e6:
-                raise Exception(
-                    'The number of searches exceeds 100,000 times, suggesting an infinite loop.')
-
-            model, interval = algorithm(self.z, self.c, z)
-            interval = np.asarray(interval)
-            intervals = _interval_to_intervals(interval)
-
-            if retain_mappings:
-                for interval in intervals:
-                    interval = tuple(interval)
-                    if interval in mappings:
-                        raise Exception(
-                            "An interval appeared a second time. Usually, numerical error "
-                            "causes this exception. Consider increasing the tol parameter "
-                            "or decreasing max_tail parameter to avoid it."
-                        )
-                    mappings[interval] = model
-
-            if model_selector(model):
-                selected_model = model if retain_selected_model else None
-                truncated_intervals += intervals
-                detect_count += 1
-
-            self.searched_intervals = union_all(
-                self.searched_intervals + intervals, tol=tol)
-
-            inf_F, sup_F = self.calc_range_of_cdf_value(
-                truncated_intervals, self.searched_intervals)
-            inf_p, sup_p = calc_p_range(inf_F, sup_F, tail=tail)
-
-            if sup_p <= significance_level:
-                reject_or_not = True
-                break
-            if inf_p > significance_level:
-                reject_or_not = False
-                break
-
-            z_l = self.left_end - self.step
-            z_r = self.right_end + self.step
-            z = self.determine_next_search_data(choose_method, z_l, z_r)
-
-        return SelectiveInferenceResult(
-            standardize(self.stat, popmean,
-                        self.eta_sigma_eta), significance_level,
-            None, inf_p, sup_p, reject_or_not,
-            standardize(union_all(truncated_intervals),
-                        popmean, self.eta_sigma_eta),
             search_count, detect_count, selected_model, mappings)
 
     def _over_conditioned_inference(
