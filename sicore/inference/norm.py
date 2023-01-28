@@ -208,15 +208,16 @@ class SelectiveInferenceNorm(InferenceNorm):
         algorithm: Callable[[np.ndarray, np.ndarray, float], Tuple[List[List[float]], Any]],
         model_selector: Callable[[Any], bool],
         significance_level: float = 0.05,
+        parametric_mode: str = 'p_value',
+        over_conditioning: bool = False,
         tail: str = 'double',
+        threshold: float = 1e-3,
         popmean: float = 0,
         tol: float = 1e-10,
         step: float = 1e-10,
-        check_only_reject_or_not: bool = False,
-        over_conditioning: bool = False,
         line_search: bool = True,
         max_tail: float = 1e3,
-        choose_method: str = 'near_stat',
+        choose_method: str = 'high_pdf',
         retain_selected_model: bool = False,
         retain_mappings: bool = False,
         dps: int | str = 'auto',
@@ -237,28 +238,34 @@ class SelectiveInferenceNorm(InferenceNorm):
                 returns True if the model is used for the testing, and False otherwise.
             significance_level (float, optional):
                 Significance level for the testing. Defaults to 0.05.
+            parametric_mode (str, optional):
+                Specifies the method used to perform parametric selective inference. This option is
+                ignored when the over_conditioning option is activated.
+                'p_value' for calculation of p-value with guaranteed accuracy specified by the threshold option.
+                'reject_or_not' for only determining whether the null hypothesis is rejected.
+                'all_search' for all searches of the interval specified by the max_tail option.
+            over_conditioning (bool, optional):
+                Over conditioning Inference. Defaults to False.
             tail (str, optional):
                 'double' for double-tailed test, 'right' for right-tailed test, and
                 'left' for left-tailed test. Defaults to 'double'.
+            threshold (float, optional):
+                Guaranteed accuracy when calculating p-value. Defaults to 1e-3.
             popmean (float, optional):
                 Mean of the null distribution. Defaults to 0.
             tol (float, optional):
-                Tolerance error parameter. Defaults to 1e-10.
+                Tolerance error parameter for intervals. Defaults to 1e-10.
             step (float, optional):
-                Step width for line search. Defaults to 1e-10.
-            check_only_reject_or_not (bool, optional):
-                Inference only for rejectness. Defaults to False.
-            over_conditioning (bool, optional):
-                Over conditioning Inference. Defaults to False.
+                Step width for parametric search. Defaults to 1e-10.
             line_search (bool, optional):
                 Wheter to perform a line search or a random search. Defaults to True.
             max_tail (float, optional):
-                Maximum tail value to be parametrically searched when neither option
-                check_only_rejecto_or_not nor over_coditionig is enabled. Defaults to 1e3.
+                Maximum tail value to be parametrically searched when
+                the parametric_mode option is set to all_search. Defaults to 1e3.
             choose_method (str, optional):
-                When check_only_reject_or_not is activated, 'near_stat' and 'high_pdf'
-                can be specified in the algorithm to select the search
-                direction. Defaults to 'near_stat'.
+                How to determine the search direction when parametric_mode
+                is other than all_search. 'high_pdf', 'near_stat', and 'random'
+                can be specified. Defaults to 'high_pdf'.
             retain_selected_model (bool, optional):
                 Whether retain selected model as returns or not. Defaults to False.
             retain_mappings (bool, optional):
@@ -271,10 +278,6 @@ class SelectiveInferenceNorm(InferenceNorm):
                 when `dps` is set to 'auto'. Defaults to 5000.
             out_log (str, optional):
                 Name for log file of mpmath. Defaults to 'test_log.log'.
-        Raises:
-            Exception:
-                The two options, check_only_reject_or_not and over-conditioning,
-                cannot be activated at the same time.
 
         Returns:
             Type[SelectiveInferenceResult]
@@ -599,3 +602,86 @@ class SelectiveInferenceNorm(InferenceNorm):
             stat_std, significance_level, p_value, inf_p, sup_p,
             (p_value <= significance_level), norm_intervals, 1, 1,
             None, model if retain_selected_model else None)
+
+    def fusion(
+            self, algorithm, model_selector, significance_level, parametric_mode,
+            threshold,  tail, popmean, choose_method, retain_selected_model, retain_mappings,
+            tol, step, dps, max_dps, out_log):
+
+        self.popmean = popmean
+        self.tol = tol
+        self.step = step
+        self.dps = dps
+        self.max_dps = max_dps
+        self.out_log = out_log
+        self.searched_intervals = list()
+
+        mappings = dict() if retain_mappings else None
+        truncated_intervals = list()
+
+        search_count = 0
+        detect_count = 0
+
+        z = self.stat
+        while True:
+            search_count += 1
+            if search_count > 1e6:
+                raise Exception(
+                    'The number of searches exceeds 100,000 times, suggesting an infinite loop.')
+
+            model, interval = algorithm(self.z, self.c, z)
+            interval = np.asarray(interval)
+            intervals = _interval_to_intervals(interval)
+
+            if retain_mappings:
+                for interval in intervals:
+                    interval = tuple(interval)
+                    if interval in mappings:
+                        raise Exception(
+                            "An interval appeared a second time. Usually, numerical error "
+                            "causes this exception. Consider increasing the tol parameter "
+                            "or decreasing max_tail parameter to avoid it."
+                        )
+                    mappings[interval] = model
+
+            if model_selector(model):
+                selected_model = model if retain_selected_model else None
+                truncated_intervals += intervals
+                detect_count += 1
+
+            self.searched_intervals = union_all(
+                self.searched_intervals + intervals, tol=tol)
+
+            inf_F, sup_F = self.calc_range_of_cdf_value(
+                truncated_intervals, self.searched_intervals)
+            inf_p, sup_p = calc_p_range(inf_F, sup_F, tail=tail)
+
+            if parametric_mode == 'p_value':
+                if np.abs(sup_p - inf_p) < threshold:
+                    break
+            if parametric_mode == 'reject_or_not':
+                if sup_p <= significance_level:
+                    reject_or_not = True
+                    break
+                if inf_p > significance_level:
+                    reject_or_not = False
+                    break
+
+            z_l = self.left_end - self.step
+            z_r = self.right_end + self.step
+            z = self.determine_next_search_data(choose_method, z_l, z_r)
+
+        stat_std = standardize(self.stat, popmean, self.eta_sigma_eta)
+        truncated_intervals = union_all(truncated_intervals, tol=self.tol)
+        norm_intervals = standardize(
+            truncated_intervals, popmean, self.eta_sigma_eta)
+        F = tn_cdf(stat_std, norm_intervals,
+                   dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
+        p_value = calc_pvalue(F, tail=tail)
+        if parametric_mode == 'p_value':
+            reject_or_not = (p_value <= significance_level)
+
+        return SelectiveInferenceResult(
+            stat_std, significance_level, p_value, inf_p, sup_p,
+            reject_or_not, norm_intervals,
+            search_count, detect_count, selected_model, mappings)
