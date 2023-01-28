@@ -213,13 +213,13 @@ class SelectiveInferenceNorm(InferenceNorm):
         tail: str = 'double',
         threshold: float = 1e-3,
         popmean: float = 0,
-        tol: float = 1e-10,
-        step: float = 1e-10,
         line_search: bool = True,
         max_tail: float = 1e3,
         choose_method: str = 'high_pdf',
         retain_selected_model: bool = False,
         retain_mappings: bool = False,
+        tol: float = 1e-10,
+        step: float = 1e-10,
         dps: int | str = 'auto',
         max_dps: int = 5000,
         out_log: str = 'test_log.log'
@@ -253,10 +253,6 @@ class SelectiveInferenceNorm(InferenceNorm):
                 Guaranteed accuracy when calculating p-value. Defaults to 1e-3.
             popmean (float, optional):
                 Mean of the null distribution. Defaults to 0.
-            tol (float, optional):
-                Tolerance error parameter for intervals. Defaults to 1e-10.
-            step (float, optional):
-                Step width for parametric search. Defaults to 1e-10.
             line_search (bool, optional):
                 Wheter to perform a line search or a random search. Defaults to True.
             max_tail (float, optional):
@@ -270,6 +266,10 @@ class SelectiveInferenceNorm(InferenceNorm):
                 Whether retain selected model as returns or not. Defaults to False.
             retain_mappings (bool, optional):
                 Whether retain mappings as returns or not. Defaults to False.
+            tol (float, optional):
+                Tolerance error parameter for intervals. Defaults to 1e-10.
+            step (float, optional):
+                Step width for parametric search. Defaults to 1e-10.
             dps (int | str, optional):
                 dps value for mpmath. Set 'auto' to select dps
                 automatically. Defaults to 'auto'.
@@ -283,19 +283,19 @@ class SelectiveInferenceNorm(InferenceNorm):
             Type[SelectiveInferenceResult]
         """
 
-        if over_conditioning and check_only_reject_or_not:
-            raise Exception(
-                'The two options, check_only_reject_or_not and over-conditioning, cannot be activated at the same time.'
-            )
-
         if over_conditioning:
             result = self._over_conditioned_inference(
                 algorithm, significance_level, tail, popmean, retain_selected_model,
                 tol, dps, max_dps, out_log)
             return result
 
-        elif check_only_reject_or_not:
-            result = self._rejection_judge_inference(
+        elif parametric_mode == 'p_value' or parametric_mode == 'reject_or_not':
+            result = self.fusion(
+
+            )
+
+        elif parametric_mode == 'all_search':
+            result = self._all_search_parametric_inference(
                 algorithm, model_selector, significance_level, tail, popmean,
                 choose_method, retain_selected_model, retain_mappings, tol, step,
                 dps, max_dps, out_log)
@@ -307,7 +307,7 @@ class SelectiveInferenceNorm(InferenceNorm):
 
         return result
 
-    def calc_range_of_cdf_value(self, truncated_intervals, searched_intervals):
+    def _calc_range_of_cdf_value(self, truncated_intervals, searched_intervals):
 
         unsearched_intervals = not_(searched_intervals)
         s = intersection(unsearched_intervals, [
@@ -336,7 +336,7 @@ class SelectiveInferenceNorm(InferenceNorm):
                        dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
         return inf_F, sup_F
 
-    def determine_next_search_data(self, choose_method, *args):
+    def _determine_next_search_data(self, choose_method, *args):
         if choose_method == 'near_stat':
             def method(z): return -np.abs(z - float(self.stat))
         if choose_method == 'high_pdf':
@@ -344,152 +344,6 @@ class SelectiveInferenceNorm(InferenceNorm):
         if choose_method == 'random':
             return random.choice(args)
         return max(args, key=method)
-
-    def _precision_guaranteed_inference(
-            self, algorithm, model_selector, significance_level, tail, popmean,
-            choose_method, retain_selected_model, retain_mappings, tol, step,
-            dps, max_dps, out_log):
-
-        self.popmean = popmean
-        self.tol = tol
-        self.step = step
-        self.dps = dps
-        self.max_dps = max_dps
-        self.out_log = out_log
-        self.searched_intervals = list()
-
-        self.th = 1e-4
-
-        mappings = dict() if retain_mappings else None
-        truncated_intervals = list()
-
-        search_count = 0
-        detect_count = 0
-
-        z = self.stat
-        while True:
-            search_count += 1
-            if search_count > 1e6:
-                raise Exception(
-                    'The number of searches exceeds 100,000 times, suggesting an infinite loop.')
-
-            model, interval = algorithm(self.z, self.c, z)
-            interval = np.asarray(interval)
-            intervals = _interval_to_intervals(interval)
-
-            if retain_mappings:
-                for interval in intervals:
-                    interval = tuple(interval)
-                    if interval in mappings:
-                        raise Exception(
-                            "An interval appeared a second time. Usually, numerical error "
-                            "causes this exception. Consider increasing the tol parameter "
-                            "or decreasing max_tail parameter to avoid it."
-                        )
-                    mappings[interval] = model
-
-            if model_selector(model):
-                selected_model = model if retain_selected_model else None
-                truncated_intervals += intervals
-                detect_count += 1
-
-            self.searched_intervals = union_all(
-                self.searched_intervals + intervals, tol=tol)
-
-            inf_F, sup_F = self.calc_range_of_cdf_value(
-                truncated_intervals, self.searched_intervals)
-            inf_p, sup_p = calc_p_range(inf_F, sup_F, tail=tail)
-
-            if np.abs(sup_p - inf_p) < self.th:
-                break
-
-            z_l = self.left_end - self.step
-            z_r = self.right_end + self.step
-            z = self.determine_next_search_data(choose_method, z_l, z_r)
-
-        stat_std = standardize(self.stat, popmean, self.eta_sigma_eta)
-        truncated_intervals = union_all(truncated_intervals, tol=self.tol)
-        norm_intervals = standardize(
-            truncated_intervals, popmean, self.eta_sigma_eta)
-        F = tn_cdf(stat_std, norm_intervals,
-                   dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
-        p_value = calc_pvalue(F, tail=tail)
-
-        return SelectiveInferenceResult(
-            stat_std, significance_level, p_value, inf_p, sup_p,
-            (p_value <= significance_level), norm_intervals,
-            search_count, detect_count, selected_model, mappings)
-
-    def _rejection_judge_inference(
-            self, algorithm, model_selector, significance_level, tail, popmean,
-            choose_method, retain_selected_model, retain_mappings, tol, step,
-            dps, max_dps, out_log):
-
-        self.popmean = popmean
-        self.tol = tol
-        self.step = step
-        self.dps = dps
-        self.max_dps = max_dps
-        self.out_log = out_log
-        self.searched_intervals = list()
-
-        mappings = dict() if retain_mappings else None
-        truncated_intervals = list()
-
-        search_count = 0
-        detect_count = 0
-
-        z = self.stat
-        while True:
-            search_count += 1
-            if search_count > 1e6:
-                raise Exception(
-                    'The number of searches exceeds 100,000 times, suggesting an infinite loop.')
-
-            model, interval = algorithm(self.z, self.c, z)
-            interval = np.asarray(interval)
-            intervals = _interval_to_intervals(interval)
-
-            if retain_mappings:
-                for interval in intervals:
-                    interval = tuple(interval)
-                    if interval in mappings:
-                        raise Exception(
-                            "An interval appeared a second time. Usually, numerical error "
-                            "causes this exception. Consider increasing the tol parameter "
-                            "or decreasing max_tail parameter to avoid it."
-                        )
-                    mappings[interval] = model
-
-            if model_selector(model):
-                selected_model = model if retain_selected_model else None
-                truncated_intervals += intervals
-                detect_count += 1
-
-            self.searched_intervals = union_all(
-                self.searched_intervals + intervals, tol=tol)
-
-            inf_F, sup_F = self.calc_range_of_cdf_value(
-                truncated_intervals, self.searched_intervals)
-            inf_p, sup_p = calc_p_range(inf_F, sup_F, tail=tail)
-
-            if sup_p <= significance_level:
-                reject_or_not = True
-                break
-            if inf_p > significance_level:
-                reject_or_not = False
-                break
-
-            z_l = self.left_end - self.step
-            z_r = self.right_end + self.step
-            z = self.determine_next_search_data(choose_method, z_l, z_r)
-
-        return SelectiveInferenceResult(
-            standardize(self.stat, popmean, self.eta_sigma_eta),
-            significance_level, None, inf_p, sup_p, reject_or_not,
-            standardize(union_all(truncated_intervals, tol=self.tol),
-                        popmean, self.eta_sigma_eta),
-            search_count, detect_count, selected_model, mappings)
 
     def _next_search_data(self, line_search):
         intervals = not_(self.searched_intervals)
@@ -502,7 +356,90 @@ class SelectiveInferenceNorm(InferenceNorm):
             param = (e + s) / 2
         return param
 
-    def _parametric_inference(
+    def fusion(
+            self, algorithm, model_selector, significance_level, parametric_mode,
+            tail, threshold, popmean, choose_method, retain_selected_model, retain_mappings,
+            tol, step, dps, max_dps, out_log):
+
+        self.popmean = popmean
+        self.tol = tol
+        self.step = step
+        self.dps = dps
+        self.max_dps = max_dps
+        self.out_log = out_log
+        self.searched_intervals = list()
+
+        mappings = dict() if retain_mappings else None
+        truncated_intervals = list()
+
+        search_count = 0
+        detect_count = 0
+
+        z = self.stat
+        while True:
+            search_count += 1
+            if search_count > 1e6:
+                raise Exception(
+                    'The number of searches exceeds 100,000 times, suggesting an infinite loop.')
+
+            model, interval = algorithm(self.z, self.c, z)
+            interval = np.asarray(interval)
+            intervals = _interval_to_intervals(interval)
+
+            if retain_mappings:
+                for interval in intervals:
+                    interval = tuple(interval)
+                    if interval in mappings:
+                        raise Exception(
+                            "An interval appeared a second time. Usually, numerical error "
+                            "causes this exception. Consider increasing the tol parameter "
+                            "or decreasing max_tail parameter to avoid it."
+                        )
+                    mappings[interval] = model
+
+            if model_selector(model):
+                selected_model = model if retain_selected_model else None
+                truncated_intervals += intervals
+                detect_count += 1
+
+            self.searched_intervals = union_all(
+                self.searched_intervals + intervals, tol=tol)
+
+            inf_F, sup_F = self._calc_range_of_cdf_value(
+                truncated_intervals, self.searched_intervals)
+            inf_p, sup_p = calc_p_range(inf_F, sup_F, tail=tail)
+
+            if parametric_mode == 'p_value':
+                if np.abs(sup_p - inf_p) < threshold:
+                    break
+            if parametric_mode == 'reject_or_not':
+                if sup_p <= significance_level:
+                    reject_or_not = True
+                    break
+                if inf_p > significance_level:
+                    reject_or_not = False
+                    break
+
+            z_l = self.left_end - self.step
+            z_r = self.right_end + self.step
+            z = self._determine_next_search_data(choose_method, z_l, z_r)
+
+        stat_std = standardize(self.stat, popmean, self.eta_sigma_eta)
+        truncated_intervals = union_all(truncated_intervals, tol=self.tol)
+        norm_intervals = standardize(
+            truncated_intervals, popmean, self.eta_sigma_eta)
+        F = tn_cdf(stat_std, norm_intervals,
+                   dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
+        p_value = calc_pvalue(F, tail=tail)
+        if parametric_mode == 'p_value':
+            reject_or_not = (p_value <= significance_level)
+
+        return SelectiveInferenceResult(
+            stat_std, significance_level, p_value, inf_p, sup_p,
+            reject_or_not, norm_intervals,
+            search_count, detect_count, selected_model, mappings)
+
+    def _all_search_parametric_inference(
             self, algorithm, model_selector, significance_level, tail, popmean,
             line_search, max_tail, retain_selected_model, retain_mappings,
             tol, step, dps, max_dps, out_log):
@@ -566,7 +503,7 @@ class SelectiveInferenceNorm(InferenceNorm):
                    dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
         p_value = calc_pvalue(F, tail=tail)
 
-        inf_F, sup_F = self.calc_range_of_cdf_value(
+        inf_F, sup_F = self._calc_range_of_cdf_value(
             truncated_intervals, [[-float(max_tail), float(max_tail)]])
         inf_p, sup_p = calc_p_range(inf_F, sup_F, tail=tail)
 
@@ -595,93 +532,10 @@ class SelectiveInferenceNorm(InferenceNorm):
                    dps=self.dps, max_dps=max_dps, out_log=out_log)
         p_value = calc_pvalue(F, tail=tail)
 
-        inf_F, sup_F = self.calc_range_of_cdf_value(intervals, intervals)
+        inf_F, sup_F = self._calc_range_of_cdf_value(intervals, intervals)
         inf_p, sup_p = calc_p_range(inf_F, sup_F, tail=tail)
 
         return SelectiveInferenceResult(
             stat_std, significance_level, p_value, inf_p, sup_p,
             (p_value <= significance_level), norm_intervals, 1, 1,
             None, model if retain_selected_model else None)
-
-    def fusion(
-            self, algorithm, model_selector, significance_level, parametric_mode,
-            threshold,  tail, popmean, choose_method, retain_selected_model, retain_mappings,
-            tol, step, dps, max_dps, out_log):
-
-        self.popmean = popmean
-        self.tol = tol
-        self.step = step
-        self.dps = dps
-        self.max_dps = max_dps
-        self.out_log = out_log
-        self.searched_intervals = list()
-
-        mappings = dict() if retain_mappings else None
-        truncated_intervals = list()
-
-        search_count = 0
-        detect_count = 0
-
-        z = self.stat
-        while True:
-            search_count += 1
-            if search_count > 1e6:
-                raise Exception(
-                    'The number of searches exceeds 100,000 times, suggesting an infinite loop.')
-
-            model, interval = algorithm(self.z, self.c, z)
-            interval = np.asarray(interval)
-            intervals = _interval_to_intervals(interval)
-
-            if retain_mappings:
-                for interval in intervals:
-                    interval = tuple(interval)
-                    if interval in mappings:
-                        raise Exception(
-                            "An interval appeared a second time. Usually, numerical error "
-                            "causes this exception. Consider increasing the tol parameter "
-                            "or decreasing max_tail parameter to avoid it."
-                        )
-                    mappings[interval] = model
-
-            if model_selector(model):
-                selected_model = model if retain_selected_model else None
-                truncated_intervals += intervals
-                detect_count += 1
-
-            self.searched_intervals = union_all(
-                self.searched_intervals + intervals, tol=tol)
-
-            inf_F, sup_F = self.calc_range_of_cdf_value(
-                truncated_intervals, self.searched_intervals)
-            inf_p, sup_p = calc_p_range(inf_F, sup_F, tail=tail)
-
-            if parametric_mode == 'p_value':
-                if np.abs(sup_p - inf_p) < threshold:
-                    break
-            if parametric_mode == 'reject_or_not':
-                if sup_p <= significance_level:
-                    reject_or_not = True
-                    break
-                if inf_p > significance_level:
-                    reject_or_not = False
-                    break
-
-            z_l = self.left_end - self.step
-            z_r = self.right_end + self.step
-            z = self.determine_next_search_data(choose_method, z_l, z_r)
-
-        stat_std = standardize(self.stat, popmean, self.eta_sigma_eta)
-        truncated_intervals = union_all(truncated_intervals, tol=self.tol)
-        norm_intervals = standardize(
-            truncated_intervals, popmean, self.eta_sigma_eta)
-        F = tn_cdf(stat_std, norm_intervals,
-                   dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
-        p_value = calc_pvalue(F, tail=tail)
-        if parametric_mode == 'p_value':
-            reject_or_not = (p_value <= significance_level)
-
-        return SelectiveInferenceResult(
-            stat_std, significance_level, p_value, inf_p, sup_p,
-            reject_or_not, norm_intervals,
-            search_count, detect_count, selected_model, mappings)
