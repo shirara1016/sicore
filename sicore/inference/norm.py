@@ -305,17 +305,6 @@ class SelectiveInferenceNorm(InferenceNorm):
 
         return result
 
-    def _next_search_data(self, line_search):
-        intervals = not_(self.searched_intervals)
-        if len(intervals) == 0:
-            return None
-        if line_search:
-            param = intervals[0][0] + self.step
-        else:
-            s, e = random.choice(intervals)
-            param = (e + s) / 2
-        return param
-
     def calc_range_of_cdf_value(self, truncated_intervals, searched_intervals):
 
         unsearched_intervals = not_(searched_intervals)
@@ -500,6 +489,17 @@ class SelectiveInferenceNorm(InferenceNorm):
             standardize(union_all(truncated_intervals),
                         popmean, self.eta_sigma_eta),
             search_count, detect_count, selected_model, mappings)
+
+    def _next_search_data(self, line_search):
+        intervals = not_(self.searched_intervals)
+        if len(intervals) == 0:
+            return None
+        if line_search:
+            param = intervals[0][0] + self.step
+        else:
+            s, e = random.choice(intervals)
+            param = (e + s) / 2
+        return param
 
     def _parametric_inference(
             self, algorithm, model_selector, significance_level, tail, popmean,
