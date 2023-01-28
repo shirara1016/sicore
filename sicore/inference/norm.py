@@ -279,6 +279,11 @@ class SelectiveInferenceNorm(InferenceNorm):
             out_log (str, optional):
                 Name for log file of mpmath. Defaults to 'test_log.log'.
 
+        Raises:
+            Exception:
+                   The parametric_mode option is not p_value, reject_or_not, or all_search,
+                   and the over_conditioning option is set False.
+
         Returns:
             Type[SelectiveInferenceResult]
         """
@@ -290,20 +295,20 @@ class SelectiveInferenceNorm(InferenceNorm):
             return result
 
         elif parametric_mode == 'p_value' or parametric_mode == 'reject_or_not':
-            result = self.fusion(
-
-            )
+            result = self._parametric_inference(
+                algorithm, model_selector, significance_level, parametric_mode,
+                tail, threshold, popmean, choose_method, retain_selected_model, retain_mappings,
+                tol, step, dps, max_dps, out_log)
 
         elif parametric_mode == 'all_search':
             result = self._all_search_parametric_inference(
                 algorithm, model_selector, significance_level, tail, popmean,
-                choose_method, retain_selected_model, retain_mappings, tol, step,
-                dps, max_dps, out_log)
+                line_search, max_tail, retain_selected_model, retain_mappings,
+                tol, step, dps, max_dps, out_log)
 
         else:
-            result = self._parametric_inference(
-                algorithm, model_selector, significance_level, tail, popmean, line_search, max_tail,
-                retain_selected_model, retain_mappings, tol, step, dps, max_dps, out_log)
+            raise Exception(
+                'Please activate either parametric_mode or over_conditioning option.')
 
         return result
 
@@ -356,7 +361,7 @@ class SelectiveInferenceNorm(InferenceNorm):
             param = (e + s) / 2
         return param
 
-    def fusion(
+    def _parametric_inference(
             self, algorithm, model_selector, significance_level, parametric_mode,
             tail, threshold, popmean, choose_method, retain_selected_model, retain_mappings,
             tol, step, dps, max_dps, out_log):
