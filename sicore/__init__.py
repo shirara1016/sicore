@@ -25,7 +25,6 @@ from .inference.base import (
 from .inference.norm import (
     NaiveInferenceNorm,
     SelectiveInferenceNorm,
-    SelectiveInferenceNormSE,
 )
 from .inference.chi_squared import (
     NaiveInferenceChiSquared,
@@ -43,7 +42,6 @@ from .inference.pci import (
 __all__ = [
     "NaiveInferenceNorm",
     "SelectiveInferenceNorm",
-    "SelectiveInferenceNormSE",
     "NaiveInferenceChiSquared",
     "SelectiveInferenceChiSquared",
     "NaivePCINorm",
