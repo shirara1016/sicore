@@ -1,9 +1,8 @@
 from abc import ABC, abstractmethod
-import math
 import numpy as np
 from scipy import sparse
 from ..utils import is_int_or_float
-from ..intervals import intersection, not_, poly_lt_zero, union_all, _interval_to_intervals
+from ..intervals import intersection, not_, union_all, _interval_to_intervals
 from ..cdf_mpmath import tn_cdf_mpmath as tn_cdf
 from .base import *
 
@@ -483,10 +482,9 @@ class SelectiveInferenceNorm(InferenceNorm):
             z = self.determine_next_search_data(choose_method, z_l, z_r)
 
         return SelectiveInferenceResult(
-            standardize(self.stat, popmean,
-                        self.eta_sigma_eta), significance_level,
-            None, inf_p, sup_p, reject_or_not,
-            standardize(union_all(truncated_intervals),
+            standardize(self.stat, popmean, self.eta_sigma_eta),
+            significance_level, None, inf_p, sup_p, reject_or_not,
+            standardize(union_all(truncated_intervals, tol=self.tol),
                         popmean, self.eta_sigma_eta),
             search_count, detect_count, selected_model, mappings)
 
