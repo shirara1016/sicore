@@ -242,7 +242,7 @@ def polytope_to_interval(a_vec, b_vec, A=None, b=None, c=None, tol=1e-10):
     Returns:
         array-like: truncation intervals [[L1, U1], [L2, U2], ...].
     """
-    alp = beta = gam = 0
+    alp, beta, gam = 0, 0, 0
 
     if A is not None:
         cA = np.dot(b_vec, A)

@@ -2,7 +2,8 @@ import numpy as np
 
 
 def is_int_or_float(value):
-    """
+    """Check if it is a scalar value.
+
     Check if a value (including a numpy object) has integer or floating data type. Note
     that infinity values have floating data type.
     """
@@ -10,9 +11,8 @@ def is_int_or_float(value):
     return np.issubdtype(type_, np.integer) or np.issubdtype(type_, np.floating)
 
 
-class OneVec:
-    """
-    Vector whose elements from position `i` to `j` are set to 1, and 0 otherwise.
+class OneVec():
+    """Vector whose elements from position `i` to `j` are set to 1, and 0 otherwise.
 
     Args:
         length (int): Dimension of the vector.
@@ -45,10 +45,23 @@ class OneVec:
 
 
 def construct_projection_matrix(basis):
+    """Construct projection matrix from basis.
+
+    Args:
+        basis (np.ndarray, List[float]): List of basis of the space to be projected
+
+    Raises:
+        Exception: When the constructed matrix does not satisfy
+            the definition of a projection matrix.
+
+    Returns:
+        np.ndarray: projection matrix
+    """
+
     basis = np.array(basis)
     V = np.linalg.qr(basis.T)[0]
     P = np.dot(V, V.T)
     if np.sum(np.abs(np.dot(P, P) - P)) > 1e-5 or np.sum(np.abs(P.T - P)) > 1e-5:
         raise Exception(
-            "The projection matrix is not constructed correctly")
+            'The projection matrix is not constructed correctly')
     return P
