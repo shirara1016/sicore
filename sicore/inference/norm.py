@@ -12,15 +12,29 @@ from typing import Callable, List, Tuple, Type
 
 
 class InferenceNorm(ABC):
-    """
-    Base inference class for a test statistic which follows normal distribution under null.
+    """Base inference class for a test statistic which follows normal distribution under null.
 
     Args:
-        data (array-like): Observation data of length `N`.
-        var (float, array-like): Value of known variance, or `N`*`N` covariance matrix.
-        eta (array-like): Contrast vector of length `N`.
-        use_sparse (boolean, optional): Whether to use sparse matrix or not. Defaults to False.
-        use_tf (boolean, optional): Whether to use tensorflow or not. Defaults to False.
+        data (np.ndarray, List[float], tf.Tensor, torch.Tensor):
+            Observation data in 1-D array. When given as a tensor,
+            activate the corresponding option.
+        var (float, np.ndarray, tf.Tensor, torch.Tensor, sparse.spmatrix):
+            Value of known variance covariance. Assuming that
+            the shape of the input is a scalar or 1-D array or 2-D array,
+            the variance-covariance matrix Cov is interpreted as follows.
+            When the input is a scalar, Cov = input * Identity.
+            When the input is a 1-D array, Cov = diag(input).
+            When the input is a 2-D array, Cov = input.
+            Also, activate the option, when given as a sparse matrix.
+        eta (np.ndarray, List[float], tf.Tensor, torch.Tensor):
+            Contrast vector in 1-D array. When given as a tensor,
+            activate the corresponding option.
+        use_sparse (boolean, optional):
+            Whether to use sparse matrix or not. Defaults to False.
+        use_tf (boolean, optional):
+            Whether to use tensorflow or not. Defaults to False.
+        use_torch (boolean, optional):
+            Whether to use pytorch or not. Defaults to False.
     """
 
     def __init__(
@@ -100,31 +114,47 @@ class InferenceNorm(ABC):
             self.eta_sigma_eta = eta @ self.sigma_eta
 
     @abstractmethod
-    def test(self, *args, **kwargs):
-        """Perform statistical testing."""
+    def inference(self, *args, **kwargs):
+        """Perform statistical inference."""
         pass
 
 
 class NaiveInferenceNorm(InferenceNorm):
-    """
-    Naive inference for a test statistic which follows normal distribution under null.
+    """Naive inference for a test statistic which follows normal distribution under null.
 
     Args:
-        data (array-like): Observation data of length `N`.
-        var (float, array-like): Value of known variance, or `N`*`N`covariance matrix.
-        eta (array-like): Contrast vector of length `N`.
-        use_sparse (boolean, optional): Whether to use sparse matrix or not. Defaults to False.
-        use_tf (boolean, optional): Whether to use tensorflow or not. Defaults to False.
+        data (np.ndarray, List[float], tf.Tensor, torch.Tensor):
+            Observation data in 1-D array. When given as a tensor,
+            activate the corresponding option.
+        var (float, np.ndarray, tf.Tensor, torch.Tensor, sparse.spmatrix):
+            Value of known variance covariance. Assuming that
+            the shape of the input is a scalar or 1-D array or 2-D array,
+            the variance-covariance matrix Cov is interpreted as follows.
+            When the input is a scalar, Cov = input * Identity.
+            When the input is a 1-D array, Cov = diag(input).
+            When the input is a 2-D array, Cov = input.
+            Also, activate the option, when given as a sparse matrix.
+        eta (np.ndarray, List[float], tf.Tensor, torch.Tensor):
+            Contrast vector in 1-D array. When given as a tensor,
+            activate the corresponding option.
+        use_sparse (boolean, optional):
+            Whether to use sparse matrix or not. Defaults to False.
+        use_tf (boolean, optional):
+            Whether to use tensorflow or not. Defaults to False.
+        use_torch (boolean, optional):
+            Whether to use pytorch or not. Defaults to False.
     """
 
-    def test(self, tail="double", popmean=0):
-        """
-        Perform naive statistical testing.
+    def inference(self, tail='double', popmean=0):
+        """Perform naive statistical inference.
 
         Args:
-            tail (str, optional): 'double' for double-tailed test, 'right' for
-                right-tailed test, and 'left' for left-tailed test. Defaults to 'double'.
-            popmean (float, optional): Population mean of `η'x` under null hypothesis.
+            tail (str, optional):
+                'double' for double-tailed test,
+                'right' for right-tailed test, and
+                'left' for left-tailed test. Defaults to 'double'.
+            popmean (float, optional):
+                Population mean of the test statistic under null hypothesis.
                 Defaults to 0.
 
         Returns:
@@ -136,19 +166,33 @@ class NaiveInferenceNorm(InferenceNorm):
 
 
 class SelectiveInferenceNorm(InferenceNorm):
-    """
-    Selective inference for a test statistic which follows normal distribution under null.
+    """Selective inference for a test statistic which follows normal distribution under null.
 
     Args:
-        data (array-like): Observation data of length `N`.
-        var (float, array-like): Value of known variance, or `N`*`N` covariance matrix.
-        eta (array-like): Contrast vector of length `N`.
-        use_sparse (boolean, optional): Whether to use sparse matrix or not. Defaults to False.
-        use_tf (boolean, optional): Whether to use tensorflow or not. Defaults to False.
+        data (np.ndarray, List[float], tf.Tensor, torch.Tensor):
+            Observation data in 1-D array. When given as a tensor,
+            activate the corresponding option.
+        var (float, np.ndarray, tf.Tensor, torch.Tensor, sparse.spmatrix):
+            Value of known variance covariance. Assuming that
+            the shape of the input is a scalar or 1-D array or 2-D array,
+            the variance-covariance matrix Cov is interpreted as follows.
+            When the input is a scalar, Cov = input * Identity.
+            When the input is a 1-D array, Cov = diag(input).
+            When the input is a 2-D array, Cov = input.
+            Also, activate the option, when given as a sparse matrix.
+        eta (np.ndarray, List[float], tf.Tensor, torch.Tensor):
+            Contrast vector in 1-D array. When given as a tensor,
+            activate the corresponding option.
+        use_sparse (boolean, optional):
+            Whether to use sparse matrix or not. Defaults to False.
+        use_tf (boolean, optional):
+            Whether to use tensorflow or not. Defaults to False.
+        use_torch (boolean, optional):
+            Whether to use pytorch or not. Defaults to False.
     """
 
-    def __init__(self, data, var, eta, use_sparse=False, use_tf=False):
-        super().__init__(data, var, eta, use_sparse, use_tf)
+    def __init__(self, data, var, eta, use_sparse=False, use_tf=False, use_torch=False):
+        super().__init__(data, var, eta, use_sparse, use_tf, use_torch)
         self.c = self.sigma_eta / self.eta_sigma_eta  # `b` vector in para si.
         self.z = data - self.stat * self.c  # `a` vecotr in para si.
         self.intervals = [[NINF, INF]]
