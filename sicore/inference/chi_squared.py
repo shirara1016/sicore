@@ -3,7 +3,7 @@ import numpy as np
 from scipy.linalg import fractional_matrix_power
 from ..utils import is_int_or_float
 from ..intervals import intersection, not_, poly_lt_zero, union_all, _interval_to_intervals
-from ..cdf_mpmath import chi2_cdf_mpmath, tc2_cdf_mpmath
+from ..cdf_mpmath import tc2_cdf_mpmath
 from .base import *
 
 from scipy import sparse
@@ -13,22 +13,37 @@ from typing import Callable, List, Tuple, Type
 
 
 class InferenceChiSquared(ABC):
-    """
-    Base inference class for a test statistic which follows chi squared distribution under null.
+    """Base inference class for a test statistic which follows chi squared distribution under null.
 
     Args:
-        data (array-like): Observation data of length `N`.
-        var (float, array-like): Value of known variance, or `N`*`N` covariance matrix.
-        P (array-like): Projection matrix.
-        degree (int): degree of freedom.
-        use_sparse (boolean, optional): Whether to use sparse matrix or not. Defaults to False.
-        use_tf (boolean, optional): Whether to use tensorflow or not. Defaults to False.
+        data (np.ndarray, tf.Tensor, torch.Tensor):
+            Observation data in 1-D array. When given as a tensor,
+            activate the corresponding option.
+        var (float, np.ndarray, tf.Tensor, torch.Tensor, sparse.spmatrix):
+            Value of known variance covariance. Assuming that
+            the shape of the input is a scalar or 1-D array or 2-D array,
+            the variance-covariance matrix Cov is interpreted as follows.
+            When the input is a scalar, Cov = input * Identity.
+            When the input is a 1-D array, Cov = diag(input).
+            When the input is a 2-D array, Cov = input.
+            Also, activate the option, when given as a sparse matrix.
+        P (np.ndarray, tf.Tensor, torch.Tensor, sparse.spmatrix):
+            Projection matrix in 2-D array. When given as
+            a tensor or a sparse matrix, activate the corresponding option.
+        degree (int):
+            Dimension of the space projected by P matrix.
+        use_sparse (boolean, optional):
+            Whether to use sparse matrix or not. Defaults to False.
+        use_tf (boolean, optional):
+            Whether to use tensorflow or not. Defaults to False.
+        use_torch (boolean, optional):
+            Whether to use pytorch or not. Defaults to False.
     """
 
     def __init__(
         self,
         data: np.ndarray,
-        var: float | np.ndarray,
+        var: float | np.ndarray | sparse.spmatrix,
         P: np.ndarray | sparse.spmatrix,
         degree: int,
         use_sparse: bool = False,
@@ -111,36 +126,54 @@ class InferenceChiSquared(ABC):
             self.stat = np.linalg.norm(whitend_P_data, ord=2)
 
     @abstractmethod
-    def test(self, *args, **kwargs):
-        """Perform statistical testing."""
+    def inference(self, *args, **kwargs):
+        """Perform statistical inference."""
         pass
 
 
 class NaiveInferenceChiSquared(InferenceChiSquared):
-    """
-    Naive inference for a test statistic which follows chi squared distribution under null.
+    """Naive inference for a test statistic which follows chi squared distribution under null.
 
     Args:
-        data (array-like): Observation data of length `N`.
-        var (float, array-like): Value of known variance, or `N`*`N`covariance matrix.
-        basis (array-like): List of basis vector of length `N`.
-        use_tf (boolean, optional): Whether to use tensorflow or not. Defaults to False.
+        data (np.ndarray, tf.Tensor, torch.Tensor):
+            Observation data in 1-D array. When given as a tensor,
+            activate the corresponding option.
+        var (float, np.ndarray, tf.Tensor, torch.Tensor, sparse.spmatrix):
+            Value of known variance covariance. Assuming that
+            the shape of the input is a scalar or 1-D array or 2-D array,
+            the variance-covariance matrix Cov is interpreted as follows.
+            When the input is a scalar, Cov = input * Identity.
+            When the input is a 1-D array, Cov = diag(input).
+            When the input is a 2-D array, Cov = input.
+            Also, activate the option, when given as a sparse matrix.
+        P (np.ndarray, tf.Tensor, torch.Tensor, sparse.spmatrix):
+            Projection matrix in 2-D array. When given as
+            a tensor or a sparse matrix, activate the corresponding option.
+        degree (int):
+            Dimension of the space projected by P matrix.
+        use_sparse (boolean, optional):
+            Whether to use sparse matrix or not. Defaults to False.
+        use_tf (boolean, optional):
+            Whether to use tensorflow or not. Defaults to False.
+        use_torch (boolean, optional):
+            Whether to use pytorch or not. Defaults to False.
     """
 
-    def test(self, tail="right"):
-        """
-        Perform naive statistical testing.
+    def inference(self, tail: str = "right"):
+        """Perform naive statistical inference.
 
         Args:
-            tail (str, optional): 'double' for double-tailed test, 'right' for
-                right-tailed test, and 'left' for left-tailed test. Defaults to 'right'.
+            tail (str, optional):
+            'double' for double-tailed test,
+            'right' for right-tailed test, and
+            'left' for left-tailed test. Defaults to 'right'.
 
         Returns:
             float: p-value
         """
-
-        chi = chi2_cdf_mpmath(np.asarray(self.stat) ** 2, self.degree)
-        return calc_pvalue(chi, tail=tail)
+        stat = np.asarray(self.stat) ** 2
+        F = chi2.cdf(stat, self.degree)
+        return calc_pvalue(F, tail=tail)
 
 
 class SelectiveInferenceChiSquared(InferenceChiSquared):

@@ -3,7 +3,7 @@ import numpy as np
 from scipy import sparse
 from ..utils import is_int_or_float
 from ..intervals import intersection, not_, union_all, _interval_to_intervals
-from ..cdf_mpmath import tn_cdf_mpmath as tn_cdf
+from ..cdf_mpmath import tn_cdf_mpmath
 from .base import *
 
 from scipy.stats import norm
@@ -14,7 +14,7 @@ class InferenceNorm(ABC):
     """Base inference class for a test statistic which follows normal distribution under null.
 
     Args:
-        data (np.ndarray, List[float], tf.Tensor, torch.Tensor):
+        data (np.ndarray, tf.Tensor, torch.Tensor):
             Observation data in 1-D array. When given as a tensor,
             activate the corresponding option.
         var (float, np.ndarray, tf.Tensor, torch.Tensor, sparse.spmatrix):
@@ -25,7 +25,7 @@ class InferenceNorm(ABC):
             When the input is a 1-D array, Cov = diag(input).
             When the input is a 2-D array, Cov = input.
             Also, activate the option, when given as a sparse matrix.
-        eta (np.ndarray, List[float], tf.Tensor, torch.Tensor):
+        eta (np.ndarray, tf.Tensor, torch.Tensor):
             Contrast vector in 1-D array. When given as a tensor,
             activate the corresponding option.
         use_sparse (boolean, optional):
@@ -335,10 +335,10 @@ class SelectiveInferenceNorm(InferenceNorm):
 
         stat_std = standardize(self.stat, self.popmean, self.eta_sigma_eta)
 
-        sup_F = tn_cdf(stat_std, norm_sup_intervals,
-                       dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
-        inf_F = tn_cdf(stat_std, norm_inf_intervals,
-                       dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
+        sup_F = tn_cdf_mpmath(stat_std, norm_sup_intervals,
+                              dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
+        inf_F = tn_cdf_mpmath(stat_std, norm_inf_intervals,
+                              dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
         return inf_F, sup_F
 
     def _determine_next_search_data(self, choose_method, *args):
@@ -433,8 +433,8 @@ class SelectiveInferenceNorm(InferenceNorm):
         truncated_intervals = union_all(truncated_intervals, tol=self.tol)
         norm_intervals = standardize(
             truncated_intervals, popmean, self.eta_sigma_eta)
-        F = tn_cdf(stat_std, norm_intervals,
-                   dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
+        F = tn_cdf_mpmath(stat_std, norm_intervals,
+                          dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
         p_value = calc_pvalue(F, tail=tail)
         if parametric_mode == 'p_value':
             reject_or_not = (p_value <= significance_level)
@@ -504,8 +504,8 @@ class SelectiveInferenceNorm(InferenceNorm):
         truncated_intervals = union_all(result_intervals, tol=self.tol)
         norm_intervals = standardize(
             truncated_intervals, popmean, self.eta_sigma_eta)
-        F = tn_cdf(stat_std, norm_intervals,
-                   dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
+        F = tn_cdf_mpmath(stat_std, norm_intervals,
+                          dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
         p_value = calc_pvalue(F, tail=tail)
 
         inf_F, sup_F = self._calc_range_of_cdf_value(
@@ -533,8 +533,8 @@ class SelectiveInferenceNorm(InferenceNorm):
 
         stat_std = standardize(self.stat, popmean, self.eta_sigma_eta)
         norm_intervals = standardize(intervals, popmean, self.eta_sigma_eta)
-        F = tn_cdf(stat_std, norm_intervals,
-                   dps=self.dps, max_dps=max_dps, out_log=out_log)
+        F = tn_cdf_mpmath(stat_std, norm_intervals,
+                          dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
         p_value = calc_pvalue(F, tail=tail)
 
         inf_F, sup_F = self._calc_range_of_cdf_value(intervals, intervals)

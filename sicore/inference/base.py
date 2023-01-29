@@ -1,4 +1,3 @@
-import math
 import random
 import numpy as np
 from scipy.stats import norm, ttest_ind, ttest_1samp
@@ -98,7 +97,7 @@ def standardize(x, mean=0, var=1):
         mean (float, optional): Mean. Defaults to 0.
         var (float, optional): Variance. Defaults to 1.
     """
-    sd = math.sqrt(var)
+    sd = np.sqrt(var)
     return (np.asarray(x) - mean) / sd
 
 
