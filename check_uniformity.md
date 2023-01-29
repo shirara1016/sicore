@@ -49,8 +49,8 @@ PythonとRのパッケージの対応状況を以下に示す．RはKS検定 (`k
 		```
 	- CVM検定は実装されていない
 	- AD検定 (`scipy.stats.anderson`)は一様分布に非対応
-	- `scipy.stats.anderson_ksamp`はk標本のAD検定
-		- 特定の分布を指定せずに，$k$標本が同じ母集団から抽出されたものかを調べるための手法
+	- `scipy.stats.anderson_ksamp`は $k$ 標本のAD検定
+		- 特定の分布を指定せずに，$k$ 標本が同じ母集団から抽出されたものかを調べるための手法
 - statsmodels
 	- KS検定は一様分布に非対応
 	- CVM検定は実装されていない
