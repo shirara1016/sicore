@@ -1,81 +1,79 @@
-# sicoreパッケージ
-Selective Inferenceで共通して利用される機能をまとめました．
+# sicore package
 
-特定の用途に最適化されていないため，実行速度は遅めです．
+This package consists of core functions commonly used in selective inference.
 
-## フォーク元のレポジトリとの関係
-- masterブランチはフォーク元との互換性を無視して公開に向けて開発を進めています. 
-- legacy_implementationsブランチはフォーク元と高い互換性があり破壊的な変更はalgorithmの引数の形状のみです.
+The Japanese version README is [here](/README_ja.md).
 
-## 導入
-インストールにはPython3.6以上が必要．依存パッケージは自動的にインストールされます．
+## Installation
+
+This package requires python 3.6 or higher and automatically installs any dependent packages. If you want to use tensorflow and pytorch's tensor, please install the framework manually.
 ```
-$ pip install --upgrade setuptools wheel
-$ pip install .
+$ pip install sicore
 ```
-アンインストール：
+Uninstall :
 ```
 $ pip uninstall sicore
 ```
 
+## List of functions
+The following fuctions are imported by `from sicore import *`
 
-## 機能一覧
-`from sicore import *`でインポートされる機能は以下の通りです．
+**Statistical Inference**
+- NaiveInferenceNorm : Naive statistical inference for the test statistic following a normal distribution.
+- SelectiveInferenceNorm : Selective statistical inference for the test statistic following a normal distribution.
+    - Parametric SI and Over-Conditioning provided.
+    - Parametric SI offers the following three types of methods.
+        - Calculation of p-value with specified guaranteed accuracy.
+        - Determining if the null hypothesis is rejected or not.
+        - Performing a parametric search of the entire specified range.
+    - Inference results are returned as a data class.
+- NaiveInferenceChiSquared : Naive statistical inference for the test statistic following a chi squared distribution.
+- SelectiveInferenceChiSquared : Selective statistical inference for the test statistic following a chi squared distribution.
+    - Parametric SI and Over-Conditioning provided.
+    - Parametric SI offers the following three types of methods.
+        - Calculation of p-value with specified guaranteed accuracy.
+        - Determining if the null hypothesis is rejected or not.
+        - Performing a parametric search of the entire specified range.
+    - Inference results are returned as a data class.
+- one_sample_test() : Naive one-sample test.
+- two_sample_test() : Naive two-sample test.
 
-**検定**
-- NaiveInferenceNorm：正規分布に従う検定統計量に対するnaiveな検定
-- SelectiveInferenceNorm：正規分布に従う検定統計量に対するselectiveな検定
-    - Selection Eventの次数は制限なし
-    - Parametric SI対応
-    - 帰無仮説を棄却するか否かのみを判定する高速なメソッドを利用可能
-- SelectiveInferenceNormSE：正規分布に従う検定統計量に対するselectiveな検定
-    - 古い実装（互換性保持のため残している）
-    - 2次までのSelection Eventにしか対応しないが，SelectiveInferenceNormより高速
-    - Parametric SI非対応
-- NaiveInferenceChiSquared：カイ二乗検定に従う検定統計量に対するnaiveな検定
-- SelectiveInferenceChiSquared：カイ二乗分布に従う検定統計量に対するselectiveな検定
-    - Selection Eventの次数は制限なし
-    - Parametric SI対応
-    - 帰無仮説を棄却するか否かのみを判定する高速なメソッドを利用可能
-- two_sample_test()：naiveな1標本検定
-- one_sample_test()：naiveな2標本検定
+**Truncated Distribution**
+Provides computation with arbitrary precision using mpmath for multiple truncated intervals.
+- tn_cdf() : truncated standard normal distribution
+- tt_cdf() : truncated t distribution
+- tc2_cdf() : truncated chi squared distribution
+- tf_cdf() : truncated F distribution
 
-**切断分布**
-全て複数の切断区間に対応し，mpmathを用いた任意精度の計算
-- tn_cdf()：切断正規分布
-- tt_cdf()：切断t分布
-- tc2_cdf()：切断カイ2乗分布
-- tf_cdf()：切断F分布
-
-**検定の評価**
+**Evaluation Function**
 - false_positive_rate()
 - false_negative_rate()
 - true_negative_rate()
 - true_positive_rate()
-- type1_error_rate()：false_positive_rate()のエイリアス
-- type2_error_rate()：false_negative_rate()のエイリアス
-- power()：true_positive_rate()のエイリアス
+- type1_error_rate() ： Alias for false_positive_rate()
+- type2_error_rate() ： Alias for false_negative_rate()
+- power() : Alias for true_positive_rate()
 
-**図の描画**
-- pvalues_hist()：p値のヒストグラムを描画
-- pvalues_qqplot()：p値の一様Q-Qプロットを描画
-- FprFigure：FPRの実験図を描画
-- PowerFigure：検出力の実験図を描画
+**Figure Drawing**
+- pvalues_hist() : Draws a histogram of p-values.
+- pvalues_qqplot() : Draws a uniform Q-Q plot of p-values.
+- FprFigure : Draws a fpr figure.
+- PowerFigure : Draws a power figure.
 
-**区間**
-- intervals.intersection()：2つの区間の積を計算
-- intervals.intersection_all()：複数区間の積を計算
-- intervals.union_all()：複数区間の和を計算
-- intervals.not_()：実数上で区間の補集合を計算
-- intervals.poly_lt_zero()：多項式の0以下となる区間を計算
+**Interval Operations**
+- intervals.intersection() : Computes the intersection of two sets of intervals.
+- intervals.intersection_all() : Computes the intersection of set of intervals.
+- intervals.union_all() : Computes the union of set of intervals.
+- intervals.not_() : Computes the complement of set of intervals with real numbers as the whole set.
 
-**その他の便利な機能**
-- OneVec：特定の場所が1，それ以外が0のベクトルを生成
-- polytope_to_interval()：二次形式の選択イベントを切断区間へと変換する関数
-- construct_projection_matrix()：基底からそれらが張る部分空間への射影行列を生成
+**Utility**
+- OneVec : Generates a vector that is 1 at the specified index and 0 otherwise.
+- poly_lt_zero() : Calculation of the intervals for which the polynomial is less than or equal to 0.
+- polytope_to_interval() : Converts a selection event given in quadratic form into truncated intervals.
+- construct_projection_matrix() : Constructs a projection matrix from a basis given as a list of vectors to the subspace it spans.
 
-## その他
-テストの実行：
+## Others
+Execute code test :
 ```
 $ pytest tests/
 ```
