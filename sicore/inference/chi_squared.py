@@ -177,309 +177,155 @@ class NaiveInferenceChiSquared(InferenceChiSquared):
 
 
 class SelectiveInferenceChiSquared(InferenceChiSquared):
-    """
-    Selective inference for a test statistic which follows chi squared distribution under null.
+    """Selective inference for a test statistic which follows chi squared distribution under null.
 
     Args:
-        data (array-like): Observation data of length `N`.
-        var (float, array-like): Value of known variance, or `N`*`N` covariance matrix.
-        P (array-like): Projection matrix.
-        degree (int): degree of freedom.
-        use_sparse (boolean, optional): Whether to use sparse matrix or not. Defaults to False.
-        use_tf (boolean, optional): Whether to use tensorflow or not. Defaults to False.
+        data (np.ndarray, tf.Tensor, torch.Tensor):
+            Observation data in 1-D array. When given as a tensor,
+            activate the corresponding option.
+        var (float, np.ndarray, tf.Tensor, torch.Tensor, sparse.spmatrix):
+            Value of known variance covariance. Assuming that
+            the shape of the input is a scalar or 1-D array or 2-D array,
+            the variance-covariance matrix Cov is interpreted as follows.
+            When the input is a scalar, Cov = input * Identity.
+            When the input is a 1-D array, Cov = diag(input).
+            When the input is a 2-D array, Cov = input.
+            Also, activate the option, when given as a sparse matrix.
+        P (np.ndarray, tf.Tensor, torch.Tensor, sparse.spmatrix):
+            Projection matrix in 2-D array. When given as
+            a tensor or a sparse matrix, activate the corresponding option.
+        degree (int):
+            Dimension of the space projected by P matrix.
+        use_sparse (boolean, optional):
+            Whether to use sparse matrix or not. Defaults to False.
+        use_tf (boolean, optional):
+            Whether to use tensorflow or not. Defaults to False.
+        use_torch (boolean, optional):
+            Whether to use pytorch or not. Defaults to False.
     """
 
-    def __init__(self, data, var, P, degree, use_sparse=False, use_tf=False):
-        super().__init__(data, var, P, degree, use_sparse, use_tf)
+    def __init__(
+        self,
+        data: np.ndarray,
+        var: float | np.ndarray | sparse.spmatrix,
+        P: np.ndarray | sparse.spmatrix,
+        degree: int,
+        use_sparse: bool = False,
+        use_tf: bool = False,
+        use_torch: bool = False
+    ):
+        super().__init__(data, var, P, degree, use_sparse, use_tf, use_torch)
         self.c = self.P_data / self.stat  # `b` vector in para si.
         self.z = data - self.P_data  # `a` vector in para si.
-        self.intervals = [[NINF, INF]]
-        self.searched_intervals = None
-        self.mappings = None  # {interval1: model1, interval2: model2, ...}
-        self.tol = None
 
-    @property
-    def parametric_data(self):
-        return [np.poly1d([a, b]) for a, b in zip(self.c, self.z)]
-
-    def add_polytope(self, A=None, b=None, c=None, tol=1e-10):
-        """
-        Add a polytope `{x'Ax+b'x+c<=0}` as a selection event.
-
-        Args:
-            A (array-like, optional): `N`*`N` matrix. Set None if `A` is unused.
-                Defaults to None.
-            b (array-like, optional): `N` dimensional vector. Set None if `b` is unused.
-                Defaults to None.
-            c (float, optional): Constant. Set None if `c` is unused. Defaults to None.
-            tol (float, optional): Tolerance error parameter. Defaults to 1e-10.
-        """
-        alp = beta = gam = 0
-
-        if A is not None:
-            cA = np.dot(self.c, A)
-            zA = np.dot(self.z, A)
-            alp += np.dot(cA, self.c)
-            beta += np.dot(zA, self.c) + np.dot(cA, self.z)
-            gam += np.dot(zA, self.z)
-
-        if b is not None:
-            beta += np.dot(b, self.c)
-            gam += np.dot(b, self.z)
-
-        if c is not None:
-            gam += c
-
-        self.add_polynomial([alp, beta, gam], tol=tol)
-
-    def add_polynomial(self, poly_or_coef, tol=1e-10):
-        """
-        Add a polynomial `f(x)` as a selection event.
+    def inference(
+        self,
+        algorithm: Callable[[np.ndarray, np.ndarray, float], Tuple[List[List[float]], Any]],
+        model_selector: Callable[[Any], bool],
+        significance_level: float = 0.05,
+        parametric_mode: str = 'p_value',
+        over_conditioning: bool = False,
+        tail: str = 'right',
+        threshold: float = 1e-3,
+        line_search: bool = True,
+        max_tail: float = 1e3,
+        choose_method: str = 'near_stat',
+        retain_selected_model: bool = False,
+        retain_mappings: bool = False,
+        tol: float = 1e-10,
+        step: float = 1e-10,
+        dps: int | str = 'auto',
+        max_dps: int = 5000,
+        out_log: str = 'test_log.log'
+    ) -> Type[SelectiveInferenceResult]:
+        """Perform Selective Inference.
 
         Args:
-            poly_or_coef (np.poly1d, array-like): np.poly1d object or coefficients of
-                the polynomial e.g. [a, b, c] for `f(x) = ax^2 + bx + c`.
-            tol (float, optional): Tolerance error parameter. It is recommended to set
-                a large value (about 1e-5) for high order polynomial (>= 3) or a
-                polynomial with multiple root. Defaults to 1e-10.
-        """
-        intervals = poly_lt_zero(poly_or_coef, tol=tol)
-        self.intervals = intersection(self.intervals, intervals)
-
-    def add_interval(self, interval):
-        """
-        Add an interval as a selection event.
-
-        Args:
-            interval (array-like): Interval [l1, u1] or the union of intervals
-                [[l1, u1], [l2, u2], ...].
-        """
-        self.intervals = intersection(self.intervals, interval)
-
-    def _next_search_data(self, line_search):
-        intervals = not_(self.searched_intervals)
-        if len(intervals) == 0:
-            return None
-        if line_search:
-            param = intervals[0][0] + self.step
-        else:
-            s, e = random.choice(intervals)
-            param = (e + s) / 2
-        return param
-
-    def parametric_search(self, algorithm, max_tail=1000, tol=1e-10, model_selector=None, line_search=True, step=1e-10):
-        """
-        Perform parametric search.
-
-        Args:
-            algorithm (callable): Callable function which takes two vectors (`a`, `b`)
+            algorithm (Callable[[np.ndarray, np.ndarray, float], Tuple[List[List[float]], Any]]):
+                Callable function which takes two vectors (`a`, `b`)
                 and a scalar `z` that can satisfy `data = a + b * z`
                 as arguments, and returns the selected model (any) and
                 the truncation intervals (array-like). A closure function might be
                 helpful to implement this.
-            max_tail (float, optional): Maximum tail value to be searched. Defaults to 1000.
-            tol (float, optional): Tolerance error parameter. Defaults to 1e-10.
-            model_selector (callable, optional): Callable function which takes
-                a selected model (any) as single argument, and returns True
-                if the model is used for the testing, and False otherwise.
-                If this option is activated, the truncation intervals for testing is
-                calculated within this method. Defaults to None.
-            line_search (boolean, optional): Whether to perform a line search or a random search
-                from unexplored regions. Defaults to True.
-            step (float, optional): Step width for line search. Defaults to 1e-10.
-        """
-        self.tol = tol
-        self.step = step
-        self.searched_intervals = union_all(
-            [[NINF, 1e-10], [float(max_tail), INF]], tol=self.tol
-        )
-        self.mappings = dict()
-        result_intervals = list()
-
-        self.count = 0
-        self.detect_count = 0
-
-        z = self._next_search_data(line_search)
-        while True:
-            if z is None:
-                break
-            self.count += 1
-
-            model, interval = algorithm(self.z, self.c, z)
-            interval = np.asarray(interval)
-            intervals = _interval_to_intervals(interval)
-
-            if model_selector is None:
-                for interval in intervals:
-                    interval = tuple(interval)
-                    if interval in self.mappings:
-                        raise Exception(
-                            "An interval appeared a second time. Usually, numerical error "
-                            "causes this exception. Consider increasing the tol parameter "
-                            "or decreasing max_tail parameter to avoid it."
-                        )
-                    self.mappings[interval] = model
-            else:
-                if model_selector(model):
-                    result_intervals += intervals
-                    self.detect_count += 1
-
-            self.searched_intervals = union_all(
-                self.searched_intervals + intervals, tol=self.tol)
-
-            z = self._next_search_data(line_search)
-
-        if model_selector is not None:
-            self.intervals = union_all(result_intervals, tol=self.tol)
-
-    def test(
-        self, intervals=None, model_selector=None, tail="right", dps="auto", out_log='test_log.log', max_dps=5000
-    ):
-        """
-        Perform selective statistical testing.
-
-        Args:
-            model_selector (callable, optional): Callable function which takes
-                a selected model (any) as single argument, and returns True
-                if the model is used for the testing, and False otherwise.
-                This option is valid after calling ``self.parametric_search()``
-                with model_selector None.
-            tail (str, optional): 'double' for double-tailed test, 'right' for
-                right-tailed test, and 'left' for left-tailed test. Defaults to 'right'.
-            dps (int, str, optional): dps value for mpmath. Set 'auto' to select dps
+            model_selector (Callable[[Any], bool]):
+                Callable function which takes a selected model (any) as single argument, and
+                returns True if the model is used for the testing, and False otherwise.
+            significance_level (float, optional):
+                Significance level for the testing. Defaults to 0.05.
+            parametric_mode (str, optional):
+                Specifies the method used to perform parametric selective inference. This option is
+                ignored when the over_conditioning option is activated.
+                'p_value' for calculation of p-value with guaranteed accuracy specified by the threshold option.
+                'reject_or_not' for only determining whether the null hypothesis is rejected.
+                'all_search' for all searches of the interval specified by the max_tail option.
+            over_conditioning (bool, optional):
+                Over conditioning Inference. Defaults to False.
+            tail (str, optional):
+                'double' for double-tailed test, 'right' for right-tailed test, and
+                'left' for left-tailed test. Defaults to 'right'.
+            threshold (float, optional):
+                Guaranteed accuracy when calculating p-value. Defaults to 1e-3.
+            line_search (bool, optional):
+                Wheter to perform a line search or a random search. Defaults to True.
+            max_tail (float, optional):
+                Maximum tail value to be parametrically searched when
+                the parametric_mode option is set to all_search. Defaults to 1e3.
+            choose_method (str, optional):
+                How to determine the search direction when parametric_mode
+                is other than all_search. 'near_stat', 'high_pdf', and 'random'
+                can be specified. Defaults to 'near_stat'.
+            retain_selected_model (bool, optional):
+                Whether retain selected model as returns or not. Defaults to False.
+            retain_mappings (bool, optional):
+                Whether retain mappings as returns or not. Defaults to False.
+            tol (float, optional):
+                Tolerance error parameter for intervals. Defaults to 1e-10.
+            step (float, optional):
+                Step width for parametric search. Defaults to 1e-10.
+            dps (int | str, optional):
+                dps value for mpmath. Set 'auto' to select dps
                 automatically. Defaults to 'auto'.
-            max_dps (int, optional): Maximum dps value for mpmath. This option is valid
+            max_dps (int, optional):
+                Maximum dps value for mpmath. This option is valid
                 when `dps` is set to 'auto'. Defaults to 5000.
+            out_log (str, optional):
+                Name for log file of mpmath. Defaults to 'test_log.log'.
+
+        Raises:
+            Exception:
+                   The parametric_mode option is not p_value, reject_or_not, or all_search,
+                   and the over_conditioning option is set False.
 
         Returns:
-            float: p-value
+            Type[SelectiveInferenceResult]
         """
-        if intervals is None:
-            if model_selector is None:
-                intervals = self.intervals
-            else:
-                if self.mappings is None:
-                    raise Exception("Parametric search has not been performed")
-                result_intervals = list(self.intervals)
-                for interval, model in self.mappings.items():
-                    if model_selector(model):
-                        result_intervals.append(interval)
-                intervals = union_all(result_intervals, tol=self.tol)
+
+        if over_conditioning:
+            result = self._over_conditioned_inference(
+                algorithm, significance_level, tail, retain_selected_model,
+                tol, dps, max_dps, out_log)
+            return result
+
+        elif parametric_mode == 'p_value' or parametric_mode == 'reject_or_not':
+            result = self._parametric_inference(
+                algorithm, model_selector, significance_level, parametric_mode,
+                tail, threshold, choose_method, retain_selected_model, retain_mappings,
+                tol, step, dps, max_dps, out_log)
+
+        elif parametric_mode == 'all_search':
+            result = self._all_search_parametric_inference(
+                algorithm, model_selector, significance_level, tail,
+                line_search, max_tail, retain_selected_model, retain_mappings,
+                tol, step, dps, max_dps, out_log)
+
         else:
-            self.interval = np.asarray(intervals)
-            intervals = self.interval
+            raise Exception(
+                'Please activate either parametric_mode or over_conditioning option.')
 
-        stat = np.asarray(self.stat) ** 2
-        chi_intervals = intersection(
-            intervals, [[1e-5, INF]])
-        chi_squared_intervals = np.power(chi_intervals, 2)
-        F = tc2_cdf_mpmath(stat, chi_squared_intervals, self.degree,
-                           dps=dps, max_dps=max_dps, out_log=out_log)
-
-        return calc_pvalue(F, tail=tail)
-
-    def only_check_reject_or_not(
-        self, algorithm, model_selector, significance_level=0.05, tol=1e-10, step=1e-10, tail="double", popmean=0, dps="auto", out_log='test_log.log', max_dps=5000
-    ):
-        """
-        Only check whether the null hypothesis is rejected or not in selective statistical test.
-
-        Args:
-            algorithm (callable): Callable function which takes two vectors (`a`, `b`)
-                and a scalar `z` that can satisfy `data = a + b * z`
-                as arguments, and returns the selected model (any) and
-                the truncation intervals (array-like). A closure function might be
-                helpful to implement this.
-            model_selector (callable): Callable function which takes
-                a selected model (any) as single argument, and returns True
-                if the model is used for the testing, and False otherwise.
-            significance_level (float, optional): Significance level value for
-                selective statistical tests. Defaults to 0.05.
-            tol (float, optional): Tolerance error parameter. Defaults to 1e-10.
-            step (float, optional): Step width for next search. Defaults to 1e-10.
-            tail (str, optional): 'double' for double-tailed test, 'right' for
-                right-tailed test, and 'left' for left-tailed test. Defaults to 'double'.
-            popmean (float, optional): Population mean of `η^T x` under null hypothesis.
-                Defaults to 0.
-            dps (int, str, optional): dps value for mpmath. Set 'auto' to select dps
-                automatically. Defaults to 'auto'.
-            max_dps (int, optional): Maximum dps value for mpmath. This option is valid
-                when `dps` is set to 'auto'. Defaults to 5000.
-
-        Returns:
-            (boolean, float, float): (reject or not, lower of p-value, upper of p-value)
-        """
-        self.tol = tol
-        self.step = step
-        self.searched_intervals = list()
-        truncated_intervals = list()
-
-        self.count = 0
-        self.detect_count = 0
-
-        stat = float(self.stat) ** 2
-
-        z = self.stat
-        while True:
-            if self.count > 1e5:
-                raise Exception(
-                    'The number of searches exceeds 10,000 times, suggesting an infinite loop.')
-            self.count += 1
-
-            model, interval = algorithm(self.z, self.c, z)
-            interval = np.asarray(interval)
-            intervals = _interval_to_intervals(interval)
-
-            if model_selector(model):
-                truncated_intervals += intervals
-                self.detect_count += 1
-
-            self.searched_intervals = union_all(
-                self.searched_intervals + intervals, tol=self.tol)
-
-            unsearched_intervals = not_(self.searched_intervals)
-            s = intersection(unsearched_intervals, [
-                             NINF, float(self.stat)])[-1][1]
-            e = intersection(unsearched_intervals, [
-                             float(self.stat), INF])[0][0]
-
-            sup_intervals = union_all(
-                truncated_intervals + [[NINF, s]], tol=self.tol)
-            inf_intervals = union_all(
-                truncated_intervals + [[e, INF]], tol=self.tol)
-
-            chi_sup_intervals = intersection(
-                sup_intervals, [[1e-5, INF]])
-            chi_inf_intervals = intersection(
-                inf_intervals, [[1e-5, INF]])
-
-            chi_squared_sup_intervals = np.power(chi_sup_intervals, 2)
-            chi_squared_inf_intervals = np.power(chi_inf_intervals, 2)
-
-            sup_F = tc2_cdf_mpmath(stat, chi_squared_sup_intervals, self.degree,
-                                   dps=dps, max_dps=max_dps, out_log=out_log)
-            inf_F = tc2_cdf_mpmath(stat, chi_squared_inf_intervals, self.degree,
-                                   dps=dps, max_dps=max_dps, out_log=out_log)
-
-            inf_p, sup_p = calc_p_range(inf_F, sup_F, tail=tail)
-
-            if sup_p <= significance_level:
-                return True, inf_p, sup_p
-            if inf_p > significance_level:
-                return False, inf_p, sup_p
-
-            z_l = s - self.step
-            z_r = e + self.step
-
-            if float(self.stat) - z_l < z_r - float(self.stat):
-                if z_l >= 1e-5:
-                    z = z_l
-            else:
-                z = z_r
+        return result
 
     def calc_range_of_cdf_value(self, truncated_intervals, searched_intervals):
 
-        lb = 1e-5
         unsearched_intervals = not_(searched_intervals)
         s = intersection(unsearched_intervals, [
             NINF, float(self.stat)])[-1][1]
@@ -495,14 +341,14 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
             truncated_intervals + [[e, INF]], tol=self.tol)
 
         chi_sup_intervals = intersection(
-            sup_intervals, [[lb, INF]])
+            sup_intervals, [[1e-5, INF]])
         chi_inf_intervals = intersection(
-            inf_intervals, [[lb, INF]])
+            inf_intervals, [[1e-5, INF]])
 
         chisq_sup_intervals = np.power(chi_sup_intervals, 2)
         chisq_inf_intervals = np.power(chi_inf_intervals, 2)
 
-        stat_chisq = float(self.stat) ** 2
+        stat_chisq = np.asarray(self.stat) ** 2
 
         sup_F = tc2_cdf_mpmath(stat_chisq, chisq_sup_intervals, self.degree,
                                dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
@@ -511,7 +357,7 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
 
         return inf_F, sup_F
 
-    def determine_next_search_data(self, choose_method, *args):
+    def _determine_next_search_data(self, choose_method, *args):
         if choose_method == 'near_stat':
             def method(z): return -np.abs(z - float(self.stat))
         if choose_method == 'high_pdf':
@@ -520,103 +366,16 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
             return random.choice(args)
         return max(args, key=method)
 
-    def inference(
-        self,
-        algorithm: Callable[[np.ndarray, np.ndarray, float], Tuple[List[List[float]], Any]],
-        model_selector: Callable[[Any], bool],
-        significance_level: float = 0.05,
-        tail: str = 'right',
-        tol: float = 1e-10,
-        step: float = 1e-10,
-        check_only_reject_or_not: bool = False,
-        over_conditioning: bool = False,
-        line_search: bool = True,
-        max_tail: float = 1e3,
-        choose_method: str = 'high_pdf',
-        retain_selected_model: bool = False,
-        retain_mappings: bool = False,
-        dps: int | str = 'auto',
-        max_dps: int = 5000,
-        out_log: str = 'test_log.log'
-    ) -> Type[SelectiveInferenceResult]:
-        """Perform Selective Inference. This is unified interface for SI.
-
-        Args:
-            algorithm (Callable[[np.ndarray, np.ndarray, float], Tuple[List[List[float]], Any]]):
-                Callable function which takes two vectors (`a`, `b`)
-                and a scalar `z` that can satisfy `data = a + b * z`
-                as arguments, and returns the selected model (any) and
-                the truncation intervals (array-like). A closure function might be
-                helpful to implement this.
-            model_selector (Callable[[Any], bool]):
-                Callable function which takes a selected model (any) as single argument, and
-                returns True if the model is used for the testing, and False otherwise.
-            significance_level (float, optional):
-                Significance level for the testing. Defaults to 0.05.
-            tail (str, optional):
-                'double' for double-tailed test, 'right' for right-tailed test, and
-                'left' for left-tailed test. Defaults to 'double'.
-            tol (float, optional):
-                Tolerance error parameter. Defaults to 1e-10.
-            step (float, optional):
-                Step width for line search. Defaults to 1e-10.
-            check_only_reject_or_not (bool, optional):
-                Inference only for rejectness. Defaults to False.
-            over_conditioning (bool, optional):
-                Over conditioning Inference. Defaults to False.
-            line_search (bool, optional):
-                Wheter to perform a line search or a random search. Defaults to True.
-            max_tail (float, optional):
-                Maximum tail value to be parametrically searched when neither option
-                check_only_rejecto_or_not nor over_coditionig is enabled. Defaults to 1e3.
-            choose_method (str, optional):
-                When check_only_reject_or_not is activated, 'near_stat' and 'high_pdf'
-                can be specified in the algorithm to select the search
-                direction. Defaults to 'near_stat'.
-            retain_selected_model (bool, optional):
-                Whether retain selected model as returns or not. Defaults to False.
-            retain_mappings (bool, optional):
-                Whether retain mappings as returns or not. Defaults to False.
-            dps (int | str, optional):
-                dps value for mpmath. Set 'auto' to select dps
-                automatically. Defaults to 'auto'.
-            max_dps (int, optional):
-                Maximum dps value for mpmath. This option is valid
-                when `dps` is set to 'auto'. Defaults to 5000.
-            out_log (str, optional):
-                Name for log file of mpmath. Defaults to 'test_log.log'.
-        Raises:
-            Exception:
-                The two options, check_only_reject_or_not and over-conditioning,
-                cannot be activated at the same time.
-
-        Returns:
-            Type[SelectiveInferenceResult]
-        """
-
-        if over_conditioning and check_only_reject_or_not:
-            raise Exception(
-                'The two options, check_only_reject_or_not and over-conditioning, cannot be activated at the same time.'
-            )
-
-        if over_conditioning:
-            result = self._over_conditioned_inference(
-                algorithm, significance_level, tail, retain_selected_model,
-                tol, dps, max_dps, out_log)
-            return result
-
-        elif check_only_reject_or_not:
-            result = self._rejectability_only_inference(
-                algorithm, model_selector, significance_level, tail, choose_method,
-                retain_selected_model, retain_mappings, tol, step,
-                dps, max_dps, out_log)
-
+    def _next_search_data(self, line_search):
+        intervals = not_(self.searched_intervals)
+        if len(intervals) == 0:
+            return None
+        if line_search:
+            param = intervals[0][0] + self.step
         else:
-            result = self._parametric_inference(
-                algorithm, model_selector, significance_level, tail, line_search, max_tail,
-                retain_selected_model, retain_mappings, tol, step, dps, max_dps, out_log)
-
-        return result
+            s, e = random.choice(intervals)
+            param = (e + s) / 2
+        return param
 
     def _parametric_inference(
             self, algorithm, model_selector, significance_level, tail,
