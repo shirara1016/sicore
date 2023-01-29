@@ -215,7 +215,7 @@ class SelectiveInferenceNorm(InferenceNorm):
         popmean: float = 0,
         line_search: bool = True,
         max_tail: float = 1e3,
-        choose_method: str = 'high_pdf',
+        choose_method: str = 'near_stat',
         retain_selected_model: bool = False,
         retain_mappings: bool = False,
         tol: float = 1e-10,
@@ -260,8 +260,8 @@ class SelectiveInferenceNorm(InferenceNorm):
                 the parametric_mode option is set to all_search. Defaults to 1e3.
             choose_method (str, optional):
                 How to determine the search direction when parametric_mode
-                is other than all_search. 'high_pdf', 'near_stat', and 'random'
-                can be specified. Defaults to 'high_pdf'.
+                is other than all_search. 'near_stat', 'high_pdf', and 'random'
+                can be specified. Defaults to 'near_stat'.
             retain_selected_model (bool, optional):
                 Whether retain selected model as returns or not. Defaults to False.
             retain_mappings (bool, optional):
