@@ -1,8 +1,8 @@
 """
 Core package for selective inference.
 """
-from . import intervals, utils
-from .intervals import polytope_to_interval
+from . import intervals
+from .intervals import polytope_to_interval, poly_lt_zero
 from .utils import OneVec, construct_projection_matrix
 from .cdf_mpmath import tc2_cdf_mpmath as tc2_cdf
 from .cdf_mpmath import tf_cdf_mpmath as tf_cdf
@@ -30,26 +30,12 @@ from .inference.chi_squared import (
     NaiveInferenceChiSquared,
     SelectiveInferenceChiSquared
 )
-from .inference.pci import (
-    NaivePCINorm,
-    SelectivePCINorm,
-    SelectivePCINormSE,
-    NaivePCIChiSquared,
-    SelectivePCIChiSquared,
-    SelectivePCIChiSquaredSE,
-)
 
 __all__ = [
     "NaiveInferenceNorm",
     "SelectiveInferenceNorm",
     "NaiveInferenceChiSquared",
     "SelectiveInferenceChiSquared",
-    "NaivePCINorm",
-    "SelectivePCINorm",
-    "SelectivePCINormSE",
-    "NaivePCIChiSquared",
-    "SelectivePCIChiSquared",
-    "SelectivePCIChiSquaredSE",
     "one_sample_test",
     "two_sample_test",
     "tn_cdf",
@@ -68,8 +54,8 @@ __all__ = [
     "FprFigure",
     "PowerFigure",
     "intervals",
-    "utils",
     "polytope_to_interval",
+    "poly_lt_zero",
     "construct_projection_matrix",
     "OneVec"
 ]
