@@ -377,7 +377,7 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
             param = (e + s) / 2
         return param
 
-    def _parametric_inference(
+    def _parametric_inference_hidden(
             self, algorithm, model_selector, significance_level, tail,
             line_search, max_tail, retain_selected_model, retain_mappings,
             tol, step, dps, max_dps, out_log):
@@ -448,10 +448,10 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
             (p_value <= significance_level), chisq_intervals,
             search_count, detect_count, selected_model, mappings)
 
-    def _rejectability_only_inference(
-            self, algorithm, model_selector, significance_level, tail, choose_method,
-            retain_selected_model, retain_mappings, tol, step,
-            dps, max_dps, out_log):
+    def _parametric_inference(
+            self, algorithm, model_selector, significance_level, parametric_mode,
+            tail, threshold, choose_method, retain_selected_model, retain_mappings,
+            tol, step, dps, max_dps, out_log):
 
         self.tol = tol
         self.step = step
@@ -494,32 +494,42 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
                 detect_count += 1
 
             self.searched_intervals = union_all(
-                self.searched_intervals + intervals, tol=tol)
+                self.searched_intervals + intervals, tol=self.tol)
 
             inf_F, sup_F = self.calc_range_of_cdf_value(
                 truncated_intervals, self.searched_intervals)
             inf_p, sup_p = calc_p_range(inf_F, sup_F, tail=tail)
 
-            if sup_p <= significance_level:
-                reject_or_not = True
-                break
-            if inf_p > significance_level:
-                reject_or_not = False
-                break
+            if parametric_mode == 'p_value':
+                if np.abs(sup_p - inf_p) < threshold:
+                    break
+            if parametric_mode == 'reject_or_not':
+                if sup_p <= significance_level:
+                    reject_or_not = True
+                    break
+                if inf_p > significance_level:
+                    reject_or_not = False
+                    break
 
             z_l = self.left_end - self.step
             z_r = self.right_end + self.step
-            z = self.determine_next_search_data(choose_method, z_l, z_r)
+            z = self._determine_next_search_data(choose_method, z_l, z_r)
             if z <= 1e-5:
                 z = z_r
 
+        stat_chisq = np.asarray(self.stat) ** 2
         truncated_intervals = union_all(truncated_intervals, tol=self.tol)
         chi_intervals = intersection(truncated_intervals, [[1e-5, INF]])
         chisq_intervals = np.power(chi_intervals, 2)
+        F = tc2_cdf_mpmath(stat_chisq, chisq_intervals, self.degree,
+                           dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
+        p_value = calc_pvalue(F, tail=tail)
+        if parametric_mode == 'p_value':
+            reject_or_not = (p_value <= significance_level)
 
         return SelectiveInferenceResult(
-            float(self.stat) ** 2, significance_level,
-            None, inf_p, sup_p, reject_or_not, chisq_intervals,
+            stat_chisq, significance_level, p_value, inf_p, sup_p,
+            reject_or_not, chisq_intervals,
             search_count, detect_count, selected_model, mappings)
 
     def _over_conditioned_inference(
