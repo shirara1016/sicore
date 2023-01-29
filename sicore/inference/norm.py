@@ -408,7 +408,7 @@ class SelectiveInferenceNorm(InferenceNorm):
                 detect_count += 1
 
             self.searched_intervals = union_all(
-                self.searched_intervals + intervals, tol=tol)
+                self.searched_intervals + intervals, tol=self.tol)
 
             inf_F, sup_F = self._calc_range_of_cdf_value(
                 truncated_intervals, self.searched_intervals)
