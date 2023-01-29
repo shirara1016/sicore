@@ -162,7 +162,7 @@ def two_sample_test(data1, data2, var=None, equal_var=True, tail='double'):
         return calc_pvalue(F, tail=tail)
     else:
         if is_int_or_float(var):
-            var1 = var2 = var
+            var1, var2 = var, var
         else:
             var1, var2 = var
 

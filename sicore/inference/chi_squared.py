@@ -1,15 +1,14 @@
 from abc import ABC, abstractmethod
 import numpy as np
-from scipy.linalg import fractional_matrix_power
+from typing import Callable, List, Tuple, Type
 from ..utils import is_int_or_float
-from ..intervals import intersection, not_, poly_lt_zero, union_all, _interval_to_intervals
+from ..intervals import intersection, not_, union_all, _interval_to_intervals
 from ..cdf_mpmath import tc2_cdf_mpmath
 from .base import *
 
 from scipy import sparse
-
 from scipy.stats import chi2
-from typing import Callable, List, Tuple, Type
+from scipy.linalg import fractional_matrix_power
 
 
 class InferenceChiSquared(ABC):

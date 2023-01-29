@@ -1,13 +1,13 @@
 from abc import ABC, abstractmethod
 import numpy as np
-from scipy import sparse
+from typing import Callable, List, Tuple, Type
 from ..utils import is_int_or_float
 from ..intervals import intersection, not_, union_all, _interval_to_intervals
 from ..cdf_mpmath import tn_cdf_mpmath
 from .base import *
 
+from scipy import sparse
 from scipy.stats import norm
-from typing import Callable, List, Tuple, Type
 
 
 class InferenceNorm(ABC):
