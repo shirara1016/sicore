@@ -45,44 +45,56 @@ NINF = -INF
 random.seed(0)
 
 
-def calc_pvalue(F, tail='double'):
+def calc_pvalue(F, alternative):
     """
     Calculate p-value.
 
     Args:
         F (float): CDF value at the observed test statistic.
-        tail (str, optional): Set 'double' for double-tailed test, 'right' for right-tailed test, and 'left' for left-tailed test. Defaults to 'double'.
+        alternative (str):
+            'two-sided' for two-tailed test,
+            'less' for right-tailed test,
+            'greater' for left-tailed test,
+            'abs' for two-tailed test for
+            the distribution of absolute values
+            following the null distribution.
 
     Returns:
         float: p-value
     """
-    if tail == 'double':
+    if alternative == 'two-sided':
         return float(2 * min(F, 1 - F))
-    elif tail == 'right':
+    elif alternative == 'less' or alternative == 'abs':
         return float(1 - F)
-    elif tail == 'left':
+    elif alternative == 'greater':
         return float(F)
 
 
-def calc_p_range(inf_F, sup_F, tail='double'):
+def calc_prange(inf_F, sup_F, alternative):
     """
     Calculate possible range of p-value.
 
     Args:
         inf_F (float): Infimum of CDF value at the observed test statistic.
         sup_F (float): Supremum of CDF value at the observed test statistic.
-        tail (str, optional): Set 'double' for double-tailed test, 'right' for right-tailed test, and 'left' for left-tailed test. Defaults to 'double'.
+        alternative (str, optional):
+            'two-sided' for two-tailed test,
+            'less' for right-tailed test,
+            'greater' for left-tailed test,
+            'abs' for two-tailed test for
+            the distribution of absolute values
+            following the null distribution.
 
     Returns:
         (float, float): (Infimum of p-value, Supremum of p-value)
     """
-    if tail == 'double':
+    if alternative == 'two-sided':
         sup_p = float(2 * min(sup_F, 1 - inf_F))
         inf_p = float(2 * min(inf_F, 1 - sup_F))
-    elif tail == 'right':
+    elif alternative == 'less' or alternative == 'abs':
         sup_p = float(1 - inf_F)
         inf_p = float(1 - sup_F)
-    elif tail == 'left':
+    elif alternative == 'greater':
         sup_p = float(sup_F)
         inf_p = float(inf_F)
     return (max(inf_p, 0), min(sup_p, 1))

@@ -56,7 +56,7 @@ def f_cdf_mpmath(x, df1, df2):
 
 
 def _truncated_cdf_from_cdf(
-    cdf_func, x, intervals, dps="auto", max_dps=5000, init_dps=30, scale=2, precision=15, out_log='test_log.log'
+    cdf_func, x, intervals, absolute=False, dps="auto", max_dps=5000, init_dps=30, scale=2, precision=15, out_log='test_log.log'
 ):
     """
     Calculate CDF of a truncated distribution from a CDF function.
@@ -65,6 +65,8 @@ def _truncated_cdf_from_cdf(
         cdf_func (callable): CDF function of a distribution.
         x (float): Return the value at `x`.
         intervals (array-like): Truncation intervals [[L1, U1], [L2, U2],...].
+        absolute (bool, optional): Calculate the CDF of the distribution of
+            absolute values when this option is activated
         dps (int, str, optional): dps value for mpmath. Set 'auto' to select dps
             automatically, although it will not work well when the interval is
             extremely narrow and the cdf values are almost the same. The auto selection
@@ -114,17 +116,21 @@ def _truncated_cdf_from_cdf(
     else:
         mp.dps = dps
 
-    num = denom = 0
+    num = 0
+    denom = 0
     inside_flag = False
 
-    for lower, upper in intervals:
-        diff = cdf_func(upper) - cdf_func(lower)
-        denom += diff
-        if lower <= x <= upper:
-            num += cdf_func(x) - cdf_func(lower)
-            inside_flag = True
-        elif upper < x:
-            num += diff
+    if absolute:
+        pass
+    else:
+        for lower, upper in intervals:
+            diff = cdf_func(upper) - cdf_func(lower)
+            denom += diff
+            if lower <= x <= upper:
+                num += cdf_func(x) - cdf_func(lower)
+                inside_flag = True
+            elif upper < x:
+                num += diff
 
     if not inside_flag:
         raise ValueError(f"Value x={x} is outside the intervals={intervals}")
