@@ -62,7 +62,7 @@ def calc_pvalue(F, alternative):
     Returns:
         float: p-value
     """
-    if alternative == 'double':
+    if alternative == 'two-sided':
         return float(2 * min(F, 1 - F))
     elif alternative == 'less' or alternative == 'abs':
         return float(1 - F)
