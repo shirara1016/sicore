@@ -144,14 +144,15 @@ class NaiveInferenceNorm(InferenceNorm):
             Whether to use pytorch or not. Defaults to False.
     """
 
-    def inference(self, tail: str = 'double', popmean: float = 0):
+    def inference(self, alternative: str = 'two-sided', popmean: float = 0):
         """Perform naive statistical inference.
 
         Args:
-            tail (str, optional):
-                'double' for double-tailed test,
-                'right' for right-tailed test, and
-                'left' for left-tailed test. Defaults to 'double'.
+            alternative (str, optional):
+                'two-sided' for two-tailed test,
+                'less' for right-tailed test,
+                'greater' for left-tailed test.
+                Defaults to 'two-sided'.
             popmean (float, optional):
                 Population mean of the test statistic under null hypothesis.
                 Defaults to 0.
@@ -161,7 +162,7 @@ class NaiveInferenceNorm(InferenceNorm):
         """
         stat = standardize(self.stat, popmean, self.eta_sigma_eta)
         F = norm.cdf(stat)
-        return calc_pvalue(F, tail=tail)
+        return calc_pvalue(F, alternative=alternative)
 
 
 class SelectiveInferenceNorm(InferenceNorm):
@@ -210,7 +211,7 @@ class SelectiveInferenceNorm(InferenceNorm):
         significance_level: float = 0.05,
         parametric_mode: str = 'p_value',
         over_conditioning: bool = False,
-        tail: str = 'double',
+        alternative: str = 'two-sided',
         threshold: float = 1e-3,
         popmean: float = 0,
         line_search: bool = True,
@@ -246,9 +247,14 @@ class SelectiveInferenceNorm(InferenceNorm):
                 'all_search' for all searches of the interval specified by the max_tail option.
             over_conditioning (bool, optional):
                 Over conditioning Inference. Defaults to False.
-            tail (str, optional):
-                'double' for double-tailed test, 'right' for right-tailed test, and
-                'left' for left-tailed test. Defaults to 'double'.
+            alternative (str, optional):
+                'two-sided' for two-tailed test,
+                'less' for right-tailed test,
+                'greater' for left-tailed test,
+                'abs' for two-tailed test for
+                the distribution of absolute values
+                following the null distribution.
+                Defaults to 'abs'.
             threshold (float, optional):
                 Guaranteed accuracy when calculating p-value. Defaults to 1e-3.
             popmean (float, optional):
@@ -290,19 +296,19 @@ class SelectiveInferenceNorm(InferenceNorm):
 
         if over_conditioning:
             result = self._over_conditioned_inference(
-                algorithm, significance_level, tail, popmean, retain_selected_model,
+                algorithm, significance_level, alternative, popmean, retain_selected_model,
                 tol, dps, max_dps, out_log)
             return result
 
         elif parametric_mode == 'p_value' or parametric_mode == 'reject_or_not':
             result = self._parametric_inference(
                 algorithm, model_selector, significance_level, parametric_mode,
-                tail, threshold, popmean, choose_method, retain_selected_model, retain_mappings,
+                alternative, threshold, popmean, choose_method, retain_selected_model, retain_mappings,
                 tol, step, dps, max_dps, out_log)
 
         elif parametric_mode == 'all_search':
             result = self._all_search_parametric_inference(
-                algorithm, model_selector, significance_level, tail, popmean,
+                algorithm, model_selector, significance_level, alternative, popmean,
                 line_search, max_tail, retain_selected_model, retain_mappings,
                 tol, step, dps, max_dps, out_log)
 
@@ -341,6 +347,52 @@ class SelectiveInferenceNorm(InferenceNorm):
                               dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
         return inf_F, sup_F
 
+    def _evaluate_pvalue(self, truncated_intervals, searched_intervals, alternative):
+
+        unsearched_intervals = not_(searched_intervals)
+        s = intersection(unsearched_intervals, [
+            NINF, float(self.stat)])[-1][-1]
+        e = intersection(unsearched_intervals, [
+            float(self.stat), INF])[0][0]
+
+        self.left_end = s
+        self.right_end = e
+
+        if alternative == 'abs':
+            inf_intervals = union_all(
+                truncated_intervals +
+                not_([min(-abs(float(self.stat)), s),
+                     max(abs(float(self.stat)), e)]),
+                tol=self.tol)
+            sup_intervals = union_all(
+                truncated_intervals +
+                intersection(
+                    [-abs(float(self.stat)), abs(float(self.stat))], not_([s, e])),
+                tol=self.tol)
+            absolute = True
+
+        else:
+            inf_intervals = union_all(
+                truncated_intervals + [[e, INF]], tol=self.tol)
+            sup_intervals = union_all(
+                truncated_intervals + [[NINF, s]], tol=self.tol)
+            absolute = False
+
+        norm_inf_intervals = standardize(
+            inf_intervals, self.popmean, self.eta_sigma_eta)
+        norm_sup_intervals = standardize(
+            sup_intervals, self.popmean, self.eta_sigma_eta)
+
+        stat_std = standardize(self.stat, self.popmean, self.eta_sigma_eta)
+
+        inf_F = tn_cdf_mpmath(stat_std, norm_inf_intervals, absolute,
+                              dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
+        sup_F = tn_cdf_mpmath(stat_std, norm_sup_intervals, absolute,
+                              dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
+        inf_p, sup_p = calc_prange(inf_F, sup_F, test_mode)
+
+        return inf_p, sup_p
+
     def _determine_next_search_data(self, choose_method, *args):
         if choose_method == 'near_stat':
             def method(z): return -np.abs(z - float(self.stat))
@@ -363,7 +415,7 @@ class SelectiveInferenceNorm(InferenceNorm):
 
     def _parametric_inference(
             self, algorithm, model_selector, significance_level, parametric_mode,
-            tail, threshold, popmean, choose_method, retain_selected_model, retain_mappings,
+            test_mode, threshold, popmean, choose_method, retain_selected_model, retain_mappings,
             tol, step, dps, max_dps, out_log):
 
         self.popmean = popmean
@@ -410,9 +462,8 @@ class SelectiveInferenceNorm(InferenceNorm):
             self.searched_intervals = union_all(
                 self.searched_intervals + intervals, tol=self.tol)
 
-            inf_F, sup_F = self._calc_range_of_cdf_value(
-                truncated_intervals, self.searched_intervals)
-            inf_p, sup_p = calc_p_range(inf_F, sup_F, tail=tail)
+            inf_p, sup_p = self._evaluate_pvalue(
+                truncated_intervals, self.searched_intervals, test_mode)
 
             if parametric_mode == 'p_value':
                 if np.abs(sup_p - inf_p) < threshold:
@@ -434,8 +485,9 @@ class SelectiveInferenceNorm(InferenceNorm):
         norm_intervals = standardize(
             truncated_intervals, popmean, self.eta_sigma_eta)
         F = tn_cdf_mpmath(stat_std, norm_intervals,
+                          True if 'absolute' in test_mode else False,
                           dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
-        p_value = calc_pvalue(F, tail=tail)
+        p_value = calc_pvalue(F, test_mode=test_mode)
         if parametric_mode == 'p_value':
             reject_or_not = (p_value <= significance_level)
 
@@ -445,7 +497,7 @@ class SelectiveInferenceNorm(InferenceNorm):
             search_count, detect_count, selected_model, mappings)
 
     def _all_search_parametric_inference(
-            self, algorithm, model_selector, significance_level, tail, popmean,
+            self, algorithm, model_selector, significance_level, test_mode, popmean,
             line_search, max_tail, retain_selected_model, retain_mappings,
             tol, step, dps, max_dps, out_log):
 
@@ -518,7 +570,7 @@ class SelectiveInferenceNorm(InferenceNorm):
             search_count, detect_count, selected_model, mappings)
 
     def _over_conditioned_inference(
-            self, algorithm, significance_level, tail, popmean,
+            self, algorithm, significance_level, test_mode, popmean,
             retain_selected_model, tol, dps, max_dps, out_log):
 
         self.popmean = popmean
