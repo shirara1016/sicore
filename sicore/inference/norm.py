@@ -17,19 +17,19 @@ class InferenceNorm(ABC):
         data (np.ndarray, tf.Tensor, torch.Tensor):
             Observation data in 1-D array. When given as a tensor,
             activate the corresponding option.
-        var (float, np.ndarray, tf.Tensor, torch.Tensor, sparse.spmatrix):
+        var (float, np.ndarray, tf.Tensor, torch.Tensor, sparse.csr_array):
             Value of known variance covariance. Assuming that
             the shape of the input is a scalar or 1-D array or 2-D array,
             the variance-covariance matrix Cov is interpreted as follows.
             When the input is a scalar, Cov = input * Identity.
             When the input is a 1-D array, Cov = diag(input).
             When the input is a 2-D array, Cov = input.
-            Also, activate the option, when given as a sparse matrix.
+            Also, activate the option, when given as a sparse array.
         eta (np.ndarray, tf.Tensor, torch.Tensor):
             Contrast vector in 1-D array. When given as a tensor,
             activate the corresponding option.
         use_sparse (boolean, optional):
-            Whether to use sparse matrix or not. Defaults to False.
+            Whether to use sparse array or not. Defaults to False.
         use_tf (boolean, optional):
             Whether to use tensorflow or not. Defaults to False.
         use_torch (boolean, optional):
@@ -39,7 +39,7 @@ class InferenceNorm(ABC):
     def __init__(
             self,
             data: np.ndarray,
-            var: float | np.ndarray | sparse.spmatrix,
+            var: float | np.ndarray | sparse.csr_array,
             eta: np.ndarray,
             use_sparse: bool = False,
             use_tf: bool = False,
@@ -108,7 +108,7 @@ class InferenceNorm(ABC):
                 vars = np.array(var)
                 self.sigma_eta = vars * eta
             elif len(var.shape) == 2:
-                cov = sparse.csr_matrix(var) if use_sparse else np.array(var)
+                cov = sparse.csr_array(var) if use_sparse else np.array(var)
                 self.sigma_eta = cov @ eta
             self.eta_sigma_eta = eta @ self.sigma_eta
 
@@ -125,19 +125,19 @@ class NaiveInferenceNorm(InferenceNorm):
         data (np.ndarray, List[float], tf.Tensor, torch.Tensor):
             Observation data in 1-D array. When given as a tensor,
             activate the corresponding option.
-        var (float, np.ndarray, tf.Tensor, torch.Tensor, sparse.spmatrix):
+        var (float, np.ndarray, tf.Tensor, torch.Tensor, sparse.csr_array):
             Value of known variance covariance. Assuming that
             the shape of the input is a scalar or 1-D array or 2-D array,
             the variance-covariance matrix Cov is interpreted as follows.
             When the input is a scalar, Cov = input * Identity.
             When the input is a 1-D array, Cov = diag(input).
             When the input is a 2-D array, Cov = input.
-            Also, activate the option, when given as a sparse matrix.
+            Also, activate the option, when given as a sparse array.
         eta (np.ndarray, List[float], tf.Tensor, torch.Tensor):
             Contrast vector in 1-D array. When given as a tensor,
             activate the corresponding option.
         use_sparse (boolean, optional):
-            Whether to use sparse matrix or not. Defaults to False.
+            Whether to use sparse array or not. Defaults to False.
         use_tf (boolean, optional):
             Whether to use tensorflow or not. Defaults to False.
         use_torch (boolean, optional):
@@ -172,19 +172,19 @@ class SelectiveInferenceNorm(InferenceNorm):
         data (np.ndarray, List[float], tf.Tensor, torch.Tensor):
             Observation data in 1-D array. When given as a tensor,
             activate the corresponding option.
-        var (float, np.ndarray, tf.Tensor, torch.Tensor, sparse.spmatrix):
+        var (float, np.ndarray, tf.Tensor, torch.Tensor, sparse.csr_array):
             Value of known variance covariance. Assuming that
             the shape of the input is a scalar or 1-D array or 2-D array,
             the variance-covariance matrix Cov is interpreted as follows.
             When the input is a scalar, Cov = input * Identity.
             When the input is a 1-D array, Cov = diag(input).
             When the input is a 2-D array, Cov = input.
-            Also, activate the option, when given as a sparse matrix.
+            Also, activate the option, when given as a sparse array.
         eta (np.ndarray, List[float], tf.Tensor, torch.Tensor):
             Contrast vector in 1-D array. When given as a tensor,
             activate the corresponding option.
         use_sparse (boolean, optional):
-            Whether to use sparse matrix or not. Defaults to False.
+            Whether to use sparse array or not. Defaults to False.
         use_tf (boolean, optional):
             Whether to use tensorflow or not. Defaults to False.
         use_torch (boolean, optional):
@@ -194,7 +194,7 @@ class SelectiveInferenceNorm(InferenceNorm):
     def __init__(
             self,
             data: np.ndarray,
-            var: float | np.ndarray | sparse.spmatrix,
+            var: float | np.ndarray | sparse.csr_array,
             eta: np.ndarray,
             use_sparse: bool = False,
             use_tf: bool = False,
