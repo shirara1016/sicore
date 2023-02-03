@@ -196,7 +196,7 @@ def poly_lt_zero(poly_or_coef, tol=1e-10):
             return []
 
     roots = []
-    if np.issubdtype(poly.roots.dtype, np.complex):
+    if np.issubdtype(poly.roots.dtype, complex):
         for root in poly.roots:
             if -tol < root.imag < tol:
                 roots.append(root.real)

@@ -15,7 +15,6 @@ mp.dps = 300
 INF = float("inf")
 NINF = -INF
 
-
 def test_t_cdf_mpmath():
     testcase = [
         ((NINF, 2), 0.0),
@@ -87,6 +86,28 @@ def test_tn_cdf_mpmath():
     for args, expected in testcase:
         assert_allclose(float(tn_cdf_mpmath(*args)), expected)
 
+def test_tn_cdf_mpmath_abs():
+    testcase_abs = [ 
+        (
+            {
+                "x" : -4, 
+                "interval" : [[-5,-4],[-2,-1],[1,3],[4,5]], 
+                "absolute" : True,
+            },
+            0.0002140296844357,
+         ),
+        (
+            {
+                "x" :2, 
+                "interval" : [[1,3] ,[4,5]], 
+                "absolute": True, 
+            },
+            0.1362149644136074,
+        ),
+    ]
+
+    for kargs, expected in testcase_abs:
+        assert_allclose(float(tn_cdf_mpmath(**kargs)), expected)
 
 def test_tt_cdf_mpmath():
     testcase = [
