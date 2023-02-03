@@ -18,17 +18,17 @@ class InferenceChiSquared(ABC):
         data (np.ndarray, tf.Tensor, torch.Tensor):
             Observation data in 1-D array. When given as a tensor,
             activate the corresponding option.
-        var (float, np.ndarray, tf.Tensor, torch.Tensor, sparse.spmatrix):
+        var (float, np.ndarray, tf.Tensor, torch.Tensor, sparse.csr_array):
             Value of known variance covariance. Assuming that
             the shape of the input is a scalar or 1-D array or 2-D array,
             the variance-covariance matrix Cov is interpreted as follows.
             When the input is a scalar, Cov = input * Identity.
             When the input is a 1-D array, Cov = diag(input).
             When the input is a 2-D array, Cov = input.
-            Also, activate the option, when given as a sparse matrix.
-        P (np.ndarray, tf.Tensor, torch.Tensor, sparse.spmatrix):
+            Also, activate the option, when given as a sparse array.
+        P (np.ndarray, tf.Tensor, torch.Tensor, sparse.csr_array):
             Projection matrix in 2-D array. When given as
-            a tensor or a sparse matrix, activate the corresponding option.
+            a tensor or a sparse array, activate the corresponding option.
         degree (int):
             Dimension of the space projected by P matrix.
         use_sparse (boolean, optional):
@@ -42,8 +42,8 @@ class InferenceChiSquared(ABC):
     def __init__(
         self,
         data: np.ndarray,
-        var: float | np.ndarray | sparse.spmatrix,
-        P: np.ndarray | sparse.spmatrix,
+        var: float | np.ndarray | sparse.csr_array,
+        P: np.ndarray | sparse.csr_array,
         degree: int,
         use_sparse: bool = False,
         use_tf: bool = False,
@@ -111,7 +111,7 @@ class InferenceChiSquared(ABC):
 
         else:
             data = np.array(data)
-            P = sparse.csr_matrix(P) if use_sparse else np.array(P)
+            P = sparse.csr_array(P) if use_sparse else np.array(P)
             self.P_data = P @ data
             if is_int_or_float(var):
                 whitend_P_data = (var ** -0.5) * self.P_data
@@ -137,17 +137,17 @@ class NaiveInferenceChiSquared(InferenceChiSquared):
         data (np.ndarray, tf.Tensor, torch.Tensor):
             Observation data in 1-D array. When given as a tensor,
             activate the corresponding option.
-        var (float, np.ndarray, tf.Tensor, torch.Tensor, sparse.spmatrix):
+        var (float, np.ndarray, tf.Tensor, torch.Tensor, sparse.csr_array):
             Value of known variance covariance. Assuming that
             the shape of the input is a scalar or 1-D array or 2-D array,
             the variance-covariance matrix Cov is interpreted as follows.
             When the input is a scalar, Cov = input * Identity.
             When the input is a 1-D array, Cov = diag(input).
             When the input is a 2-D array, Cov = input.
-            Also, activate the option, when given as a sparse matrix.
-        P (np.ndarray, tf.Tensor, torch.Tensor, sparse.spmatrix):
+            Also, activate the option, when given as a sparse array.
+        P (np.ndarray, tf.Tensor, torch.Tensor, sparse.csr_array):
             Projection matrix in 2-D array. When given as
-            a tensor or a sparse matrix, activate the corresponding option.
+            a tensor or a sparse array, activate the corresponding option.
         degree (int):
             Dimension of the space projected by P matrix.
         use_sparse (boolean, optional):
@@ -158,21 +158,22 @@ class NaiveInferenceChiSquared(InferenceChiSquared):
             Whether to use pytorch or not. Defaults to False.
     """
 
-    def inference(self, tail: str = "right"):
+    def inference(self, alternative: str = "less"):
         """Perform naive statistical inference.
 
         Args:
-            tail (str, optional):
-            'double' for double-tailed test,
-            'right' for right-tailed test, and
-            'left' for left-tailed test. Defaults to 'right'.
+            alternative (str, optional):
+                'two-sided' for two-tailed test,
+                'less' for right-tailed test,
+                'greater' for left-tailed test.
+                Defaults to 'less'.
 
         Returns:
             float: p-value
         """
         stat = np.asarray(self.stat) ** 2
         F = chi2.cdf(stat, self.degree)
-        return calc_pvalue(F, tail=tail)
+        return calc_pvalue(F, alternative=alternative)
 
 
 class SelectiveInferenceChiSquared(InferenceChiSquared):
@@ -182,17 +183,17 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
         data (np.ndarray, tf.Tensor, torch.Tensor):
             Observation data in 1-D array. When given as a tensor,
             activate the corresponding option.
-        var (float, np.ndarray, tf.Tensor, torch.Tensor, sparse.spmatrix):
+        var (float, np.ndarray, tf.Tensor, torch.Tensor, sparse.csr_array):
             Value of known variance covariance. Assuming that
             the shape of the input is a scalar or 1-D array or 2-D array,
             the variance-covariance matrix Cov is interpreted as follows.
             When the input is a scalar, Cov = input * Identity.
             When the input is a 1-D array, Cov = diag(input).
             When the input is a 2-D array, Cov = input.
-            Also, activate the option, when given as a sparse matrix.
-        P (np.ndarray, tf.Tensor, torch.Tensor, sparse.spmatrix):
+            Also, activate the option, when given as a sparse array.
+        P (np.ndarray, tf.Tensor, torch.Tensor, sparse.csr_array):
             Projection matrix in 2-D array. When given as
-            a tensor or a sparse matrix, activate the corresponding option.
+            a tensor or a sparse array, activate the corresponding option.
         degree (int):
             Dimension of the space projected by P matrix.
         use_sparse (boolean, optional):
@@ -206,8 +207,8 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
     def __init__(
         self,
         data: np.ndarray,
-        var: float | np.ndarray | sparse.spmatrix,
-        P: np.ndarray | sparse.spmatrix,
+        var: float | np.ndarray | sparse.csr_array,
+        P: np.ndarray | sparse.csr_array,
         degree: int,
         use_sparse: bool = False,
         use_tf: bool = False,
@@ -224,7 +225,7 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
         significance_level: float = 0.05,
         parametric_mode: str = 'p_value',
         over_conditioning: bool = False,
-        tail: str = 'right',
+        alternative: str = 'less',
         threshold: float = 1e-3,
         line_search: bool = True,
         max_tail: float = 1e3,
@@ -259,9 +260,14 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
                 'all_search' for all searches of the interval specified by the max_tail option.
             over_conditioning (bool, optional):
                 Over conditioning Inference. Defaults to False.
-            tail (str, optional):
-                'double' for double-tailed test, 'right' for right-tailed test, and
-                'left' for left-tailed test. Defaults to 'right'.
+            alternative (str, optional):
+                'two-sided' for two-tailed test,
+                'less' for right-tailed test,
+                'greater' for left-tailed test,
+                'abs' for two-tailed test for
+                the distribution of absolute values
+                following the null distribution.
+                Defaults to 'less'.
             threshold (float, optional):
                 Guaranteed accuracy when calculating p-value. Defaults to 1e-3.
             line_search (bool, optional):
@@ -301,19 +307,19 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
 
         if over_conditioning:
             result = self._over_conditioned_inference(
-                algorithm, significance_level, tail, retain_selected_model,
+                algorithm, significance_level, alternative, retain_selected_model,
                 tol, dps, max_dps, out_log)
             return result
 
         elif parametric_mode == 'p_value' or parametric_mode == 'reject_or_not':
             result = self._parametric_inference(
                 algorithm, model_selector, significance_level, parametric_mode,
-                tail, threshold, choose_method, retain_selected_model, retain_mappings,
+                alternative, threshold, choose_method, retain_selected_model, retain_mappings,
                 tol, step, dps, max_dps, out_log)
 
         elif parametric_mode == 'all_search':
             result = self._all_search_parametric_inference(
-                algorithm, model_selector, significance_level, tail,
+                algorithm, model_selector, significance_level, alternative,
                 line_search, max_tail, retain_selected_model, retain_mappings,
                 tol, step, dps, max_dps, out_log)
 
@@ -323,7 +329,7 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
 
         return result
 
-    def _calc_range_of_cdf_value(self, truncated_intervals, searched_intervals):
+    def _evaluate_pvalue(self, truncated_intervals, searched_intervals, alternative):
 
         unsearched_intervals = not_(searched_intervals)
         s = intersection(unsearched_intervals, [
@@ -354,7 +360,9 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
         inf_F = tc2_cdf_mpmath(stat_chisq, chisq_inf_intervals, self.degree,
                                dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
 
-        return inf_F, sup_F
+        inf_p, sup_p = calc_prange(inf_F, sup_F, alternative)
+
+        return inf_p, sup_p
 
     def _determine_next_search_data(self, choose_method, *args):
         if choose_method == 'near_stat':
@@ -378,7 +386,7 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
 
     def _parametric_inference(
             self, algorithm, model_selector, significance_level, parametric_mode,
-            tail, threshold, choose_method, retain_selected_model, retain_mappings,
+            alternative, threshold, choose_method, retain_selected_model, retain_mappings,
             tol, step, dps, max_dps, out_log):
 
         self.tol = tol
@@ -424,9 +432,8 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
             self.searched_intervals = union_all(
                 self.searched_intervals + intervals, tol=self.tol)
 
-            inf_F, sup_F = self._calc_range_of_cdf_value(
-                truncated_intervals, self.searched_intervals)
-            inf_p, sup_p = calc_p_range(inf_F, sup_F, tail=tail)
+            inf_p, sup_p = self._evaluate_pvalue(
+                truncated_intervals, self.searched_intervals, alternative)
 
             if parametric_mode == 'p_value':
                 if np.abs(sup_p - inf_p) < threshold:
@@ -449,9 +456,9 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
         truncated_intervals = union_all(truncated_intervals, tol=self.tol)
         chi_intervals = intersection(truncated_intervals, [[1e-5, INF]])
         chisq_intervals = np.power(chi_intervals, 2)
-        F = tc2_cdf_mpmath(stat_chisq, chisq_intervals, self.degree,
+        F = tc2_cdf_mpmath(stat_chisq, chisq_intervals, self.degree, absolute=False,
                            dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
-        p_value = calc_pvalue(F, tail=tail)
+        p_value = calc_pvalue(F, alternative)
         if parametric_mode == 'p_value':
             reject_or_not = (p_value <= significance_level)
 
@@ -461,7 +468,7 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
             search_count, detect_count, selected_model, mappings)
 
     def _all_search_parametric_inference(
-            self, algorithm, model_selector, significance_level, tail,
+            self, algorithm, model_selector, significance_level, alternative,
             line_search, max_tail, retain_selected_model, retain_mappings,
             tol, step, dps, max_dps, out_log):
 
@@ -518,13 +525,12 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
         truncated_intervals = union_all(result_intervals, tol=self.tol)
         chi_intervals = intersection(truncated_intervals, [[1e-5, INF]])
         chisq_intervals = np.power(chi_intervals, 2)
-        F = tc2_cdf_mpmath(stat_chisq, chisq_intervals, self.degree,
+        F = tc2_cdf_mpmath(stat_chisq, chisq_intervals, self.degree, absolute=False,
                            dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
-        p_value = calc_pvalue(F, tail=tail)
+        p_value = calc_pvalue(F, alternative)
 
-        inf_F, sup_F = self._calc_range_of_cdf_value(
-            truncated_intervals, [[1e-5, float(max_tail)]])
-        inf_p, sup_p = calc_p_range(inf_F, sup_F, tail=tail)
+        inf_p, sup_p = self._evaluate_pvalue(
+            truncated_intervals, [[1e-5, float(max_tail)]], alternative)
 
         return SelectiveInferenceResult(
             stat_chisq, significance_level, p_value, inf_p, sup_p,
@@ -532,7 +538,7 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
             search_count, detect_count, selected_model, mappings)
 
     def _over_conditioned_inference(
-            self, algorithm, significance_level, tail,
+            self, algorithm, significance_level, alternative,
             retain_selected_model, tol, dps, max_dps, out_log):
 
         self.tol = tol
@@ -547,12 +553,11 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
         stat_chisq = np.asarray(self.stat) ** 2
         chi_intervals = intersection(intervals, [[1e-5, INF]])
         chisq_intervals = np.power(chi_intervals, 2)
-        F = tc2_cdf_mpmath(stat_chisq, chisq_intervals, self.degree,
+        F = tc2_cdf_mpmath(stat_chisq, chisq_intervals, self.degree, absolute=False,
                            dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
-        p_value = calc_pvalue(F, tail=tail)
+        p_value = calc_pvalue(F, alternative)
 
-        inf_F, sup_F = self._calc_range_of_cdf_value(intervals, intervals)
-        inf_p, sup_p = calc_p_range(inf_F, sup_F, tail=tail)
+        inf_p, sup_p = self._evaluate_pvalue(intervals, intervals, alternative)
 
         return SelectiveInferenceResult(
             stat_chisq, significance_level, p_value, inf_p, sup_p,
