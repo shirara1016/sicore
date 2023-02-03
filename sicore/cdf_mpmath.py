@@ -95,24 +95,26 @@ def _truncated_cdf_from_cdf(
         # If the cdf value of the maximum absolute truncation interval except INF and
         # NINF is '1.0', increase the precision
         flatten = np.ravel(intervals)
-        max_tail = np.abs(flatten[np.isfinite(flatten)]).max()
-        if (
-            mp.nstr(
-                cdf_func(max_tail), init_dps - precision, min_fixed=NINF, max_fixed=INF
-            )
-            == "1.0"
-        ):
-            next_dps = int(init_dps * scale)
-            if next_dps <= max_dps:
-                return _truncated_cdf_from_cdf(
-                    cdf_func,
-                    x,
-                    intervals,
-                    dps=dps,
-                    init_dps=next_dps,
-                    scale=scale,
-                    precision=precision,
+        nonfinites = flatten[np.isfinite(flatten)]
+        if len(nonfinites) != 0:
+            max_tail = np.abs(nonfinites).max()
+            if (
+                mp.nstr(
+                    cdf_func(max_tail), init_dps - precision, min_fixed=NINF, max_fixed=INF
                 )
+                == "1.0"
+            ):
+                next_dps = int(init_dps * scale)
+                if next_dps <= max_dps:
+                    return _truncated_cdf_from_cdf(
+                        cdf_func,
+                        x,
+                        intervals,
+                        dps=dps,
+                        init_dps=next_dps,
+                        scale=scale,
+                        precision=precision,
+                    )
     else:
         mp.dps = dps
 
@@ -143,7 +145,7 @@ def _truncated_cdf_from_cdf(
                 elif lower <= abs(x) <= upper:
                     num += cdf_func(upper) - cdf_func(abs(x))
                     inside_flag = True
-        num = denom - num
+        num = (denom - num)
     else:
         for lower, upper in intervals:
             diff = cdf_func(upper) - cdf_func(lower)

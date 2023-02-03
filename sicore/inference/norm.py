@@ -211,7 +211,7 @@ class SelectiveInferenceNorm(InferenceNorm):
         significance_level: float = 0.05,
         parametric_mode: str = 'p_value',
         over_conditioning: bool = False,
-        alternative: str = 'two-sided',
+        alternative: str = 'abs',
         threshold: float = 1e-3,
         popmean: float = 0,
         line_search: bool = True,
