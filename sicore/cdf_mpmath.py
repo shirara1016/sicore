@@ -145,7 +145,7 @@ def _truncated_cdf_from_cdf(
                 elif lower <= abs(x) <= upper:
                     num += cdf_func(upper) - cdf_func(abs(x))
                     inside_flag = True
-        num = (denom - num)
+        num = 0
     else:
         for lower, upper in intervals:
             diff = cdf_func(upper) - cdf_func(lower)
