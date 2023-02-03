@@ -129,7 +129,7 @@ def _truncated_cdf_from_cdf(
                     num += cdf_func(-abs(x)) - cdf_func(lower)
                     inside_flag = True
                 elif upper <= -abs(x):
-                    num += diff 
+                    num += diff
             elif lower <= 0 < upper:
                 if lower <= -abs(x):
                     num += cdf_func(-abs(x)) - cdf_func(lower)
@@ -137,12 +137,13 @@ def _truncated_cdf_from_cdf(
                 if 0 <= abs(x) <= upper:
                     num += cdf_func(upper) - cdf_func(abs(x))
                     inside_flag = True
-            elif  0 < lower:
+            elif 0 < lower:
                 if abs(x) < lower:
-                    num += diff 
+                    num += diff
                 elif lower <= abs(x) <= upper:
                     num += cdf_func(upper) - cdf_func(abs(x))
                     inside_flag = True
+        num = denom - num
     else:
         for lower, upper in intervals:
             diff = cdf_func(upper) - cdf_func(lower)
