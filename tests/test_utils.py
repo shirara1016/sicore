@@ -1,6 +1,6 @@
 import numpy as np
-from numpy.testing import assert_equal
-from sicore.utils import OneVec, is_int_or_float
+from numpy.testing import assert_equal, assert_almost_equal
+from sicore.utils import OneVec, is_int_or_float, construct_projection_matrix
 
 
 def test_is_int_or_float():
@@ -35,3 +35,14 @@ def test_OneVec():
     one = OneVec(5)
     for args, expected in testcase:
         assert_equal(one.get(*args), expected)
+
+
+def test_construct_projection_matrix():
+    testcase = [
+        ([[1, 0, 0]], np.array([[1, 0, 0], [0, 0, 0], [0, 0, 0]])),
+        ([[1, 0, 0], [0, 1, 0]], np.array([[1, 0, 0], [0, 1, 0], [0, 0, 0]])),
+        ([[0, 1]], np.array([[0, 0], [0, 1]])),
+        ([[1, 0, 1]], np.array([[0.5, 0, 0.5], [0, 0, 0], [0.5, 0, 0.5]]))
+    ]
+    for args, expected in testcase:
+        assert_almost_equal(construct_projection_matrix(args), expected)
