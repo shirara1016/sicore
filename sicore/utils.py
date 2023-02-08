@@ -44,7 +44,7 @@ class OneVec():
         return vec
 
 
-def construct_projection_matrix(basis):
+def construct_projection_matrix(basis, verbose=False):
     """Construct projection matrix from basis.
 
     Args:
@@ -61,7 +61,12 @@ def construct_projection_matrix(basis):
     basis = np.array(basis)
     V = np.linalg.qr(basis.T)[0]
     P = np.dot(V, V.T)
-    if np.sum(np.abs(np.dot(P, P) - P)) > 1e-5 or np.sum(np.abs(P.T - P)) > 1e-5:
-        raise Exception(
-            'The projection matrix is not constructed correctly')
+    if verbose:
+        if np.sum(np.abs(P.T - P)) > 1e-5:
+            raise Exception(
+                'The projection matrix is not constructed correctly')
+        else:
+            if np.sum(np.abs(np.dot(P, P) - P)) > 1e-5:
+                raise Exception(
+                    'The projection matrix is not constructed correctly')
     return P

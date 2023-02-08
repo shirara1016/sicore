@@ -4,3 +4,5 @@ tests/__pycache__
 build
 docs
 evaluation_of_p_value_range.md
+__pycache__
+sicore/inference/__pycache__
