@@ -1,8 +1,8 @@
 # sicoreパッケージ
-Selective Inferenceで共通して利用される機能をまとめました．
+Selective Inferenceで共通して利用される機能をまとめたパッケージです．
 
 ## 導入
-インストールにはPython3.6以上が必要．依存パッケージは自動的にインストールされます．
+インストールにはPython3.6以上が必要です．また依存パッケージは自動的にインストールされます．もしtensorflowやpytorchのtensorを利用したい場合は手動で対応するフレームワークをインストールしてください．
 ```
 $ pip install --upgrade setuptools wheel
 $ pip install .
