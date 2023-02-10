@@ -12,6 +12,9 @@ $ pip install .
 $ pip uninstall sicore
 ```
 
+## APIドキュメント
+詳細なAPIドキュメントは[こちら](https://shirara1016.github.io/sicore/)です．
+
 ## 機能一覧
 `from sicore import *`でインポートされる機能は以下の通りです．
 

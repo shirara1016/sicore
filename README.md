@@ -15,6 +15,9 @@ Uninstall :
 $ pip uninstall sicore
 ```
 
+## API Reference
+Deteiled API reference is [here](https://shirara1016.github.io/sicore/)
+
 ## List of functions
 The following fuctions are imported by `from sicore import *`
 
