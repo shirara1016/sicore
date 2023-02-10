@@ -1,0 +1,37 @@
+sicore.inference package
+========================
+
+Submodules
+----------
+
+sicore.inference.base module
+----------------------------
+
+.. automodule:: sicore.inference.base
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+sicore.inference.chisquared module
+----------------------------------
+
+.. automodule:: sicore.inference.chisquared
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+sicore.inference.norm module
+----------------------------
+
+.. automodule:: sicore.inference.norm
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: sicore.inference
+   :members:
+   :undoc-members:
+   :show-inheritance:
