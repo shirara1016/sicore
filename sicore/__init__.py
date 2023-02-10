@@ -26,7 +26,7 @@ from .inference.norm import (
     NaiveInferenceNorm,
     SelectiveInferenceNorm,
 )
-from .inference.chi_squared import (
+from .inference.chisquared import (
     NaiveInferenceChiSquared,
     SelectiveInferenceChiSquared
 )
