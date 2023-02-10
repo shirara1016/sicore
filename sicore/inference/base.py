@@ -16,7 +16,7 @@ class SelectiveInferenceResult():
     Attributes:
         stat (float): Observed value of test statistic.
         alpha (float): Significance level.
-        p_value (float | None): p-value from test performed.
+        p_value (float): p-value from test performed.
         inf_p (float): Lower bound of p-value.
         sup_p (float): Upper bound of p-value.
         reject_or_not (bool): Whether or not to reject the null hypothesis.
@@ -28,7 +28,7 @@ class SelectiveInferenceResult():
     """
     stat: float
     alpha: float
-    p_value: float | None
+    p_value: float
     inf_p: float
     sup_p: float
     reject_or_not: bool

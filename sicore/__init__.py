@@ -19,6 +19,7 @@ from .evaluation import (
 )
 from .figures import FprFigure, PowerFigure, pvalues_hist, pvalues_qqplot
 from .inference.base import (
+    SelectiveInferenceResult,
     one_sample_test,
     two_sample_test,
 )
@@ -36,6 +37,7 @@ __all__ = [
     "SelectiveInferenceNorm",
     "NaiveInferenceChiSquared",
     "SelectiveInferenceChiSquared",
+    "SelectiveInferenceResult",
     "one_sample_test",
     "two_sample_test",
     "tn_cdf",
