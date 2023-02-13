@@ -20,6 +20,7 @@ from .evaluation import (
 from .figures import FprFigure, PowerFigure, pvalues_hist, pvalues_qqplot
 from .inference.base import (
     SelectiveInferenceResult,
+    InfiniteLoopError,
     one_sample_test,
     two_sample_test,
 )
@@ -38,6 +39,7 @@ __all__ = [
     "NaiveInferenceChiSquared",
     "SelectiveInferenceChiSquared",
     "SelectiveInferenceResult",
+    "InfiniteLoopError",
     "one_sample_test",
     "two_sample_test",
     "tn_cdf",

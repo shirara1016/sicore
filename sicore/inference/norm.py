@@ -223,7 +223,8 @@ class SelectiveInferenceNorm(InferenceNorm):
         step: float = 1e-10,
         dps: int | str = 'auto',
         max_dps: int = 5000,
-        out_log: str = 'test_log.log'
+        out_log: str = 'test_log.log',
+        max_iter: int = 1e6
     ) -> Type[SelectiveInferenceResult]:
         """Perform Selective Inference.
 
@@ -284,6 +285,10 @@ class SelectiveInferenceNorm(InferenceNorm):
                 when `dps` is set to 'auto'. Defaults to 5000.
             out_log (str, optional):
                 Name for log file of mpmath. Defaults to 'test_log.log'.
+            max_iter (int, optional):
+                Maximum number of times to perform parametric search.
+                If this value is exceeded, the loop is considered
+                to be infinite. Defaults to 1e6.
 
         Raises:
             Exception:
@@ -304,7 +309,7 @@ class SelectiveInferenceNorm(InferenceNorm):
             result = self._parametric_inference(
                 algorithm, model_selector, significance_level, parametric_mode,
                 alternative, threshold, popmean, choose_method, retain_selected_model, retain_mappings,
-                tol, step, dps, max_dps, out_log)
+                tol, step, dps, max_dps, out_log, max_iter)
 
         elif parametric_mode == 'all_search':
             result = self._all_search_parametric_inference(
@@ -387,7 +392,7 @@ class SelectiveInferenceNorm(InferenceNorm):
     def _parametric_inference(
             self, algorithm, model_selector, significance_level, parametric_mode,
             alternative, threshold, popmean, choose_method, retain_selected_model, retain_mappings,
-            tol, step, dps, max_dps, out_log):
+            tol, step, dps, max_dps, out_log, max_iter):
 
         self.popmean = popmean
         self.tol = tol
@@ -396,6 +401,8 @@ class SelectiveInferenceNorm(InferenceNorm):
         self.max_dps = max_dps
         self.out_log = out_log
         self.searched_intervals = list()
+
+        self.searched_length = 0
 
         mappings = dict() if retain_mappings else None
         truncated_intervals = list()
@@ -406,9 +413,6 @@ class SelectiveInferenceNorm(InferenceNorm):
         z = self.stat
         while True:
             search_count += 1
-            if search_count > 1e6:
-                raise Exception(
-                    'The number of searches exceeds 100,000 times, suggesting an infinite loop.')
 
             model, interval = algorithm(self.z, self.c, z)
             interval = np.asarray(interval)
@@ -432,6 +436,14 @@ class SelectiveInferenceNorm(InferenceNorm):
 
             self.searched_intervals = union_all(
                 self.searched_intervals + intervals, tol=self.tol)
+
+            searched_length = 0
+            for lower, upper in self.searched_intervals:
+                searched_length += (upper - lower)
+            if searched_length - self.searched_length < 1e-11 or search_count > max_iter:
+                raise InfiniteLoopError(
+                    'Perhaps an infinite loop is occurring')
+            self.searched_length = searched_length
 
             inf_p, sup_p = self._evaluate_pvalue(
                 truncated_intervals, self.searched_intervals, alternative)

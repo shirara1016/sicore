@@ -39,6 +39,10 @@ class SelectiveInferenceResult():
     mappings: Dict[tuple[float], Any] | None
 
 
+class InfiniteLoopError(Exception):
+    pass
+
+
 INF = float('inf')
 NINF = -INF
 
