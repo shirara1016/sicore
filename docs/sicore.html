@@ -296,14 +296,6 @@
                             <li class="toctree-l3"><a class="reference internal" href="#sicore.true_positive_rate"><code
                                   class="docutils literal notranslate"><span class="pre">true_positive_rate()</span></code></a>
                             </li>
-                            <li class="toctree-l3"><a class="reference internal" href="#sicore.type1_error_rate"><code
-                                  class="docutils literal notranslate"><span class="pre">type1_error_rate()</span></code></a>
-                            </li>
-                            <li class="toctree-l3"><a class="reference internal" href="#sicore.type2_error_rate"><code
-                                  class="docutils literal notranslate"><span class="pre">type2_error_rate()</span></code></a>
-                            </li>
-                            <li class="toctree-l3"><a class="reference internal" href="#sicore.power"><code
-                                  class="docutils literal notranslate"><span class="pre">power()</span></code></a></li>
                             <li class="toctree-l3"><a class="reference internal" href="#sicore.pvalues_hist"><code
                                   class="docutils literal notranslate"><span class="pre">pvalues_hist()</span></code></a>
                             </li>
@@ -1872,119 +1864,6 @@
                         class="default_value"><span class="pre">0.05</span></span></em><span
                       class="sig-paren">)</span><a class="headerlink" href="#sicore.true_positive_rate"
                       title="Permalink to this definition">#</a>
-                  </dt>
-                  <dd>
-                    <p>Calculate true positive rate of p-values under alternative.</p>
-                    <dl class="field-list simple">
-                      <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-                      <dd class="field-odd">
-                        <ul class="simple">
-                          <li>
-                            <p><strong>pvalues</strong> (<em>array-like</em>) – List of p-values.</p>
-                          </li>
-                          <li>
-                            <p><strong>alpha</strong> (<em>float</em><em>, </em><em>optional</em>) – Significance level.
-                            </p>
-                          </li>
-                        </ul>
-                      </dd>
-                      <dt class="field-even">Returns<span class="colon">:</span></dt>
-                      <dd class="field-even">
-                        <p>True positive rate.</p>
-                      </dd>
-                      <dt class="field-odd">Return type<span class="colon">:</span></dt>
-                      <dd class="field-odd">
-                        <p>float</p>
-                      </dd>
-                    </dl>
-                  </dd>
-                </dl>
-
-                <dl class="py function">
-                  <dt class="sig sig-object py" id="sicore.type1_error_rate">
-                    <span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span
-                      class="sig-name descname"><span class="pre">type1_error_rate</span></span><span
-                      class="sig-paren">(</span><em class="sig-param"><span class="n"><span
-                          class="pre">pvalues</span></span></em>, <em class="sig-param"><span class="n"><span
-                          class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span
-                        class="default_value"><span class="pre">0.05</span></span></em><span
-                      class="sig-paren">)</span><a class="headerlink" href="#sicore.type1_error_rate"
-                      title="Permalink to this definition">#</a>
-                  </dt>
-                  <dd>
-                    <p>Calculate false positive rate of p-values under null.</p>
-                    <dl class="field-list simple">
-                      <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-                      <dd class="field-odd">
-                        <ul class="simple">
-                          <li>
-                            <p><strong>pvalues</strong> (<em>array-like</em>) – List of p-values.</p>
-                          </li>
-                          <li>
-                            <p><strong>alpha</strong> (<em>float</em><em>, </em><em>optional</em>) – Significance level.
-                            </p>
-                          </li>
-                        </ul>
-                      </dd>
-                      <dt class="field-even">Returns<span class="colon">:</span></dt>
-                      <dd class="field-even">
-                        <p>False positive rate.</p>
-                      </dd>
-                      <dt class="field-odd">Return type<span class="colon">:</span></dt>
-                      <dd class="field-odd">
-                        <p>float</p>
-                      </dd>
-                    </dl>
-                  </dd>
-                </dl>
-
-                <dl class="py function">
-                  <dt class="sig sig-object py" id="sicore.type2_error_rate">
-                    <span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span
-                      class="sig-name descname"><span class="pre">type2_error_rate</span></span><span
-                      class="sig-paren">(</span><em class="sig-param"><span class="n"><span
-                          class="pre">pvalues</span></span></em>, <em class="sig-param"><span class="n"><span
-                          class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span
-                        class="default_value"><span class="pre">0.05</span></span></em><span
-                      class="sig-paren">)</span><a class="headerlink" href="#sicore.type2_error_rate"
-                      title="Permalink to this definition">#</a>
-                  </dt>
-                  <dd>
-                    <p>Calculate false negative rate of p-values under alternative.</p>
-                    <dl class="field-list simple">
-                      <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-                      <dd class="field-odd">
-                        <ul class="simple">
-                          <li>
-                            <p><strong>pvalues</strong> (<em>array-like</em>) – List of p-values.</p>
-                          </li>
-                          <li>
-                            <p><strong>alpha</strong> (<em>float</em><em>, </em><em>optional</em>) – Significance level.
-                            </p>
-                          </li>
-                        </ul>
-                      </dd>
-                      <dt class="field-even">Returns<span class="colon">:</span></dt>
-                      <dd class="field-even">
-                        <p>False negative rate.</p>
-                      </dd>
-                      <dt class="field-odd">Return type<span class="colon">:</span></dt>
-                      <dd class="field-odd">
-                        <p>float</p>
-                      </dd>
-                    </dl>
-                  </dd>
-                </dl>
-
-                <dl class="py function">
-                  <dt class="sig sig-object py" id="sicore.power">
-                    <span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span
-                      class="sig-name descname"><span class="pre">power</span></span><span class="sig-paren">(</span><em
-                      class="sig-param"><span class="n"><span class="pre">pvalues</span></span></em>, <em
-                      class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span
-                          class="pre">=</span></span><span class="default_value"><span
-                          class="pre">0.05</span></span></em><span class="sig-paren">)</span><a class="headerlink"
-                      href="#sicore.power" title="Permalink to this definition">#</a>
                   </dt>
                   <dd>
                     <p>Calculate true positive rate of p-values under alternative.</p>
