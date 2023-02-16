@@ -5,3 +5,4 @@ build
 evaluation_of_p_value_range.md
 __pycache__
 sicore/inference/__pycache__
+.pytest_cache
