@@ -415,7 +415,7 @@ class SelectiveInferenceNorm(InferenceNorm):
             search_count += 1
 
             model, interval = algorithm(self.z, self.c, z)
-            # interval = np.asarray(interval)
+            interval = np.asarray(interval)
             intervals = _interval_to_intervals(interval)
 
             if retain_mappings:
@@ -511,7 +511,7 @@ class SelectiveInferenceNorm(InferenceNorm):
                     'The number of searches exceeds 100,000 times, suggesting an infinite loop.')
 
             model, interval = algorithm(self.z, self.c, z)
-            # interval = np.asarray(interval)
+            interval = np.asarray(interval)
             intervals = _interval_to_intervals(interval)
 
             if retain_mappings:

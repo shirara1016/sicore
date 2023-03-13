@@ -15,7 +15,7 @@ def _interval_to_intervals(interval):
     [[L1, U1], [L2, U2], ...].
     """
     if len(interval) > 0 and is_int_or_float(interval[0]):
-        return [interval]
+        return [list(interval)]
     else:
         return list(interval)
 
