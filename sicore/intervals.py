@@ -17,7 +17,7 @@ def _interval_to_intervals(interval):
     if len(interval) > 0 and is_int_or_float(interval[0]):
         return [interval]
     else:
-        return interval
+        return list(interval)
 
 
 def _verify_and_raise(intervals):
