@@ -326,7 +326,6 @@ class SelectiveInferenceNorm(InferenceNorm):
     def _evaluate_pvalue(self, truncated_intervals, searched_intervals, alternative):
 
         unsearched_intervals = not_(searched_intervals)
-        print(unsearched_intervals)
         s = intersection(unsearched_intervals, [
             NINF, float(self.stat)])[-1][-1]
         e = intersection(unsearched_intervals, [
