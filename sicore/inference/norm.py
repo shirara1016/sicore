@@ -335,24 +335,22 @@ class SelectiveInferenceNorm(InferenceNorm):
         self.right_end = e
 
         if alternative == 'abs':
-            inf_intervals = union_all(
-                truncated_intervals +
-                not_([min(-abs(float(self.stat)), s),
-                     max(abs(float(self.stat)), e)]),
-                tol=self.tol)
-            sup_intervals = union_all(
-                truncated_intervals +
-                intersection(
-                    [-abs(float(self.stat)), abs(float(self.stat))], not_([s, e])),
-                tol=self.tol)
+            mask_intervals = [[-abs(float(self.stat)), abs(float(self.stat))]]
             absolute = True
-
         else:
-            inf_intervals = union_all(
-                truncated_intervals + [[e, INF]], tol=self.tol)
-            sup_intervals = union_all(
-                truncated_intervals + [[NINF, s]], tol=self.tol)
+            mask_intervals = [[NINF, float(self.stat)]]
             absolute = False
+
+        inf_intervals = union_all(
+            truncated_intervals +
+            intersection(
+                unsearched_intervals, not_(mask_intervals)),
+            tol=self.tol)
+        sup_intervals = union_all(
+            truncated_intervals +
+            intersection(
+                unsearched_intervals, mask_intervals),
+            tol=self.tol)
 
         norm_inf_intervals = standardize(
             inf_intervals, self.popmean, self.eta_sigma_eta)

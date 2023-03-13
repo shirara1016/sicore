@@ -345,10 +345,18 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
         self.left_end = s
         self.right_end = e
 
-        sup_intervals = union_all(
-            truncated_intervals + [[NINF, s]], tol=self.tol)
+        mask_intervals = [[NINF, float(self.stat)]]
+
         inf_intervals = union_all(
-            truncated_intervals + [[e, INF]], tol=self.tol)
+            truncated_intervals +
+            intersection(
+                unsearched_intervals, not_(mask_intervals)),
+            tol=self.tol)
+        sup_intervals = union_all(
+            truncated_intervals +
+            intersection(
+                unsearched_intervals, mask_intervals),
+            tol=self.tol)
 
         chi_sup_intervals = intersection(
             sup_intervals, [[1e-5, INF]])
