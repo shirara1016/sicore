@@ -337,13 +337,6 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
     def _evaluate_pvalue(self, truncated_intervals, searched_intervals, alternative):
 
         unsearched_intervals = not_(searched_intervals)
-        s = intersection(unsearched_intervals, [
-            NINF, float(self.stat)])[-1][1]
-        e = intersection(unsearched_intervals, [
-            float(self.stat), INF])[0][0]
-
-        self.left_end = s
-        self.right_end = e
 
         mask_intervals = [[NINF, float(self.stat)]]
 
@@ -377,14 +370,39 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
 
         return inf_p, sup_p
 
-    def _determine_next_search_data(self, choose_method, *args):
+    def _determine_next_search_data(self, choose_method, searched_intervals):
+
+        unsearched_intervals = intersection(
+            not_(searched_intervals), [[1e-5 + self.step, INF]])
+        candidates = list()
+
+        if choose_method == 'sup_pdf':
+            for interval in unsearched_intervals:
+                l = interval[0]
+                u = max(self.degree + 4 * np.sqrt(self.degree * 2),
+                        interval[0] + 10) if np.isinf(interval[1]) else interval[1]
+                if u - l > 2 * self.step:
+                    candidates += list(
+                        np.linspace(l + self.step, u - self.step, 50, endpoint=True))
+
+        if choose_method == 'near_stat' or choose_method == 'high_pdf':
+            unsearched_lower_stat = intersection(
+                unsearched_intervals, [[NINF, float(self.stat)]])
+            unsearched_upper_stat = intersection(
+                unsearched_intervals, [[float(self.stat), INF]])
+            if len(unsearched_lower_stat) != 0:
+                candidates.append(
+                    unsearched_lower_stat[-1][-1] - self.step)
+            if len(unsearched_upper_stat) != 0:
+                candidates.append(
+                    unsearched_upper_stat[0][0] + self.step)
+
         if choose_method == 'near_stat':
             def method(z): return -np.abs(z - float(self.stat))
-        if choose_method == 'high_pdf':
+        if choose_method == 'high_pdf' or choose_method == 'sup_pdf':
             def method(z): return chi2.pdf(z ** 2, self.degree)
-        if choose_method == 'random':
-            return random.choice(args)
-        return max(args, key=method)
+
+        return max(candidates, key=method)
 
     def _next_search_data(self, line_search):
         intervals = not_(self.searched_intervals)
@@ -471,6 +489,9 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
             z = self._determine_next_search_data(choose_method, z_l, z_r)
             if z <= 1e-5:
                 z = z_r
+
+            z = self._determine_next_search_data(
+                choose_method, self.searched_intervals)
 
         stat_chisq = np.asarray(self.stat) ** 2
         truncated_intervals = union_all(truncated_intervals, tol=self.tol)
