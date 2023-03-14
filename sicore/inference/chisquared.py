@@ -484,12 +484,6 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
                     reject_or_not = False
                     break
 
-            z_l = self.left_end - self.step
-            z_r = self.right_end + self.step
-            z = self._determine_next_search_data(choose_method, z_l, z_r)
-            if z <= 1e-5:
-                z = z_r
-
             z = self._determine_next_search_data(
                 choose_method, self.searched_intervals)
 
