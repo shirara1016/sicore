@@ -462,14 +462,6 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
             self.searched_intervals = union_all(
                 self.searched_intervals + intervals, tol=self.tol)
 
-            searched_length = 0
-            for lower, upper in self.searched_intervals:
-                searched_length += (upper - lower)
-            if searched_length - self.searched_length < 1e-11 or search_count > max_iter:
-                raise InfiniteLoopError(
-                    'Perhaps an infinite loop is occurring')
-            self.searched_length = searched_length
-
             inf_p, sup_p = self._evaluate_pvalue(
                 truncated_intervals, self.searched_intervals, alternative)
 
