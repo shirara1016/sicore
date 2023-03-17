@@ -71,7 +71,7 @@ class SearchChecker:
     def verify_progress(self, intervals):
         length = len(intervals)
         width = self._compute_logarithm_width(intervals)
-        if length == self.last_length and length <= self.last_length:
+        if length == self.last_length and width <= self.last_width:
             raise InfiniteLoopError()
         if self.num_search > self.max_iter:
             raise InfiniteLoopError()
