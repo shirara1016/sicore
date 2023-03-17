@@ -400,7 +400,7 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
         if choose_method == 'near_stat':
             def method(z): return -np.abs(z - float(self.stat))
         if choose_method == 'high_pdf' or choose_method == 'sup_pdf':
-            def method(z): return chi2.pdf(z ** 2, self.degree)
+            def method(z): return chi2.logpdf(z ** 2, self.degree)
 
         return max(candidates, key=method)
 

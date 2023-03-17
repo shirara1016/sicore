@@ -390,7 +390,8 @@ class SelectiveInferenceNorm(InferenceNorm):
         if choose_method == 'near_stat':
             def method(z): return -np.abs(z - float(self.stat))
         if choose_method == 'high_pdf' or choose_method == 'sup_pdf':
-            def method(z): return norm.pdf(z, 0, np.sqrt(self.eta_sigma_eta))
+            def method(z): return norm.logpdf(
+                z, 0, np.sqrt(self.eta_sigma_eta))
 
         return max(candidates, key=method)
 
