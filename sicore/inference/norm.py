@@ -373,7 +373,8 @@ class SelectiveInferenceNorm(InferenceNorm):
                     10, interval[0] + 10) if np.isinf(interval[1]) else interval[1]
                 if u - l > 2 * self.step:
                     candidates += list(
-                        np.linspace(l + self.step, u - self.step, 50, endpoint=True))
+                        np.linspace(l + self.step, u - self.step,
+                                    int(1000 / len(unsearched_intervals))))
 
         if choose_method == 'near_stat' or choose_method == 'high_pdf':
             unsearched_lower_stat = intersection(
