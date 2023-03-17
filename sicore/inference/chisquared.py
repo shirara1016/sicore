@@ -3,11 +3,11 @@ import numpy as np
 from typing import Callable, List, Tuple, Type
 from ..utils import is_int_or_float
 from ..intervals import intersection, not_, union_all, _interval_to_intervals
-from ..cdf_mpmath import tc2_cdf_mpmath
+from ..cdf_mpmath import tc2_cdf_mpmath, tc_cdf_mpmath
 from .base import *
 
 from scipy import sparse
-from scipy.stats import chi2
+from scipy.stats import chi2, chi
 from scipy.linalg import fractional_matrix_power
 
 
@@ -356,15 +356,12 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
         chi_inf_intervals = intersection(
             inf_intervals, [[0.0, INF]])
 
-        chisq_sup_intervals = np.power(chi_sup_intervals, 2)
-        chisq_inf_intervals = np.power(chi_inf_intervals, 2)
+        stat_chi = np.asarray(self.stat)
 
-        stat_chisq = np.asarray(self.stat) ** 2
-
-        sup_F = tc2_cdf_mpmath(stat_chisq, chisq_sup_intervals, self.degree,
-                               dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
-        inf_F = tc2_cdf_mpmath(stat_chisq, chisq_inf_intervals, self.degree,
-                               dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
+        sup_F = tc_cdf_mpmath(stat_chi, chi_sup_intervals, self.degree,
+                              dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
+        inf_F = tc_cdf_mpmath(stat_chi, chi_inf_intervals, self.degree,
+                              dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
 
         inf_p, sup_p = calc_prange(inf_F, sup_F, alternative)
 
@@ -401,7 +398,7 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
         if choose_method == 'near_stat':
             def method(z): return -np.abs(z - float(self.stat))
         if choose_method == 'high_pdf' or choose_method == 'sup_pdf':
-            def method(z): return chi2.logpdf(z ** 2, self.degree)
+            def method(z): return chi.logpdf(z, self.degree)
 
         candidates = np.array(candidates)
         return candidates[np.argmax(method(candidates))]
@@ -483,19 +480,18 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
             z = self._determine_next_search_data(
                 choose_method, self.searched_intervals)
 
-        stat_chisq = np.asarray(self.stat) ** 2
+        stat_chi = float(self.stat)
         truncated_intervals = union_all(truncated_intervals, tol=self.tol)
         chi_intervals = intersection(truncated_intervals, [[0.0, INF]])
-        chisq_intervals = np.power(chi_intervals, 2)
-        F = tc2_cdf_mpmath(stat_chisq, chisq_intervals, self.degree, absolute=False,
-                           dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
+        F = tc_cdf_mpmath(stat_chi, chi_intervals, self.degree, absolute=False,
+                          dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
         p_value = calc_pvalue(F, alternative)
         if parametric_mode == 'p_value':
             reject_or_not = (p_value <= significance_level)
 
         return SelectiveInferenceResult(
-            stat_chisq, significance_level, p_value, inf_p, sup_p,
-            reject_or_not, chisq_intervals,
+            stat_chi, significance_level, p_value, inf_p, sup_p,
+            reject_or_not, chi_intervals,
             search_count, detect_count, selected_model, mappings)
 
     def _all_search_parametric_inference(
@@ -552,11 +548,10 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
 
             z = self._next_search_data(line_search)
 
-        stat_chisq = np.asarray(self.stat) ** 2
+        stat_chi = float(self.stat)
         truncated_intervals = union_all(result_intervals, tol=self.tol)
         chi_intervals = intersection(truncated_intervals, [[0.0, INF]])
-        chisq_intervals = np.power(chi_intervals, 2)
-        F = tc2_cdf_mpmath(stat_chisq, chisq_intervals, self.degree, absolute=False,
+        F = tc2_cdf_mpmath(stat_chi, chi_intervals, self.degree, absolute=False,
                            dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
         p_value = calc_pvalue(F, alternative)
 
@@ -564,8 +559,8 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
             truncated_intervals, [[1e-5, float(max_tail)]], alternative)
 
         return SelectiveInferenceResult(
-            stat_chisq, significance_level, p_value, inf_p, sup_p,
-            (p_value <= significance_level), chisq_intervals,
+            stat_chi, significance_level, p_value, inf_p, sup_p,
+            (p_value <= significance_level), chi_intervals,
             search_count, detect_count, selected_model, mappings)
 
     def _over_conditioned_inference(
@@ -581,16 +576,15 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
         interval = np.asarray(interval)
         intervals = _interval_to_intervals(interval)
 
-        stat_chisq = np.asarray(self.stat) ** 2
+        stat_chi = float(self.stat)
         chi_intervals = intersection(intervals, [[0.0, INF]])
-        chisq_intervals = np.power(chi_intervals, 2)
-        F = tc2_cdf_mpmath(stat_chisq, chisq_intervals, self.degree, absolute=False,
-                           dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
+        F = tc_cdf_mpmath(stat_chi, chi_intervals, self.degree, absolute=False,
+                          dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
         p_value = calc_pvalue(F, alternative)
 
         inf_p, sup_p = self._evaluate_pvalue(intervals, intervals, alternative)
 
         return SelectiveInferenceResult(
-            stat_chisq, significance_level, p_value, inf_p, sup_p,
-            (p_value <= significance_level), chisq_intervals, 1, 1,
+            stat_chi, significance_level, p_value, inf_p, sup_p,
+            (p_value <= significance_level), chi_intervals, 1, 1,
             None, model if retain_selected_model else None)
