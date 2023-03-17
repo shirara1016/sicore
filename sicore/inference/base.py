@@ -45,23 +45,21 @@ class InfiniteLoopError(Exception):
 
 
 class SearchChecker:
-    def __init__(self, max_iter=1e6, tol=1e-10):
+    def __init__(self, max_iter=1e6):
         self.last_length = -np.inf
         self.num_search = 0
         self.min = -np.inf
         self.max = np.inf
         self.max_iter = max_iter
-        self.tol = tol
 
     def _compute_logarithm_length(self, intervals):
         length = 0
-        intervals = union_all(intervals, tol=self.tol)
         if len(intervals) == 0:
             return -np.inf
 
         if np.isinf(intervals[0][0]):
             self.min = intervals[0][1] - 1
-        if np.isinf(intervals[-1][1]):
+        if np.isinf(intervals[-1][-1]):
             self.max = intervals[-1][0] + 1
 
         intervals = intersection(intervals, [[self.min, self.max]])

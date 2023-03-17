@@ -429,7 +429,7 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
         self.out_log = out_log
         self.searched_intervals = list()
 
-        self.searched_length = 0
+        self.search_checker = SearchChecker(max_iter)
 
         mappings = dict() if retain_mappings else None
         truncated_intervals = list()
@@ -463,6 +463,8 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
 
             self.searched_intervals = union_all(
                 self.searched_intervals + intervals, tol=self.tol)
+            self.search_checker.verify_progress(
+                self.searched_intervals)
 
             inf_p, sup_p = self._evaluate_pvalue(
                 truncated_intervals, self.searched_intervals, alternative)
