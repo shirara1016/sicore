@@ -25,6 +25,20 @@ def t_cdf_mpmath(x, df):
     return 1 - abs_x_ccdf if x >= 0 else abs_x_ccdf
 
 
+def chi_cdf_mpmath(x, df):
+    """
+    CDF of a chi distribution.
+
+    Args:
+        x (float): Return the valua at `x`.
+        df (float): Degree of freedom.
+
+    Returns:
+        float: CDF value at `x`.
+    """
+    return mp.gammainc(df / 2, a=0, b=x ** 2 / 2, regularized=True)
+
+
 def chi2_cdf_mpmath(x, df):
     """
     CDF of a chi-squared distribution.
@@ -204,6 +218,26 @@ def tt_cdf_mpmath(x, interval, df, **kwargs):
     intervals = _interval_to_intervals(interval)
     cdf_val = _truncated_cdf_from_cdf(
         lambda z: t_cdf_mpmath(z, df), x, intervals, **kwargs
+    )
+    return float(cdf_val)
+
+
+def tc_cdf_mpmath(x, interval, df, **kwargs):
+    """
+    CDF of a truncated chi distribution.
+
+    Args:
+        x (float): Return the value at `x`.
+        interval (array-like): Truncation interval [L, U] or intervals
+            [[L1, U1], [L2, U2],...].
+        df (float): Degree of freedom.
+
+    Returns:
+        float: CDF value at `x`.
+    """
+    intervals = _interval_to_intervals(interval)
+    cdf_val = _truncated_cdf_from_cdf(
+        lambda z: chi_cdf_mpmath(z, df), x, intervals, **kwargs
     )
     return float(cdf_val)
 
