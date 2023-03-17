@@ -3,6 +3,7 @@ import numpy as np
 from scipy.stats import norm, ttest_ind, ttest_1samp
 
 from ..utils import is_int_or_float
+from ..intervals import union_all, intersection
 
 from typing import List, Any, Dict
 from dataclasses import dataclass
@@ -41,6 +42,39 @@ class SelectiveInferenceResult():
 
 class InfiniteLoopError(Exception):
     pass
+
+
+class SearchChecker:
+    def __init__(self, max_iter=1e6, tol=1e-10):
+        self.last_length = -np.inf
+        self.num_search = 0
+        self.min = -np.inf
+        self.max = np.inf
+        self.max_iter = max_iter
+        self.tol = tol
+
+    def _compute_logarithm_length(self, intervals):
+        length = 0
+        intervals = union_all(intervals, tol=self.tol)
+        if len(intervals) == 0:
+            return -np.inf
+
+        if np.isinf(intervals[0][0]):
+            self.min = intervals[0][1] - 1
+        if np.isinf(intervals[-1][1]):
+            self.max = intervals[-1][0] + 1
+
+        intervals = intersection(intervals, [[self.min, self.max]])
+        for interval in intervals:
+            length += np.log(interval[1] - interval[0])
+        return length
+
+    def verify_progress(self, intervals):
+        length = self._compute_logarithm_length(intervals)
+        if length <= self.last_length or self.num_search > self.max_iter:
+            raise InfiniteLoopError()
+        self.last_length = length
+        self.num_search += 1
 
 
 INF = float('inf')
