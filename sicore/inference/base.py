@@ -46,14 +46,15 @@ class InfiniteLoopError(Exception):
 
 class SearchChecker:
     def __init__(self, max_iter=1e6):
-        self.last_length = -np.inf
+        self.last_width = -np.inf
+        self.last_length = 0
         self.num_search = 0
         self.min = -np.inf
         self.max = np.inf
         self.max_iter = max_iter
 
-    def _compute_logarithm_length(self, intervals):
-        length = 0
+    def _compute_logarithm_width(self, intervals):
+        width = 0
         if len(intervals) == 0:
             return -np.inf
 
@@ -64,14 +65,18 @@ class SearchChecker:
 
         intervals = intersection(intervals, [[self.min, self.max]])
         for interval in intervals:
-            length += np.log(interval[1] - interval[0])
-        return length
+            width += np.log(interval[1] - interval[0])
+        return width
 
     def verify_progress(self, intervals):
-        length = self._compute_logarithm_length(intervals)
-        if length <= self.last_length or self.num_search > self.max_iter:
+        length = len(intervals)
+        width = self._compute_logarithm_width(intervals)
+        if length == self.last_length and length <= self.last_length:
+            raise InfiniteLoopError()
+        if self.num_search > self.max_iter:
             raise InfiniteLoopError()
         self.last_length = length
+        self.last_width = width
         self.num_search += 1
 
 
