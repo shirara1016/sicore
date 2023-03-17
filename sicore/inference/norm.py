@@ -394,7 +394,8 @@ class SelectiveInferenceNorm(InferenceNorm):
             def method(z): return norm.logpdf(
                 z, 0, np.sqrt(self.eta_sigma_eta))
 
-        return max(candidates, key=method)
+        candidates = np.array(candidates)
+        return candidates[np.argmax(method(candidates))]
 
     def _next_search_data(self, line_search):
         intervals = not_(self.searched_intervals)

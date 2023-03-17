@@ -403,7 +403,8 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
         if choose_method == 'high_pdf' or choose_method == 'sup_pdf':
             def method(z): return chi2.logpdf(z ** 2, self.degree)
 
-        return max(candidates, key=method)
+        candidates = np.array(candidates)
+        return candidates[np.argmax(method(candidates))]
 
     def _next_search_data(self, line_search):
         intervals = not_(self.searched_intervals)
