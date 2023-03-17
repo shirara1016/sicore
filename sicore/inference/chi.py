@@ -3,15 +3,15 @@ import numpy as np
 from typing import Callable, List, Tuple, Type
 from ..utils import is_int_or_float
 from ..intervals import intersection, not_, union_all, _interval_to_intervals
-from ..cdf_mpmath import tc2_cdf_mpmath, tc_cdf_mpmath
+from ..cdf_mpmath import tc_cdf_mpmath
 from .base import *
 
 from scipy import sparse
-from scipy.stats import chi2, chi
+from scipy.stats import chi
 from scipy.linalg import fractional_matrix_power
 
 
-class InferenceChiSquared(ABC):
+class InferenceChi(ABC):
     """Base inference class for a test statistic which follows chi squared distribution under null.
 
     Args:
@@ -130,7 +130,7 @@ class InferenceChiSquared(ABC):
         pass
 
 
-class NaiveInferenceChiSquared(InferenceChiSquared):
+class NaiveInferenceChi(InferenceChi):
     """Naive inference for a test statistic which follows chi squared distribution under null.
 
     Args:
@@ -171,12 +171,12 @@ class NaiveInferenceChiSquared(InferenceChiSquared):
         Returns:
             float: p-value
         """
-        stat = np.asarray(self.stat) ** 2
-        F = chi2.cdf(stat, self.degree)
+        stat = np.asarray(self.stat)
+        F = chi.cdf(stat, self.degree)
         return calc_pvalue(F, alternative=alternative)
 
 
-class SelectiveInferenceChiSquared(InferenceChiSquared):
+class SelectiveInferenceChi(InferenceChi):
     """Selective inference for a test statistic which follows chi squared distribution under null.
 
     Args:
@@ -551,8 +551,8 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
         stat_chi = float(self.stat)
         truncated_intervals = union_all(result_intervals, tol=self.tol)
         chi_intervals = intersection(truncated_intervals, [[0.0, INF]])
-        F = tc2_cdf_mpmath(stat_chi, chi_intervals, self.degree, absolute=False,
-                           dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
+        F = tc_cdf_mpmath(stat_chi, chi_intervals, self.degree, absolute=False,
+                          dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
         p_value = calc_pvalue(F, alternative)
 
         inf_p, sup_p = self._evaluate_pvalue(

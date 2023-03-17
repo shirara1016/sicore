@@ -29,16 +29,16 @@ from .inference.norm import (
     NaiveInferenceNorm,
     SelectiveInferenceNorm,
 )
-from .inference.chisquared import (
-    NaiveInferenceChiSquared,
-    SelectiveInferenceChiSquared
+from .inference.chi import (
+    NaiveInferenceChi,
+    SelectiveInferenceChi
 )
 
 __all__ = [
     "NaiveInferenceNorm",
     "SelectiveInferenceNorm",
-    "NaiveInferenceChiSquared",
-    "SelectiveInferenceChiSquared",
+    "NaiveInferenceChi",
+    "SelectiveInferenceChi",
     "SelectiveInferenceResult",
     "InfiniteLoopError",
     "one_sample_test",
