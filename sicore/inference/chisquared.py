@@ -352,9 +352,9 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
             tol=self.tol)
 
         chi_sup_intervals = intersection(
-            sup_intervals, [[1e-5, INF]])
+            sup_intervals, [[0.0, INF]])
         chi_inf_intervals = intersection(
-            inf_intervals, [[1e-5, INF]])
+            inf_intervals, [[0.0, INF]])
 
         chisq_sup_intervals = np.power(chi_sup_intervals, 2)
         chisq_inf_intervals = np.power(chi_inf_intervals, 2)
@@ -373,7 +373,7 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
     def _determine_next_search_data(self, choose_method, searched_intervals):
 
         unsearched_intervals = intersection(
-            not_(searched_intervals), [[1e-5 + self.step, INF]])
+            not_(searched_intervals), [[0.0, INF]])
         candidates = list()
 
         if choose_method == 'sup_pdf':
@@ -485,7 +485,7 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
 
         stat_chisq = np.asarray(self.stat) ** 2
         truncated_intervals = union_all(truncated_intervals, tol=self.tol)
-        chi_intervals = intersection(truncated_intervals, [[1e-5, INF]])
+        chi_intervals = intersection(truncated_intervals, [[0.0, INF]])
         chisq_intervals = np.power(chi_intervals, 2)
         F = tc2_cdf_mpmath(stat_chisq, chisq_intervals, self.degree, absolute=False,
                            dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
@@ -509,7 +509,7 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
         self.max_dps = max_dps
         self.out_log = out_log
         self.searched_intervals = union_all(
-            [[NINF, 1e-5], [float(max_tail), INF]], tol=self.tol)
+            [[NINF, 0.0], [float(max_tail), INF]], tol=self.tol)
 
         mappings = dict() if retain_mappings else None
         result_intervals = list()
@@ -554,7 +554,7 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
 
         stat_chisq = np.asarray(self.stat) ** 2
         truncated_intervals = union_all(result_intervals, tol=self.tol)
-        chi_intervals = intersection(truncated_intervals, [[1e-5, INF]])
+        chi_intervals = intersection(truncated_intervals, [[0.0, INF]])
         chisq_intervals = np.power(chi_intervals, 2)
         F = tc2_cdf_mpmath(stat_chisq, chisq_intervals, self.degree, absolute=False,
                            dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
@@ -582,7 +582,7 @@ class SelectiveInferenceChiSquared(InferenceChiSquared):
         intervals = _interval_to_intervals(interval)
 
         stat_chisq = np.asarray(self.stat) ** 2
-        chi_intervals = intersection(intervals, [[1e-5, INF]])
+        chi_intervals = intersection(intervals, [[0.0, INF]])
         chisq_intervals = np.power(chi_intervals, 2)
         F = tc2_cdf_mpmath(stat_chisq, chisq_intervals, self.degree, absolute=False,
                            dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
