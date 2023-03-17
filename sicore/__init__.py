@@ -4,6 +4,7 @@ Core package for selective inference.
 from . import intervals
 from .intervals import polytope_to_interval, poly_lt_zero
 from .utils import OneVec, construct_projection_matrix
+from .cdf_mpmath import tc_cdf_mpmath as tc_cdf
 from .cdf_mpmath import tc2_cdf_mpmath as tc2_cdf
 from .cdf_mpmath import tf_cdf_mpmath as tf_cdf
 from .cdf_mpmath import tn_cdf_mpmath as tn_cdf
@@ -28,22 +29,23 @@ from .inference.norm import (
     NaiveInferenceNorm,
     SelectiveInferenceNorm,
 )
-from .inference.chisquared import (
-    NaiveInferenceChiSquared,
-    SelectiveInferenceChiSquared
+from .inference.chi import (
+    NaiveInferenceChi,
+    SelectiveInferenceChi
 )
 
 __all__ = [
     "NaiveInferenceNorm",
     "SelectiveInferenceNorm",
-    "NaiveInferenceChiSquared",
-    "SelectiveInferenceChiSquared",
+    "NaiveInferenceChi",
+    "SelectiveInferenceChi",
     "SelectiveInferenceResult",
     "InfiniteLoopError",
     "one_sample_test",
     "two_sample_test",
     "tn_cdf",
     "tt_cdf",
+    "tc_cdf",
     "tc2_cdf",
     "tf_cdf",
     "false_positive_rate",

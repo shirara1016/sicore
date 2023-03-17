@@ -362,7 +362,8 @@ class SelectiveInferenceNorm(InferenceNorm):
 
     def _determine_next_search_data(self, choose_method, searched_intervals):
 
-        unsearched_intervals = not_(searched_intervals)
+        unsearched_intervals = standardize(
+            not_(searched_intervals), self.popmean, self.eta_sigma_eta).tolist()
         candidates = list()
 
         if choose_method == 'sup_pdf':
@@ -378,9 +379,11 @@ class SelectiveInferenceNorm(InferenceNorm):
 
         if choose_method == 'near_stat' or choose_method == 'high_pdf':
             unsearched_lower_stat = intersection(
-                unsearched_intervals, [[NINF, float(self.stat)]])
+                unsearched_intervals,
+                [[NINF, standardize(self.stat, self.popmean, self.eta_sigma_eta)]])
             unsearched_upper_stat = intersection(
-                unsearched_intervals, [[float(self.stat), INF]])
+                unsearched_intervals,
+                [[standardize(self.stat, self.popmean, self.eta_sigma_eta), INF]])
             if len(unsearched_lower_stat) != 0:
                 candidates.append(
                     unsearched_lower_stat[-1][-1] - self.step)
@@ -389,13 +392,14 @@ class SelectiveInferenceNorm(InferenceNorm):
                     unsearched_upper_stat[0][0] + self.step)
 
         if choose_method == 'near_stat':
-            def method(z): return -np.abs(z - float(self.stat))
+            def method(z): return -np.abs(
+                z - standardize(self.stat, self.popmean, self.eta_sigma_eta))
         if choose_method == 'high_pdf' or choose_method == 'sup_pdf':
-            def method(z): return norm.logpdf(
-                z, 0, np.sqrt(self.eta_sigma_eta))
+            def method(z): return norm.logpdf(z)
 
         candidates = np.array(candidates)
-        return candidates[np.argmax(method(candidates))]
+        return np.sqrt(self.eta_sigma_eta) * \
+            candidates[np.argmax(method(candidates))] + self.popmean
 
     def _next_search_data(self, line_search):
         intervals = not_(self.searched_intervals)
@@ -478,7 +482,7 @@ class SelectiveInferenceNorm(InferenceNorm):
         stat_std = standardize(self.stat, popmean, self.eta_sigma_eta)
         truncated_intervals = union_all(truncated_intervals, tol=self.tol)
         norm_intervals = standardize(
-            truncated_intervals, popmean, self.eta_sigma_eta)
+            truncated_intervals, popmean, self.eta_sigma_eta).tolist()
         absolute = True if alternative == 'abs' else False
         F = tn_cdf_mpmath(stat_std, norm_intervals, absolute=absolute,
                           dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
@@ -550,7 +554,7 @@ class SelectiveInferenceNorm(InferenceNorm):
         stat_std = standardize(self.stat, popmean, self.eta_sigma_eta)
         truncated_intervals = union_all(result_intervals, tol=self.tol)
         norm_intervals = standardize(
-            truncated_intervals, popmean, self.eta_sigma_eta)
+            truncated_intervals, popmean, self.eta_sigma_eta).tolist()
         absolute = True if alternative == 'abs' else False
         F = tn_cdf_mpmath(stat_std, norm_intervals, absolute=absolute,
                           dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
@@ -579,7 +583,8 @@ class SelectiveInferenceNorm(InferenceNorm):
         intervals = _interval_to_intervals(interval)
 
         stat_std = standardize(self.stat, popmean, self.eta_sigma_eta)
-        norm_intervals = standardize(intervals, popmean, self.eta_sigma_eta)
+        norm_intervals = standardize(
+            intervals, popmean, self.eta_sigma_eta).tolist()
         absolute = True if alternative == 'abs' else False
         F = tn_cdf_mpmath(stat_std, norm_intervals, absolute=absolute,
                           dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
