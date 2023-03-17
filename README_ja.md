@@ -25,8 +25,8 @@ $ pip uninstall sicore
         - 精度保証付きのp値の算出
         - 帰無仮説が棄却されるかどうかの判定
         - 指定した全範囲のparametric探索
-- NaiveInferenceChiSquared：カイ二乗検定に従う検定統計量に対するnaiveな検定
-- SelectiveInferenceChiSquared：カイ二乗分布に従う検定統計量に対するselectiveな検定
+- NaiveInferenceChi：カイ分布に従う検定統計量に対するnaiveな検定
+- SelectiveInferenceChi：カイ分布に従う検定統計量に対するselectiveな検定
     - Parametric SIとOver-Coniditinonigに対応
     - Parametric SIでは次の3種類の方法が利用可能
         - 精度保証付きのp値の算出
@@ -39,6 +39,7 @@ $ pip uninstall sicore
 全て複数の切断区間に対応し，mpmathを用いた任意精度の計算
 - tn_cdf()：切断正規分布
 - tt_cdf()：切断t分布
+- tc_cdf()：切断カイ分布
 - tc2_cdf()：切断カイ2乗分布
 - tf_cdf()：切断F分布
 

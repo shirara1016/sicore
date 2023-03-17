@@ -30,8 +30,8 @@ The following fuctions are imported by `from sicore import *`
         - Determining if the null hypothesis is rejected or not.
         - Performing a parametric search of the entire specified range.
     - Inference results are returned as a data class.
-- NaiveInferenceChiSquared : Naive statistical inference for the test statistic following a chi squared distribution.
-- SelectiveInferenceChiSquared : Selective statistical inference for the test statistic following a chi squared distribution.
+- NaiveInferenceChi : Naive statistical inference for the test statistic following a chi distribution.
+- SelectiveInferenceChi : Selective statistical inference for the test statistic following a chi distribution.
     - Parametric SI and Over-Conditioning provided.
     - Parametric SI offers the following three types of methods.
         - Calculation of p-value with specified guaranteed accuracy.
@@ -45,6 +45,7 @@ The following fuctions are imported by `from sicore import *`
 Provides computation with arbitrary precision using mpmath for multiple truncated intervals.
 - tn_cdf() : truncated standard normal distribution
 - tt_cdf() : truncated t distribution
+- tc_cdf() : truncated chi distribution
 - tc2_cdf() : truncated chi squared distribution
 - tf_cdf() : truncated F distribution
 
