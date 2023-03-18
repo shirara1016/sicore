@@ -365,13 +365,18 @@ class SelectiveInferenceNorm(InferenceNorm):
         unsearched_intervals = standardize(
             not_(searched_intervals), self.popmean, self.eta_sigma_eta).tolist()
         candidates = list()
+        mode = 0
 
         if choose_method == 'sup_pdf':
             for interval in unsearched_intervals:
-                l = min(
-                    -10, interval[1] - 10) if np.isinf(interval[0]) else interval[0]
-                u = max(
-                    10, interval[0] + 10) if np.isinf(interval[1]) else interval[1]
+                if np.isinf(interval[0]):
+                    l = min(mode - 2, interval[1] - 2)
+                else:
+                    l = interval[0]
+                if np.isinf(interval[1]):
+                    u = max(mode + 2, interval[0] + 2)
+                else:
+                    u = interval[1]
                 if u - l > 2 * self.step:
                     candidates += list(
                         np.linspace(l + self.step, u - self.step,

@@ -372,12 +372,15 @@ class SelectiveInferenceChi(InferenceChi):
         unsearched_intervals = intersection(
             not_(searched_intervals), [[0.0, INF]])
         candidates = list()
+        mode = np.sqrt(self.degree - 1)
 
         if choose_method == 'sup_pdf':
             for interval in unsearched_intervals:
                 l = interval[0]
-                u = max(self.degree + 4 * np.sqrt(self.degree * 2),
-                        interval[0] + 10) if np.isinf(interval[1]) else interval[1]
+                if np.isinf(interval[1]):
+                    u = max(mode + 2, interval[0] + 2)
+                else:
+                    u = interval[1]
                 if u - l > 2 * self.step:
                     candidates += list(
                         np.linspace(l + self.step, u - self.step,
