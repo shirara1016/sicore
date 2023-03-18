@@ -1,9 +1,11 @@
 from numpy.testing import assert_allclose
 from sicore.cdf_mpmath import (
+    chi_cdf_mpmath,
     chi2_cdf_mpmath,
     f_cdf_mpmath,
     mp,
     t_cdf_mpmath,
+    tc_cdf_mpmath,
     tc2_cdf_mpmath,
     tf_cdf_mpmath,
     tn_cdf_mpmath,
@@ -32,6 +34,23 @@ def test_t_cdf_mpmath():
 
     for args, expected in testcase:
         assert_allclose(float(t_cdf_mpmath(*args)), expected)
+
+
+def test_chi_cdf_mpmath():
+    testcase = [
+        ((0.0, 2), 0.0),
+        ((0.0, 3), 0.0),
+        ((1.0, 2), 0.3934693402873665),
+        ((1.0, 3), 0.19874804309879915),
+        ((3.0, 2), 0.9888910034617577),
+        ((3.0, 3), 0.9707091134651118),
+        ((3.0, 15), 0.1224825483987176),
+        ((INF, 2), 1.0),
+        ((INF, 3), 1.0),
+    ]
+
+    for args, expected in testcase:
+        assert_allclose(float(chi_cdf_mpmath(*args)), expected)
 
 
 def test_chi2_cdf_mpmath():
@@ -112,6 +131,19 @@ def test_tt_cdf_mpmath():
 
     for args, expected in testcase:
         assert_allclose(float(tt_cdf_mpmath(*args)), expected)
+
+
+def test_tc_cdf_mpmath():
+    testcase = [
+        ((2.5, [[1.6, 6.6]], 14), 0.039857837599),
+        ((8.4, [[8.3, 24.4], [24.6, 27.1]], 1), 0.571152956027),
+        ((6.7, [[6.4, 7.3], [18.9, 22.2], [24.7, 27.9]], 5), 0.842784288742),
+        ((2.3, [[0.0, 0.5], [1.0, 1.5], [2.0, INF]], 7), 0.247393505668),
+        ((INF, [[0.0, 0.5], [1.0, 1.5], [2.0, INF]], 2), 1.0),
+    ]
+
+    for args, expected in testcase:
+        assert_allclose(float(tc_cdf_mpmath(*args)), expected)
 
 
 def test_tc2_cdf_mpmath():
