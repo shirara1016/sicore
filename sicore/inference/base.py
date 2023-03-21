@@ -3,7 +3,7 @@ import numpy as np
 from scipy.stats import norm, ttest_ind, ttest_1samp
 
 from ..utils import is_int_or_float
-from ..intervals import union_all, intersection
+from ..intervals import intersection
 
 from typing import List, Any, Dict
 from dataclasses import dataclass
@@ -45,12 +45,12 @@ class InfiniteLoopError(Exception):
 
 
 class SearchChecker:
-    def __init__(self, max_iter=1e6):
+    def __init__(self, max_iter: int = 1e6):
         self.last_width = -np.inf
         self.last_length = 0
         self.num_search = 0
-        self.min = -np.inf
-        self.max = np.inf
+        self.min = np.inf
+        self.max = -np.inf
         self.max_iter = max_iter
 
     def _compute_logarithm_width(self, intervals):
@@ -58,17 +58,24 @@ class SearchChecker:
         if len(intervals) == 0:
             return -np.inf
 
-        if np.isinf(intervals[0][0]):
-            self.min = intervals[0][1] - 1
-        if np.isinf(intervals[-1][-1]):
-            self.max = intervals[-1][0] + 1
+        self.min = np.min([self.min, intervals[0][-1]])
+        self.max = np.max([self.max, intervals[-1][0]])
+
+        if np.isneginf(intervals[0][0]):
+            self.min = self.min - 2
+        else:
+            self.min = intervals[0][0]
+        if np.isposinf(intervals[-1][-1]):
+            self.max = self.max + 2
+        else:
+            self.max = intervals[-1][-1]
 
         intervals = intersection(intervals, [[self.min, self.max]])
         for interval in intervals:
             width += np.log(interval[1] - interval[0])
         return width
 
-    def verify_progress(self, intervals):
+    def verify_progress(self, intervals: List[List[float]]):
         length = len(intervals)
         width = self._compute_logarithm_width(intervals)
         if length == self.last_length and width <= self.last_width:
