@@ -2,6 +2,7 @@ import itertools
 from operator import itemgetter
 
 import numpy as np
+from scipy import sparse
 
 from .utils import is_int_or_float
 
@@ -226,7 +227,7 @@ def poly_lt_zero(poly_or_coef, tol=1e-10):
     return union_all(intervals, tol=tol)
 
 
-def polytope_to_interval(a_vec, b_vec, A=None, b=None, c=None, tol=1e-10):
+def polytope_to_interval(a_vec, b_vec, A=None, b=None, c=None, tol=1e-10, use_sparse=False):
     """
     Compute truncation intervals obtained from a polytope `{x'Ax+b'x+c<=0}` as a selection event.
 
@@ -238,6 +239,7 @@ def polytope_to_interval(a_vec, b_vec, A=None, b=None, c=None, tol=1e-10):
             Defaults to None.
         c (float, optional): Constant. Set None if `c` is unused. Defaults to None.
         tol (float, optional): Tolerance error parameter. Defaults to 1e-10.
+        use_sparse (boolean, optional): Whether to use sparse array or not. Defaults to False.
 
     Returns:
         array-like: truncation intervals [[L1, U1], [L2, U2], ...].
@@ -245,15 +247,19 @@ def polytope_to_interval(a_vec, b_vec, A=None, b=None, c=None, tol=1e-10):
     alp, beta, gam = 0, 0, 0
 
     if A is not None:
-        cA = np.dot(b_vec, A)
-        zA = np.dot(a_vec, A)
-        alp += np.dot(cA, b_vec)
-        beta += np.dot(zA, b_vec) + np.dot(cA, a_vec)
-        gam += np.dot(zA, a_vec)
+        if use_sparse:
+            A = sparse.csr_array(A)
+        else:
+            A = np.array(A)
+        cA = b_vec @ A
+        zA = a_vec @ A
+        alp += cA @ b_vec
+        beta += zA @ b_vec + cA @ a_vec
+        gam += zA @ a_vec
 
     if b is not None:
-        beta += np.dot(b, b_vec)
-        gam += np.dot(b, a_vec)
+        beta += b @ b_vec
+        gam += b @ a_vec
 
     if c is not None:
         gam += c
