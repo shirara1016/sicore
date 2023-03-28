@@ -311,6 +311,9 @@ class SelectiveInferenceChi(InferenceChi):
             Type[SelectiveInferenceResult]
         """
 
+        lim = max(20 + np.sqrt(self.degree - 1), 10 + float(self.stat))
+        self.restrict = [[-lim, lim]]
+
         if over_conditioning:
             result = self._over_conditioned_inference(
                 algorithm, significance_level, alternative, retain_selected_model,
@@ -352,16 +355,19 @@ class SelectiveInferenceChi(InferenceChi):
                 unsearched_intervals, mask_intervals),
             tol=self.tol)
 
-        chi_sup_intervals = intersection(
-            sup_intervals, [[0.0, INF]])
         chi_inf_intervals = intersection(
             inf_intervals, [[0.0, INF]])
+        chi_sup_intervals = intersection(
+            sup_intervals, [[0.0, INF]])
+
+        chi_inf_intervals = intersection(chi_inf_intervals, self.restrict)
+        chi_sup_intervals = intersection(chi_sup_intervals, self.restrict)
 
         stat_chi = np.asarray(self.stat)
 
-        sup_F = tc_cdf_mpmath(stat_chi, chi_sup_intervals, self.degree,
-                              dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
         inf_F = tc_cdf_mpmath(stat_chi, chi_inf_intervals, self.degree,
+                              dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
+        sup_F = tc_cdf_mpmath(stat_chi, chi_sup_intervals, self.degree,
                               dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
 
         inf_p, sup_p = calc_prange(inf_F, sup_F, alternative)
@@ -487,6 +493,7 @@ class SelectiveInferenceChi(InferenceChi):
         stat_chi = float(self.stat)
         truncated_intervals = union_all(truncated_intervals, tol=self.tol)
         chi_intervals = intersection(truncated_intervals, [[0.0, INF]])
+        chi_intervals = intersection(chi_intervals, self.restrict)
         F = tc_cdf_mpmath(stat_chi, chi_intervals, self.degree, absolute=False,
                           dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
         p_value = calc_pvalue(F, alternative)
@@ -555,6 +562,7 @@ class SelectiveInferenceChi(InferenceChi):
         stat_chi = float(self.stat)
         truncated_intervals = union_all(result_intervals, tol=self.tol)
         chi_intervals = intersection(truncated_intervals, [[0.0, INF]])
+        chi_intervals = intersection(chi_intervals, self.restrict)
         F = tc_cdf_mpmath(stat_chi, chi_intervals, self.degree, absolute=False,
                           dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
         p_value = calc_pvalue(F, alternative)
@@ -582,6 +590,7 @@ class SelectiveInferenceChi(InferenceChi):
 
         stat_chi = float(self.stat)
         chi_intervals = intersection(intervals, [[0.0, INF]])
+        chi_intervals = intersection(chi_intervals, self.restrict)
         F = tc_cdf_mpmath(stat_chi, chi_intervals, self.degree, absolute=False,
                           dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
         p_value = calc_pvalue(F, alternative)

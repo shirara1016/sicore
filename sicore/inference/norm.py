@@ -300,6 +300,10 @@ class SelectiveInferenceNorm(InferenceNorm):
             Type[SelectiveInferenceResult]
         """
 
+        lim = max(30, 10 + abs(
+            standardize(self.stat, popmean, self.eta_sigma_eta)))
+        self.restrict = [[-lim, lim]]
+
         if over_conditioning:
             result = self._over_conditioned_inference(
                 algorithm, significance_level, alternative, popmean, retain_selected_model,
@@ -350,6 +354,9 @@ class SelectiveInferenceNorm(InferenceNorm):
             inf_intervals, self.popmean, self.eta_sigma_eta)
         norm_sup_intervals = standardize(
             sup_intervals, self.popmean, self.eta_sigma_eta)
+
+        norm_inf_intervals = intersection(norm_inf_intervals, self.restrict)
+        norm_sup_intervals = intersection(norm_sup_intervals, self.restrict)
 
         stat_std = standardize(self.stat, self.popmean, self.eta_sigma_eta)
 
@@ -489,6 +496,7 @@ class SelectiveInferenceNorm(InferenceNorm):
         truncated_intervals = union_all(truncated_intervals, tol=self.tol)
         norm_intervals = standardize(
             truncated_intervals, popmean, self.eta_sigma_eta).tolist()
+        norm_intervals = intersection(norm_intervals, self.restrict)
         absolute = True if alternative == 'abs' else False
         F = tn_cdf_mpmath(stat_std, norm_intervals, absolute=absolute,
                           dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
@@ -561,6 +569,7 @@ class SelectiveInferenceNorm(InferenceNorm):
         truncated_intervals = union_all(result_intervals, tol=self.tol)
         norm_intervals = standardize(
             truncated_intervals, popmean, self.eta_sigma_eta).tolist()
+        norm_intervals = intersection(norm_intervals, self.restrict)
         absolute = True if alternative == 'abs' else False
         F = tn_cdf_mpmath(stat_std, norm_intervals, absolute=absolute,
                           dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
@@ -591,6 +600,7 @@ class SelectiveInferenceNorm(InferenceNorm):
         stat_std = standardize(self.stat, popmean, self.eta_sigma_eta)
         norm_intervals = standardize(
             intervals, popmean, self.eta_sigma_eta).tolist()
+        norm_intervals = intersection(norm_intervals, self.restrict)
         absolute = True if alternative == 'abs' else False
         F = tn_cdf_mpmath(stat_std, norm_intervals, absolute=absolute,
                           dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
