@@ -237,7 +237,8 @@ class SelectiveInferenceChi(InferenceChi):
         dps: int | str = 'auto',
         max_dps: int = 5000,
         out_log: str = 'test_log.log',
-        max_iter: int = 1e6
+        max_iter: int = 1e6,
+        callback: Callable[[Type[SelectiveInferenceResult]], Any] = None
     ) -> Type[SelectiveInferenceResult]:
         """Perform Selective Inference.
 
@@ -320,13 +321,13 @@ class SelectiveInferenceChi(InferenceChi):
             result = self._parametric_inference(
                 algorithm, model_selector, significance_level, parametric_mode,
                 alternative, threshold, choose_method, retain_selected_model, retain_mappings,
-                tol, step, dps, max_dps, out_log, max_iter)
+                tol, step, dps, max_dps, out_log, max_iter, callback)
 
         elif parametric_mode == 'all_search':
             result = self._all_search_parametric_inference(
                 algorithm, model_selector, significance_level, alternative,
                 line_search, max_tail, retain_selected_model, retain_mappings,
-                tol, step, dps, max_dps, out_log)
+                tol, step, dps, max_dps, out_log, callback)
 
         else:
             raise Exception(
@@ -420,7 +421,7 @@ class SelectiveInferenceChi(InferenceChi):
     def _parametric_inference(
             self, algorithm, model_selector, significance_level, parametric_mode,
             alternative, threshold, choose_method, retain_selected_model, retain_mappings,
-            tol, step, dps, max_dps, out_log, max_iter):
+            tol, step, dps, max_dps, out_log, max_iter, callback):
 
         self.tol = tol
         self.step = step
@@ -500,7 +501,7 @@ class SelectiveInferenceChi(InferenceChi):
     def _all_search_parametric_inference(
             self, algorithm, model_selector, significance_level, alternative,
             line_search, max_tail, retain_selected_model, retain_mappings,
-            tol, step, dps, max_dps, out_log):
+            tol, step, dps, max_dps, out_log, callback):
 
         self.tol = tol
         self.step = step
