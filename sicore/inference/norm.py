@@ -441,7 +441,7 @@ class SelectiveInferenceNorm(InferenceNorm):
         self.out_log = out_log
         self.searched_intervals = list()
 
-        self.search_history = []
+        self.search_history = list()
         self.search_checker = SearchChecker(max_iter)
 
         mappings = dict() if retain_mappings else None
