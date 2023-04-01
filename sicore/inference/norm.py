@@ -320,7 +320,7 @@ class SelectiveInferenceNorm(InferenceNorm):
             result = self._all_search_parametric_inference(
                 algorithm, model_selector, significance_level, alternative, popmean,
                 line_search, max_tail, retain_selected_model, retain_mappings,
-                tol, step, dps, max_dps, out_log, callback)
+                tol, step, dps, max_dps, out_log)
 
         else:
             raise Exception(
@@ -425,6 +425,9 @@ class SelectiveInferenceNorm(InferenceNorm):
             param = (e + s) / 2
         return param
 
+    def _execute_callback(self, callback, progress):
+        self.search_history.append(callback(progress))
+
     def _parametric_inference(
             self, algorithm, model_selector, significance_level, parametric_mode,
             alternative, threshold, popmean, choose_method, retain_selected_model, retain_mappings,
@@ -438,6 +441,7 @@ class SelectiveInferenceNorm(InferenceNorm):
         self.out_log = out_log
         self.searched_intervals = list()
 
+        self.search_history = []
         self.search_checker = SearchChecker(max_iter)
 
         mappings = dict() if retain_mappings else None
@@ -492,14 +496,14 @@ class SelectiveInferenceNorm(InferenceNorm):
                 current_p_value = calc_pvalue(F, alternative)
                 current_searched_intervals = standardize(
                     self.searched_intervals, popmean, self.eta_sigma_eta).tolist()
-                current_search_point = standardize(
+                searched_point = standardize(
                     z, popmean, self.eta_sigma_eta)
 
-                process = SearchProgress(
+                progress = SearchProgress(
                     stat_std, significance_level, current_p_value, inf_p, sup_p,
                     current_norm_intervals, current_searched_intervals,
-                    current_search_point, search_count, detect_count)
-                callback(process)
+                    searched_point, search_count, detect_count)
+                self._execute_callback(callback, progress)
 
             if parametric_mode == 'p_value':
                 if np.abs(sup_p - inf_p) < threshold:
@@ -535,7 +539,7 @@ class SelectiveInferenceNorm(InferenceNorm):
     def _all_search_parametric_inference(
             self, algorithm, model_selector, significance_level, alternative, popmean,
             line_search, max_tail, retain_selected_model, retain_mappings,
-            tol, step, dps, max_dps, out_log, callback):
+            tol, step, dps, max_dps, out_log):
 
         self.popmean = popmean
         self.tol = tol

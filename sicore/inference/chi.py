@@ -330,7 +330,7 @@ class SelectiveInferenceChi(InferenceChi):
             result = self._all_search_parametric_inference(
                 algorithm, model_selector, significance_level, alternative,
                 line_search, max_tail, retain_selected_model, retain_mappings,
-                tol, step, dps, max_dps, out_log, callback)
+                tol, step, dps, max_dps, out_log)
 
         else:
             raise Exception(
@@ -424,6 +424,9 @@ class SelectiveInferenceChi(InferenceChi):
             param = (e + s) / 2
         return param
 
+    def _execute_callback(self, callback, progress):
+        self.search_history.append(callback(progress))
+
     def _parametric_inference(
             self, algorithm, model_selector, significance_level, parametric_mode,
             alternative, threshold, choose_method, retain_selected_model, retain_mappings,
@@ -436,6 +439,7 @@ class SelectiveInferenceChi(InferenceChi):
         self.out_log = out_log
         self.searched_intervals = list()
 
+        self.search_history = list()
         self.search_checker = SearchChecker(max_iter)
 
         mappings = dict() if retain_mappings else None
@@ -489,13 +493,13 @@ class SelectiveInferenceChi(InferenceChi):
                 current_p_value = calc_pvalue(F, alternative)
                 current_searched_intervals = intersection(
                     self.searched_intervals, [[0.0, INF]])
-                current_search_point = float(z)
+                searched_point = float(z)
 
-                process = SearchProgress(
+                progress = SearchProgress(
                     stat_chi, significance_level, current_p_value, inf_p, sup_p,
                     current_chi_intervals, current_searched_intervals,
-                    current_search_point, search_count, detect_count)
-                callback(process)
+                    searched_point, search_count, detect_count)
+                self._execute_callback(callback, progress)
 
             if parametric_mode == 'p_value':
                 if np.abs(sup_p - inf_p) < threshold:
@@ -529,7 +533,7 @@ class SelectiveInferenceChi(InferenceChi):
     def _all_search_parametric_inference(
             self, algorithm, model_selector, significance_level, alternative,
             line_search, max_tail, retain_selected_model, retain_mappings,
-            tol, step, dps, max_dps, out_log, callback):
+            tol, step, dps, max_dps, out_log):
 
         self.tol = tol
         self.step = step
