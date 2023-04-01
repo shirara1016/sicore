@@ -502,7 +502,7 @@ class SelectiveInferenceNorm(InferenceNorm):
                 progress = SearchProgress(
                     stat_std, significance_level, current_p_value, inf_p, sup_p,
                     current_norm_intervals, current_searched_intervals,
-                    searched_point, search_count, detect_count)
+                    searched_point, search_count, detect_count, choose_method)
                 self._execute_callback(callback, progress)
 
             if parametric_mode == 'p_value':

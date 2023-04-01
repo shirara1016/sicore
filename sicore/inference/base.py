@@ -57,6 +57,7 @@ class SearchProgress():
     search_point: float
     search_count: int
     detect_count: int
+    choose_method: str
 
 
 class InfiniteLoopError(Exception):
