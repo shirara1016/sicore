@@ -225,7 +225,7 @@ class SelectiveInferenceNorm(InferenceNorm):
         max_dps: int = 5000,
         out_log: str = 'test_log.log',
         max_iter: int = 1e6,
-        callback: Callable[[Type[SelectiveInferenceResult]], Any] = None
+        callback: Callable[[Type[SearchProgress]], Any] = None
     ) -> Type[SelectiveInferenceResult]:
         """Perform Selective Inference.
 
@@ -477,6 +477,29 @@ class SelectiveInferenceNorm(InferenceNorm):
 
             inf_p, sup_p = self._evaluate_pvalue(
                 truncated_intervals, self.searched_intervals, alternative)
+
+            if callback is not None:
+                stat_std = standardize(self.stat, popmean, self.eta_sigma_eta)
+                current_truncated_intervals = union_all(
+                    truncated_intervals, tol=self.tol)
+                current_norm_intervals = standardize(
+                    current_truncated_intervals, popmean, self.eta_sigma_eta).tolist()
+                current_norm_intervals = intersection(
+                    current_norm_intervals, self.restrict)
+                absolute = True if alternative == 'abs' else False
+                F = tn_cdf_mpmath(stat_std, current_norm_intervals, absolute=absolute,
+                                  dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
+                current_p_value = calc_pvalue(F, alternative)
+                current_searched_intervals = standardize(
+                    self.searched_intervals, popmean, self.eta_sigma_eta).tolist()
+                current_search_point = standardize(
+                    z, popmean, self.eta_sigma_eta)
+
+                process = SearchProgress(
+                    stat_std, significance_level, current_p_value, inf_p, sup_p,
+                    current_norm_intervals, current_searched_intervals,
+                    current_search_point, search_count, detect_count)
+                callback(process)
 
             if parametric_mode == 'p_value':
                 if np.abs(sup_p - inf_p) < threshold:

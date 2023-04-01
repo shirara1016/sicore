@@ -40,6 +40,25 @@ class SelectiveInferenceResult():
     mappings: Dict[tuple[float], Any] | None
 
 
+@dataclass
+class SearchProgress():
+    """
+    This class contains the intermediate results of each search process.
+
+    Attributes:
+    """
+    stat: float
+    alpha: float
+    p_value: float
+    inf_p: float
+    sup_p: float
+    truncated_intervals: List[List[float]]
+    searched_intervals: List[List[float]]
+    search_point: float
+    search_count: int
+    detect_count: int
+
+
 class InfiniteLoopError(Exception):
     pass
 
