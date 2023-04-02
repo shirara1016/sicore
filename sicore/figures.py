@@ -215,7 +215,19 @@ class PowerFigure(SummaryFigure):
 
 
 def search_history_visualizer(history, fname='search_history.pdf', figsize=(8, 6)):
+    """
+    Visualize history of searched intervals and truncated intervals.
 
+    Args:
+        history (List[Type[SearchProgress]]):
+            A list consisting of data classes that summarizes the
+            intermediate stages of each search and stores the history of
+            the parametric search.
+        fname (str, optional):
+            File name. Defaults to 'search_history.pdf'.
+        figsize (tuple, optional):
+            Size of the figure. Defaults to (8, 6).
+    """
     distribution = history[0].null_distribution
     if distribution == 'norm':
         dist = norm
@@ -276,7 +288,23 @@ def search_history_visualizer(history, fname='search_history.pdf', figsize=(8, 6
     pdf_pages.close()
 
 
-def plot_p_history(history, title=None, fname=None, figsize=(8, 6)):
+def pvalue_bounds_plot(history, title=None, fname=None, figsize=(8, 6)):
+    """
+    Plot the upper and lower bounds of the p-value obtained for each search.
+
+    Args:
+        history (List[Type[SearchProgress]]):
+            A list consisting of data classes that summarizes the
+            intermediate stages of each search and stores the history of
+            the parametric search.
+        title (str, optional):
+            Title of the figure. Defaults to None.
+        fname (str, optional):
+            File name. If `fname` is given, the plotted figure will
+            be saved as a file. Defaults to None.
+        figsize (tuple, optional):
+            Size of the figure. Defaults to (8, 6).
+    """
 
     inf_ps = [0.0] + [prog.inf_p for prog in history]
     sup_ps = [1.0] + [prog.sup_p for prog in history]

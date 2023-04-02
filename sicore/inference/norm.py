@@ -293,8 +293,8 @@ class SelectiveInferenceNorm(InferenceNorm):
 
         Raises:
             Exception:
-                   The parametric_mode option is not p_value, reject_or_not, or all_search,
-                   and the over_conditioning option is set False.
+                The parametric_mode option is not p_value, reject_or_not, or all_search,
+                and the over_conditioning option is set False.
 
         Returns:
             Type[SelectiveInferenceResult]
