@@ -58,6 +58,7 @@ class SearchProgress():
     search_count: int
     detect_count: int
     choose_method: str
+    null_distribution: str
 
 
 class InfiniteLoopError(Exception):
