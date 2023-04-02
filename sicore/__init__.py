@@ -18,7 +18,10 @@ from .evaluation import (
     type1_error_rate,
     type2_error_rate,
 )
-from .figures import FprFigure, PowerFigure, pvalues_hist, pvalues_qqplot
+from .figures import (
+    FprFigure, PowerFigure, pvalues_hist, pvalues_qqplot,
+    search_history_visualizer, pvalue_bounds_plot
+)
 from .inference.base import (
     SelectiveInferenceResult,
     InfiniteLoopError,
@@ -59,6 +62,8 @@ __all__ = [
     "pvalues_qqplot",
     "FprFigure",
     "PowerFigure",
+    "search_history_visualizer",
+    "pvalue_bounds_plot",
     "intervals",
     "polytope_to_interval",
     "poly_lt_zero",
