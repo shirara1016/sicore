@@ -337,6 +337,6 @@ def pvalue_bounds_plot(history, title=None, fname=None, figsize=(8, 6)):
     if fname is None:
         plt.show()
     else:
-        plt.savefig('proceed.pdf', transparent=True)
+        plt.savefig(fname, transparent=True)
     plt.clf()
     plt.close()
