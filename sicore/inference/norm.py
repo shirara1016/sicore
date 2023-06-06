@@ -393,8 +393,19 @@ class SelectiveInferenceNorm(InferenceNorm):
             sup_intervals, self.popmean, self.eta_sigma_eta
         )
 
-        norm_inf_intervals = intersection(norm_inf_intervals, self.restrict)
-        norm_sup_intervals = intersection(norm_sup_intervals, self.restrict)
+        flatten = np.ravel(norm_inf_intervals)
+        nonfinites = flatten[np.isfinite(flatten)]
+        if len(nonfinites) != 0:
+            if np.abs(nonfinites).max() > self.restrict[0][1]:
+                norm_inf_intervals = intersection(norm_inf_intervals, self.restrict)
+        flatten = np.ravel(norm_sup_intervals)
+        nonfinites = flatten[np.isfinite(flatten)]
+        if len(nonfinites) != 0:
+            if np.abs(nonfinites).max() > self.restrict[0][1]:
+                norm_sup_intervals = intersection(norm_sup_intervals, self.restrict)
+
+        # norm_inf_intervals = intersection(norm_inf_intervals, self.restrict)
+        # norm_sup_intervals = intersection(norm_sup_intervals, self.restrict)
 
         stat_std = standardize(self.stat, self.popmean, self.eta_sigma_eta)
 
@@ -687,7 +698,7 @@ class SelectiveInferenceNorm(InferenceNorm):
                 break
 
             search_count += 1
-            if search_count > 1e6:
+            if search_count > 3e4:
                 raise Exception(
                     "The number of searches exceeds 100,000 times, suggesting an infinite loop."
                 )

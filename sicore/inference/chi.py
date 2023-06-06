@@ -391,8 +391,19 @@ class SelectiveInferenceChi(InferenceChi):
         chi_inf_intervals = intersection(inf_intervals, [[0.0, INF]])
         chi_sup_intervals = intersection(sup_intervals, [[0.0, INF]])
 
-        chi_inf_intervals = intersection(chi_inf_intervals, self.restrict)
-        chi_sup_intervals = intersection(chi_sup_intervals, self.restrict)
+        flatten = np.ravel(chi_inf_intervals)
+        nonfinites = flatten[np.isfinite(flatten)]
+        if len(nonfinites) != 0:
+            if np.abs(nonfinites).max() > self.restrict[0][1]:
+                chi_inf_intervals = intersection(chi_inf_intervals, self.restrict)
+        flatten = np.ravel(chi_sup_intervals)
+        nonfinites = flatten[np.isfinite(flatten)]
+        if len(nonfinites) != 0:
+            if np.abs(nonfinites).max() > self.restrict[0][1]:
+                chi_sup_intervals = intersection(chi_sup_intervals, self.restrict)
+
+        # chi_inf_intervals = intersection(chi_inf_intervals, self.restrict)
+        # chi_sup_intervals = intersection(chi_sup_intervals, self.restrict)
 
         stat_chi = np.asarray(self.stat)
 
@@ -667,7 +678,7 @@ class SelectiveInferenceChi(InferenceChi):
                 break
 
             search_count += 1
-            if search_count > 1e6:
+            if search_count > 3e4:
                 raise Exception(
                     "The number of searches exceeds 100,000 times, suggesting an infinite loop."
                 )
