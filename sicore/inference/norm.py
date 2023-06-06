@@ -393,8 +393,20 @@ class SelectiveInferenceNorm(InferenceNorm):
             sup_intervals, self.popmean, self.eta_sigma_eta
         )
 
-        norm_inf_intervals = intersection(norm_inf_intervals, self.restrict)
-        norm_sup_intervals = intersection(norm_sup_intervals, self.restrict)
+        # バク遅になる 死ね
+        # norm_inf_intervals = intersection(norm_inf_intervals, self.restrict)
+        # norm_sup_intervals = intersection(norm_sup_intervals, self.restrict)
+
+        # flatten = np.ravel(norm_inf_intervals)
+        # nonfinites = flatten[np.isfinite(flatten)]
+        # if len(nonfinites) != 0:
+        #     if np.abs(nonfinites).max() > self.restrict[0][1]:
+        #         norm_inf_intervals = intersection(norm_inf_intervals, self.restrict)
+        # flatten = np.ravel(norm_sup_intervals)
+        # nonfinites = flatten[np.isfinite(flatten)]
+        # if len(nonfinites) != 0:
+        #     if np.abs(nonfinites).max() > self.restrict[0][1]:
+        #         norm_sup_intervals = intersection(norm_sup_intervals, self.restrict)
 
         stat_std = standardize(self.stat, self.popmean, self.eta_sigma_eta)
 
@@ -419,13 +431,12 @@ class SelectiveInferenceNorm(InferenceNorm):
         return inf_p, sup_p
 
     def _determine_next_search_data(self, choose_method, searched_intervals):
-        unsearched_intervals = standardize(
-            not_(searched_intervals), self.popmean, self.eta_sigma_eta
-        ).tolist()
-        candidates = list()
-        mode = 0
-
         if choose_method == "sup_pdf":
+            unsearched_intervals = standardize(
+                not_(searched_intervals), self.popmean, self.eta_sigma_eta
+            ).tolist()
+            candidates = list()
+            mode = 0
             for interval in unsearched_intervals:
                 if np.isinf(interval[0]):
                     l = min(mode - 2, interval[1] - 2)
@@ -445,30 +456,22 @@ class SelectiveInferenceNorm(InferenceNorm):
                     )
 
         if choose_method == "near_stat" or choose_method == "high_pdf":
-            unsearched_lower_stat = intersection(
-                unsearched_intervals,
-                [[NINF, standardize(self.stat, self.popmean, self.eta_sigma_eta)]],
-            )
-            unsearched_upper_stat = intersection(
-                unsearched_intervals,
-                [[standardize(self.stat, self.popmean, self.eta_sigma_eta), INF]],
-            )
-            if len(unsearched_lower_stat) != 0:
-                candidates.append(unsearched_lower_stat[-1][-1] - self.step)
-            if len(unsearched_upper_stat) != 0:
-                candidates.append(unsearched_upper_stat[0][0] + self.step)
+            left_side_cand = self.searched_intervals[0][0] - self.step
+            right_side_cand = self.searched_intervals[0][1] + self.step
 
-        if choose_method == "near_stat":
+            if choose_method == "near_stat":
+                if right_side_cand - self.stat > self.stat - left_side_cand:
+                    return left_side_cand
+                else:
+                    return right_side_cand
+            else:
+                if np.abs(right_side_cand) < np.abs(left_side_cand):
+                    return right_side_cand
+                else:
+                    return left_side_cand
 
-            def method(z):
-                return -np.abs(
-                    z - standardize(self.stat, self.popmean, self.eta_sigma_eta)
-                )
-
-        if choose_method == "high_pdf" or choose_method == "sup_pdf":
-
-            def method(z):
-                return norm.logpdf(z)
+        def method(z):
+            return norm.logpdf(z)
 
         candidates = np.array(candidates)
         return (
@@ -554,6 +557,9 @@ class SelectiveInferenceNorm(InferenceNorm):
                 self.searched_intervals + intervals, tol=self.tol
             )
 
+            if len(self.searched_intervals) > 2 or search_count > 3e4:
+                raise InfiniteLoopError
+
             inf_p, sup_p = self._evaluate_pvalue(
                 truncated_intervals, self.searched_intervals, alternative
             )
@@ -569,7 +575,11 @@ class SelectiveInferenceNorm(InferenceNorm):
                     reject_or_not = False
                     break
 
+            prev_z = z
             z = self._determine_next_search_data(choose_method, self.searched_intervals)
+
+            if np.abs(prev_z - z) < self.step * 0.2:
+                raise InfiniteLoopError
 
         stat_std = standardize(self.stat, popmean, self.eta_sigma_eta)
         truncated_intervals = union_all(truncated_intervals, tol=self.tol)
@@ -643,7 +653,7 @@ class SelectiveInferenceNorm(InferenceNorm):
                 break
 
             search_count += 1
-            if search_count > 1e6:
+            if search_count > 3e4:
                 raise Exception(
                     "The number of searches exceeds 100,000 times, suggesting an infinite loop."
                 )
