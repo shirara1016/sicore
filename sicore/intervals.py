@@ -33,8 +33,7 @@ def _verify_and_raise(intervals):
             raise TypeError(f"Invalid data type exists in {[s, e]}")
 
         if s >= e:
-            raise ValueError(
-                f"Inverted or no-range interval found in {[s, e]}")
+            raise ValueError(f"Inverted or no-range interval found in {[s, e]}")
 
 
 def intersection(interval1, interval2, verify=False):
@@ -227,7 +226,9 @@ def poly_lt_zero(poly_or_coef, tol=1e-10):
     return union_all(intervals, tol=tol)
 
 
-def polytope_to_interval(a_vec, b_vec, A=None, b=None, c=None, tol=1e-10, use_sparse=False):
+def polytope_to_interval(
+    a_vec, b_vec, A=None, b=None, c=None, tol=1e-10, use_sparse=False
+):
     """
     Compute truncation intervals obtained from a polytope `{x'Ax+b'x+c<=0}` as a selection event.
 

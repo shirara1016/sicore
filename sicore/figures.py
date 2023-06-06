@@ -214,7 +214,7 @@ class PowerFigure(SummaryFigure):
         self.add_value(power, label, xloc)
 
 
-def search_history_visualizer(history, fname='search_history.pdf', figsize=(8, 6)):
+def search_history_visualizer(history, fname="search_history.pdf", figsize=(8, 6)):
     """
     Visualize history of searched intervals and truncated intervals.
 
@@ -229,11 +229,11 @@ def search_history_visualizer(history, fname='search_history.pdf', figsize=(8, 6
             Size of the figure. Defaults to (8, 6).
     """
     distribution = history[0].null_distribution
-    if distribution == 'norm':
+    if distribution == "norm":
         dist = norm
         start = -6
         end = 6
-    if distribution[:3] == 'chi':
+    if distribution[:3] == "chi":
         df = int(distribution[3:])
         dist = chi(df=df)
         start = min(0, np.sqrt(df - 1) - 6)
@@ -251,16 +251,16 @@ def search_history_visualizer(history, fname='search_history.pdf', figsize=(8, 6
 
         inf_p = progress.inf_p
         sup_p = progress.sup_p
-        title = f'Search strategy is {startegy}, p-value in [{inf_p:.3f}, {sup_p:.3f}]'
+        title = f"Search strategy is {startegy}, p-value in [{inf_p:.3f}, {sup_p:.3f}]"
         plt.title(title)
 
-        plt.plot(x, y, color='black', lw=0.8)
-        plt.plot(x, np.zeros_like(x), color='black', lw=0.8)
+        plt.plot(x, y, color="black", lw=0.8)
+        plt.plot(x, np.zeros_like(x), color="black", lw=0.8)
 
-        plt.plot([stat, stat], [-0.008, 0.008], color='black', lw=0.8)
-        plt.text(stat, -0.02, 'stat', ha='center', color='black')
+        plt.plot([stat, stat], [-0.008, 0.008], color="black", lw=0.8)
+        plt.text(stat, -0.02, "stat", ha="center", color="black")
 
-        plt.scatter([progress.search_point], [0], color='black', s=8)
+        plt.scatter([progress.search_point], [0], color="black", s=8)
 
         current_R = progress.truncated_intervals
         current_S = progress.searched_intervals
@@ -272,12 +272,12 @@ def search_history_visualizer(history, fname='search_history.pdf', figsize=(8, 6
         for R in [current_R, newly_R]:
             for interval in R:
                 mask = (x > interval[0]) & (x < interval[1])
-                plt.fill_between(x, y, 0, where=mask, color='blue', alpha=0.3)
+                plt.fill_between(x, y, 0, where=mask, color="blue", alpha=0.3)
 
         for S in [current_S, newly_S]:
             for interval in S:
                 mask = (x > interval[0]) & (x < interval[1])
-                plt.fill_between(x, y, 0, where=mask, color='red', alpha=0.3)
+                plt.fill_between(x, y, 0, where=mask, color="red", alpha=0.3)
 
         prev_R = current_R
         prev_S = current_S
@@ -316,22 +316,19 @@ def pvalue_bounds_plot(history, title=None, fname=None, figsize=(8, 6)):
     plt.figure(figsize=figsize)
     if title is not None:
         plt.title(title)
-    plt.xlabel('search count')
-    plt.ylabel('p-value')
+    plt.xlabel("search count")
+    plt.ylabel("p-value")
     plt.xlim([0, len(history)])
     plt.ylim([0.0, 1.0])
     yticks = [0, alpha, 0.2, 0.4, 0.6, 0.8, 1.0]
-    ylabels = [f'{value:.2f}' for value in yticks]
+    ylabels = [f"{value:.2f}" for value in yticks]
     plt.yticks(yticks, ylabels)
     plt.gca().xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
 
-    plt.plot(count, alphas, color='tab:red', linestyle='--', lw=0.5)
-    plt.plot(count, sup_ps, color='tab:orange',
-             marker='o', ms=3, label='upper bound')
-    plt.plot(count, inf_ps, color='tab:blue',
-             marker='o', ms=3, label='lower bound')
-    plt.plot(count, ps, color='black', marker='o',
-             ms=2, label='p-value', lw=0.7)
+    plt.plot(count, alphas, color="tab:red", linestyle="--", lw=0.5)
+    plt.plot(count, sup_ps, color="tab:orange", marker="o", ms=3, label="upper bound")
+    plt.plot(count, inf_ps, color="tab:blue", marker="o", ms=3, label="lower bound")
+    plt.plot(count, ps, color="black", marker="o", ms=2, label="p-value", lw=0.7)
 
     plt.legend()
     if fname is None:

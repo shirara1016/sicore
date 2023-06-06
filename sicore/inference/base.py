@@ -10,7 +10,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class SelectiveInferenceResult():
+class SelectiveInferenceResult:
     """
     This class contains the results of selective inference.
 
@@ -27,6 +27,7 @@ class SelectiveInferenceResult():
         selected_model (Any | None): The model selected for the observed test statistic.
         mappings (Dict[tuple[float], Any] | None): A dictionary that holds the model obtained at any point.
     """
+
     stat: float
     alpha: float
     p_value: float
@@ -41,12 +42,13 @@ class SelectiveInferenceResult():
 
 
 @dataclass
-class SearchProgress():
+class SearchProgress:
     """
     This class contains the intermediate results of each search process.
 
     Attributes:
     """
+
     stat: float
     alpha: float
     p_value: float
@@ -108,7 +110,7 @@ class SearchChecker:
         self.num_search += 1
 
 
-INF = float('inf')
+INF = float("inf")
 NINF = -INF
 
 random.seed(0)
@@ -131,11 +133,11 @@ def calc_pvalue(F, alternative):
     Returns:
         float: p-value
     """
-    if alternative == 'two-sided':
+    if alternative == "two-sided":
         return float(2 * min(F, 1 - F))
-    elif alternative == 'less' or alternative == 'abs':
+    elif alternative == "less" or alternative == "abs":
         return float(1 - F)
-    elif alternative == 'greater':
+    elif alternative == "greater":
         return float(F)
 
 
@@ -157,13 +159,13 @@ def calc_prange(inf_F, sup_F, alternative):
     Returns:
         (float, float): (Infimum of p-value, Supremum of p-value)
     """
-    if alternative == 'two-sided':
+    if alternative == "two-sided":
         sup_p = float(2 * min(sup_F, 1 - inf_F))
         inf_p = float(2 * min(inf_F, 1 - sup_F))
-    elif alternative == 'less' or alternative == 'abs':
+    elif alternative == "less" or alternative == "abs":
         sup_p = float(1 - inf_F)
         inf_p = float(1 - sup_F)
-    elif alternative == 'greater':
+    elif alternative == "greater":
         sup_p = float(sup_F)
         inf_p = float(inf_F)
     return (max(inf_p, 0), min(sup_p, 1))
@@ -182,7 +184,7 @@ def standardize(x, mean=0, var=1):
     return (np.asarray(x) - mean) / sd
 
 
-def one_sample_test(data, popmean, var=None, tail='double'):
+def one_sample_test(data, popmean, var=None, tail="double"):
     """
     One sample hypothesis testing for population mean.
 
@@ -214,7 +216,7 @@ def one_sample_test(data, popmean, var=None, tail='double'):
         return calc_pvalue(F, tail=tail)
 
 
-def two_sample_test(data1, data2, var=None, equal_var=True, tail='double'):
+def two_sample_test(data1, data2, var=None, equal_var=True, tail="double"):
     """
     Two sample hypothesis testing for the difference between population means.
 

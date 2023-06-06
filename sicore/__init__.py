@@ -19,8 +19,12 @@ from .evaluation import (
     type2_error_rate,
 )
 from .figures import (
-    FprFigure, PowerFigure, pvalues_hist, pvalues_qqplot,
-    search_history_visualizer, pvalue_bounds_plot
+    FprFigure,
+    PowerFigure,
+    pvalues_hist,
+    pvalues_qqplot,
+    search_history_visualizer,
+    pvalue_bounds_plot,
 )
 from .inference.base import (
     SelectiveInferenceResult,
@@ -32,10 +36,7 @@ from .inference.norm import (
     NaiveInferenceNorm,
     SelectiveInferenceNorm,
 )
-from .inference.chi import (
-    NaiveInferenceChi,
-    SelectiveInferenceChi
-)
+from .inference.chi import NaiveInferenceChi, SelectiveInferenceChi
 
 __all__ = [
     "NaiveInferenceNorm",
@@ -68,5 +69,5 @@ __all__ = [
     "polytope_to_interval",
     "poly_lt_zero",
     "construct_projection_matrix",
-    "OneVec"
+    "OneVec",
 ]

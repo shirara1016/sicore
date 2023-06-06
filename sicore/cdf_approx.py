@@ -24,14 +24,14 @@ def norm_ccdf_approx(x):
     if np.isinf(x):
         return 0.0
 
-    num = x ** 2 + 5.575192695 * x + 12.77436324
+    num = x**2 + 5.575192695 * x + 12.77436324
     denom = (
-        math.sqrt(2 * math.pi) * (x ** 3)
-        + 14.38718147 * (x ** 2)
+        math.sqrt(2 * math.pi) * (x**3)
+        + 14.38718147 * (x**2)
         + 31.53531977 * x
         + 2 * 12.77436324
     )
-    return (num / denom) * math.exp(-(x ** 2) / 2)
+    return (num / denom) * math.exp(-(x**2) / 2)
 
 
 def t_ccdf_approx(x, df):
@@ -48,7 +48,7 @@ def t_ccdf_approx(x, df):
         float: CCDF value at `x`.
     """
     z = (df - 2 / 3 + 1 / (10 * df)) * math.sqrt(
-        math.log(1 + x ** 2 / df) / (df - 5 / 6)
+        math.log(1 + x**2 / df) / (df - 5 / 6)
     )
     return norm_ccdf_approx(z)
 
@@ -71,8 +71,8 @@ def chi2_ccdf_approx(x, df):
         return 0.0
 
     z = (x / df) ** (1 / 6) - (x / df) ** (1 / 3) / 2 + (x / df) ** (1 / 2) / 3
-    mean = 5 / 6 - 1 / (9 * df) - 7 / (648 * (df ** 2)) + 25 / (2187 * (df ** 3))
-    var = 1 / (18 * df) + 1 / (162 * (df ** 2)) - 37 / (11664 * (df ** 3))
+    mean = 5 / 6 - 1 / (9 * df) - 7 / (648 * (df**2)) + 25 / (2187 * (df**3))
+    var = 1 / (18 * df) + 1 / (162 * (df**2)) - 37 / (11664 * (df**3))
     z_norm = (z - mean) / math.sqrt(var)
 
     if z_norm >= 0:
@@ -114,9 +114,9 @@ def f_ccdf_approx(x, df1, df2):
 
     def g(z):
         if 0 < z < 1:
-            return (1 - z ** 2 + 2 * z * math.log(z)) / (1 - z ** 2)
+            return (1 - z**2 + 2 * z * math.log(z)) / (1 - z**2)
         elif z > 1:
-            return (-(z ** 2) + 1 + 2 * z * math.log(z)) / (z ** 2 - 1)
+            return (-(z**2) + 1 + 2 * z * math.log(z)) / (z**2 - 1)
         elif z == 0:
             return 1
         elif z == 1:

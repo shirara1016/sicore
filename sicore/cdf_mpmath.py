@@ -20,7 +20,7 @@ def t_cdf_mpmath(x, df):
     Returns:
         float: CDF value at `x`.
     """
-    z = df / (x ** 2 + df)
+    z = df / (x**2 + df)
     abs_x_ccdf = mp.betainc(df / 2, 1 / 2, x2=z, regularized=True) / 2
     return 1 - abs_x_ccdf if x >= 0 else abs_x_ccdf
 
@@ -36,7 +36,7 @@ def chi_cdf_mpmath(x, df):
     Returns:
         float: CDF value at `x`.
     """
-    return mp.gammainc(df / 2, a=0, b=x ** 2 / 2, regularized=True)
+    return mp.gammainc(df / 2, a=0, b=x**2 / 2, regularized=True)
 
 
 def chi2_cdf_mpmath(x, df):
@@ -70,7 +70,16 @@ def f_cdf_mpmath(x, df1, df2):
 
 
 def _truncated_cdf_from_cdf(
-    cdf_func, x, intervals, absolute=False, dps="auto", max_dps=5000, init_dps=30, scale=2, precision=15, out_log='test_log.log'
+    cdf_func,
+    x,
+    intervals,
+    absolute=False,
+    dps="auto",
+    max_dps=5000,
+    init_dps=30,
+    scale=2,
+    precision=15,
+    out_log="test_log.log",
 ):
     """
     Calculate CDF of a truncated distribution from a CDF function.
@@ -114,7 +123,10 @@ def _truncated_cdf_from_cdf(
             max_tail = np.abs(nonfinites).max()
             if (
                 mp.nstr(
-                    cdf_func(max_tail), init_dps - precision, min_fixed=NINF, max_fixed=INF
+                    cdf_func(max_tail),
+                    init_dps - precision,
+                    min_fixed=NINF,
+                    max_fixed=INF,
                 )
                 == "1.0"
             ):
@@ -160,7 +172,7 @@ def _truncated_cdf_from_cdf(
                 elif lower <= abs(x) <= upper:
                     num += cdf_func(upper) - cdf_func(abs(x))
                     inside_flag = True
-        num = (denom - num)
+        num = denom - num
     else:
         for lower, upper in intervals:
             diff = cdf_func(upper) - cdf_func(lower)

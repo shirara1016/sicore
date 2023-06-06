@@ -37,21 +37,20 @@ class InferenceNorm(ABC):
     """
 
     def __init__(
-            self,
-            data: np.ndarray,
-            var: float | np.ndarray | sparse.csr_array,
-            eta: np.ndarray,
-            use_sparse: bool = False,
-            use_tf: bool = False,
-            use_torch: bool = False
+        self,
+        data: np.ndarray,
+        var: float | np.ndarray | sparse.csr_array,
+        eta: np.ndarray,
+        use_sparse: bool = False,
+        use_tf: bool = False,
+        use_torch: bool = False,
     ):
-
         if use_sparse and (use_tf or use_torch):
             raise Exception(
-                'Sparse matrix cannot be used with the deep learning framework at the same time.')
+                "Sparse matrix cannot be used with the deep learning framework at the same time."
+            )
         if use_tf and use_torch:
-            raise Exception(
-                'Only one of tensorflow and pytorch is available.')
+            raise Exception("Only one of tensorflow and pytorch is available.")
 
         self.data = data  # unnecessary
         self.length = len(data)  # unnecessary
@@ -62,7 +61,8 @@ class InferenceNorm(ABC):
                 import tensorflow as tf
             except ModuleNotFoundError:
                 raise Exception(
-                    'The option use_tf is activated, but tensorflow was not found.')
+                    "The option use_tf is activated, but tensorflow was not found."
+                )
 
             assert isinstance(data, tf.Tensor)
             assert isinstance(eta, tf.Tensor)
@@ -83,7 +83,8 @@ class InferenceNorm(ABC):
                 import torch
             except ModuleNotFoundError:
                 raise Exception(
-                    'The option use_torch is activated, but pytorch was not found.')
+                    "The option use_torch is activated, but pytorch was not found."
+                )
 
             assert isinstance(data, torch.Tensor)
             assert isinstance(eta, torch.Tensor)
@@ -144,7 +145,7 @@ class NaiveInferenceNorm(InferenceNorm):
             Whether to use pytorch or not. Defaults to False.
     """
 
-    def inference(self, alternative: str = 'two-sided', popmean: float = 0):
+    def inference(self, alternative: str = "two-sided", popmean: float = 0):
         """Perform naive statistical inference.
 
         Args:
@@ -192,13 +193,13 @@ class SelectiveInferenceNorm(InferenceNorm):
     """
 
     def __init__(
-            self,
-            data: np.ndarray,
-            var: float | np.ndarray | sparse.csr_array,
-            eta: np.ndarray,
-            use_sparse: bool = False,
-            use_tf: bool = False,
-            use_torch: bool = False
+        self,
+        data: np.ndarray,
+        var: float | np.ndarray | sparse.csr_array,
+        eta: np.ndarray,
+        use_sparse: bool = False,
+        use_tf: bool = False,
+        use_torch: bool = False,
     ):
         super().__init__(data, var, eta, use_sparse, use_tf, use_torch)
         self.c = self.sigma_eta / self.eta_sigma_eta  # `b` vector in para si.
@@ -206,26 +207,28 @@ class SelectiveInferenceNorm(InferenceNorm):
 
     def inference(
         self,
-        algorithm: Callable[[np.ndarray, np.ndarray, float], Tuple[List[List[float]], Any]],
+        algorithm: Callable[
+            [np.ndarray, np.ndarray, float], Tuple[List[List[float]], Any]
+        ],
         model_selector: Callable[[Any], bool],
         significance_level: float = 0.05,
-        parametric_mode: str = 'p_value',
+        parametric_mode: str = "p_value",
         over_conditioning: bool = False,
-        alternative: str = 'abs',
+        alternative: str = "abs",
         threshold: float = 1e-3,
         popmean: float = 0,
         line_search: bool = True,
         max_tail: float = 1e3,
-        choose_method: str = 'near_stat',
+        choose_method: str = "near_stat",
         retain_selected_model: bool = False,
         retain_mappings: bool = False,
         tol: float = 1e-10,
         step: float = 1e-10,
-        dps: int | str = 'auto',
+        dps: int | str = "auto",
         max_dps: int = 5000,
-        out_log: str = 'test_log.log',
+        out_log: str = "test_log.log",
         max_iter: int = 1e6,
-        callback: Callable[[Type[SearchProgress]], Any] = None
+        callback: Callable[[Type[SearchProgress]], Any] = None,
     ) -> Type[SelectiveInferenceResult]:
         """Perform Selective Inference.
 
@@ -300,39 +303,73 @@ class SelectiveInferenceNorm(InferenceNorm):
             Type[SelectiveInferenceResult]
         """
 
-        lim = max(30, 10 + abs(
-            standardize(self.stat, popmean, self.eta_sigma_eta)))
+        lim = max(30, 10 + abs(standardize(self.stat, popmean, self.eta_sigma_eta)))
         self.restrict = [[-lim, lim]]
 
         if over_conditioning:
             result = self._over_conditioned_inference(
-                algorithm, significance_level, alternative, popmean, retain_selected_model,
-                tol, dps, max_dps, out_log)
+                algorithm,
+                significance_level,
+                alternative,
+                popmean,
+                retain_selected_model,
+                tol,
+                dps,
+                max_dps,
+                out_log,
+            )
             return result
 
-        elif parametric_mode == 'p_value' or parametric_mode == 'reject_or_not':
+        elif parametric_mode == "p_value" or parametric_mode == "reject_or_not":
             result = self._parametric_inference(
-                algorithm, model_selector, significance_level, parametric_mode,
-                alternative, threshold, popmean, choose_method, retain_selected_model, retain_mappings,
-                tol, step, dps, max_dps, out_log, max_iter, callback)
+                algorithm,
+                model_selector,
+                significance_level,
+                parametric_mode,
+                alternative,
+                threshold,
+                popmean,
+                choose_method,
+                retain_selected_model,
+                retain_mappings,
+                tol,
+                step,
+                dps,
+                max_dps,
+                out_log,
+                max_iter,
+                callback,
+            )
 
-        elif parametric_mode == 'all_search':
+        elif parametric_mode == "all_search":
             result = self._all_search_parametric_inference(
-                algorithm, model_selector, significance_level, alternative, popmean,
-                line_search, max_tail, retain_selected_model, retain_mappings,
-                tol, step, dps, max_dps, out_log)
+                algorithm,
+                model_selector,
+                significance_level,
+                alternative,
+                popmean,
+                line_search,
+                max_tail,
+                retain_selected_model,
+                retain_mappings,
+                tol,
+                step,
+                dps,
+                max_dps,
+                out_log,
+            )
 
         else:
             raise Exception(
-                'Please activate either parametric_mode or over_conditioning option.')
+                "Please activate either parametric_mode or over_conditioning option."
+            )
 
         return result
 
     def _evaluate_pvalue(self, truncated_intervals, searched_intervals, alternative):
-
         unsearched_intervals = not_(searched_intervals)
 
-        if alternative == 'abs':
+        if alternative == "abs":
             mask_intervals = [[-abs(float(self.stat)), abs(float(self.stat))]]
             absolute = True
         else:
@@ -340,42 +377,55 @@ class SelectiveInferenceNorm(InferenceNorm):
             absolute = False
 
         inf_intervals = union_all(
-            truncated_intervals +
-            intersection(
-                unsearched_intervals, not_(mask_intervals)),
-            tol=self.tol)
+            truncated_intervals
+            + intersection(unsearched_intervals, not_(mask_intervals)),
+            tol=self.tol,
+        )
         sup_intervals = union_all(
-            truncated_intervals +
-            intersection(
-                unsearched_intervals, mask_intervals),
-            tol=self.tol)
+            truncated_intervals + intersection(unsearched_intervals, mask_intervals),
+            tol=self.tol,
+        )
 
         norm_inf_intervals = standardize(
-            inf_intervals, self.popmean, self.eta_sigma_eta)
+            inf_intervals, self.popmean, self.eta_sigma_eta
+        )
         norm_sup_intervals = standardize(
-            sup_intervals, self.popmean, self.eta_sigma_eta)
+            sup_intervals, self.popmean, self.eta_sigma_eta
+        )
 
         norm_inf_intervals = intersection(norm_inf_intervals, self.restrict)
         norm_sup_intervals = intersection(norm_sup_intervals, self.restrict)
 
         stat_std = standardize(self.stat, self.popmean, self.eta_sigma_eta)
 
-        inf_F = tn_cdf_mpmath(stat_std, norm_inf_intervals, absolute=absolute,
-                              dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
-        sup_F = tn_cdf_mpmath(stat_std, norm_sup_intervals, absolute=absolute,
-                              dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
+        inf_F = tn_cdf_mpmath(
+            stat_std,
+            norm_inf_intervals,
+            absolute=absolute,
+            dps=self.dps,
+            max_dps=self.max_dps,
+            out_log=self.out_log,
+        )
+        sup_F = tn_cdf_mpmath(
+            stat_std,
+            norm_sup_intervals,
+            absolute=absolute,
+            dps=self.dps,
+            max_dps=self.max_dps,
+            out_log=self.out_log,
+        )
         inf_p, sup_p = calc_prange(inf_F, sup_F, alternative)
 
         return inf_p, sup_p
 
     def _determine_next_search_data(self, choose_method, searched_intervals):
-
         unsearched_intervals = standardize(
-            not_(searched_intervals), self.popmean, self.eta_sigma_eta).tolist()
+            not_(searched_intervals), self.popmean, self.eta_sigma_eta
+        ).tolist()
         candidates = list()
         mode = 0
 
-        if choose_method == 'sup_pdf':
+        if choose_method == "sup_pdf":
             for interval in unsearched_intervals:
                 if np.isinf(interval[0]):
                     l = min(mode - 2, interval[1] - 2)
@@ -387,32 +437,44 @@ class SelectiveInferenceNorm(InferenceNorm):
                     u = interval[1]
                 if u - l > 2 * self.step:
                     candidates += list(
-                        np.linspace(l + self.step, u - self.step,
-                                    int(1000 / len(unsearched_intervals))))
+                        np.linspace(
+                            l + self.step,
+                            u - self.step,
+                            int(1000 / len(unsearched_intervals)),
+                        )
+                    )
 
-        if choose_method == 'near_stat' or choose_method == 'high_pdf':
+        if choose_method == "near_stat" or choose_method == "high_pdf":
             unsearched_lower_stat = intersection(
                 unsearched_intervals,
-                [[NINF, standardize(self.stat, self.popmean, self.eta_sigma_eta)]])
+                [[NINF, standardize(self.stat, self.popmean, self.eta_sigma_eta)]],
+            )
             unsearched_upper_stat = intersection(
                 unsearched_intervals,
-                [[standardize(self.stat, self.popmean, self.eta_sigma_eta), INF]])
+                [[standardize(self.stat, self.popmean, self.eta_sigma_eta), INF]],
+            )
             if len(unsearched_lower_stat) != 0:
-                candidates.append(
-                    unsearched_lower_stat[-1][-1] - self.step)
+                candidates.append(unsearched_lower_stat[-1][-1] - self.step)
             if len(unsearched_upper_stat) != 0:
-                candidates.append(
-                    unsearched_upper_stat[0][0] + self.step)
+                candidates.append(unsearched_upper_stat[0][0] + self.step)
 
-        if choose_method == 'near_stat':
-            def method(z): return -np.abs(
-                z - standardize(self.stat, self.popmean, self.eta_sigma_eta))
-        if choose_method == 'high_pdf' or choose_method == 'sup_pdf':
-            def method(z): return norm.logpdf(z)
+        if choose_method == "near_stat":
+
+            def method(z):
+                return -np.abs(
+                    z - standardize(self.stat, self.popmean, self.eta_sigma_eta)
+                )
+
+        if choose_method == "high_pdf" or choose_method == "sup_pdf":
+
+            def method(z):
+                return norm.logpdf(z)
 
         candidates = np.array(candidates)
-        return np.sqrt(self.eta_sigma_eta) * \
-            candidates[np.argmax(method(candidates))] + self.popmean
+        return (
+            np.sqrt(self.eta_sigma_eta) * candidates[np.argmax(method(candidates))]
+            + self.popmean
+        )
 
     def _next_search_data(self, line_search):
         intervals = not_(self.searched_intervals)
@@ -429,10 +491,25 @@ class SelectiveInferenceNorm(InferenceNorm):
         self.search_history.append(callback(progress))
 
     def _parametric_inference(
-            self, algorithm, model_selector, significance_level, parametric_mode,
-            alternative, threshold, popmean, choose_method, retain_selected_model, retain_mappings,
-            tol, step, dps, max_dps, out_log, max_iter, callback):
-
+        self,
+        algorithm,
+        model_selector,
+        significance_level,
+        parametric_mode,
+        alternative,
+        threshold,
+        popmean,
+        choose_method,
+        retain_selected_model,
+        retain_mappings,
+        tol,
+        step,
+        dps,
+        max_dps,
+        out_log,
+        max_iter,
+        callback,
+    ):
         self.popmean = popmean
         self.tol = tol
         self.step = step
@@ -475,40 +552,60 @@ class SelectiveInferenceNorm(InferenceNorm):
                 detect_count += 1
 
             self.searched_intervals = union_all(
-                self.searched_intervals + intervals, tol=self.tol)
-            self.search_checker.verify_progress(
-                self.searched_intervals)
+                self.searched_intervals + intervals, tol=self.tol
+            )
+            self.search_checker.verify_progress(self.searched_intervals)
 
             inf_p, sup_p = self._evaluate_pvalue(
-                truncated_intervals, self.searched_intervals, alternative)
+                truncated_intervals, self.searched_intervals, alternative
+            )
 
             if callback is not None:
                 stat_std = standardize(self.stat, popmean, self.eta_sigma_eta)
                 current_truncated_intervals = union_all(
-                    truncated_intervals, tol=self.tol)
+                    truncated_intervals, tol=self.tol
+                )
                 current_norm_intervals = standardize(
-                    current_truncated_intervals, popmean, self.eta_sigma_eta).tolist()
+                    current_truncated_intervals, popmean, self.eta_sigma_eta
+                ).tolist()
                 current_norm_intervals = intersection(
-                    current_norm_intervals, self.restrict)
-                absolute = True if alternative == 'abs' else False
-                F = tn_cdf_mpmath(stat_std, current_norm_intervals, absolute=absolute,
-                                  dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
+                    current_norm_intervals, self.restrict
+                )
+                absolute = True if alternative == "abs" else False
+                F = tn_cdf_mpmath(
+                    stat_std,
+                    current_norm_intervals,
+                    absolute=absolute,
+                    dps=self.dps,
+                    max_dps=self.max_dps,
+                    out_log=self.out_log,
+                )
                 current_p_value = calc_pvalue(F, alternative)
                 current_searched_intervals = standardize(
-                    self.searched_intervals, popmean, self.eta_sigma_eta).tolist()
-                searched_point = standardize(
-                    z, popmean, self.eta_sigma_eta)
+                    self.searched_intervals, popmean, self.eta_sigma_eta
+                ).tolist()
+                searched_point = standardize(z, popmean, self.eta_sigma_eta)
 
                 progress = SearchProgress(
-                    stat_std, significance_level, current_p_value, inf_p, sup_p,
-                    current_norm_intervals, current_searched_intervals,
-                    searched_point, search_count, detect_count, choose_method, 'norm')
+                    stat_std,
+                    significance_level,
+                    current_p_value,
+                    inf_p,
+                    sup_p,
+                    current_norm_intervals,
+                    current_searched_intervals,
+                    searched_point,
+                    search_count,
+                    detect_count,
+                    choose_method,
+                    "norm",
+                )
                 self._execute_callback(callback, progress)
 
-            if parametric_mode == 'p_value':
+            if parametric_mode == "p_value":
                 if np.abs(sup_p - inf_p) < threshold:
                     break
-            if parametric_mode == 'reject_or_not':
+            if parametric_mode == "reject_or_not":
                 if sup_p <= significance_level:
                     reject_or_not = True
                     break
@@ -516,31 +613,58 @@ class SelectiveInferenceNorm(InferenceNorm):
                     reject_or_not = False
                     break
 
-            z = self._determine_next_search_data(
-                choose_method, self.searched_intervals)
+            z = self._determine_next_search_data(choose_method, self.searched_intervals)
 
         stat_std = standardize(self.stat, popmean, self.eta_sigma_eta)
         truncated_intervals = union_all(truncated_intervals, tol=self.tol)
         norm_intervals = standardize(
-            truncated_intervals, popmean, self.eta_sigma_eta).tolist()
+            truncated_intervals, popmean, self.eta_sigma_eta
+        ).tolist()
         norm_intervals = intersection(norm_intervals, self.restrict)
-        absolute = True if alternative == 'abs' else False
-        F = tn_cdf_mpmath(stat_std, norm_intervals, absolute=absolute,
-                          dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
+        absolute = True if alternative == "abs" else False
+        F = tn_cdf_mpmath(
+            stat_std,
+            norm_intervals,
+            absolute=absolute,
+            dps=self.dps,
+            max_dps=self.max_dps,
+            out_log=self.out_log,
+        )
         p_value = calc_pvalue(F, alternative)
-        if parametric_mode == 'p_value':
-            reject_or_not = (p_value <= significance_level)
+        if parametric_mode == "p_value":
+            reject_or_not = p_value <= significance_level
 
         return SelectiveInferenceResult(
-            stat_std, significance_level, p_value, inf_p, sup_p,
-            reject_or_not, norm_intervals,
-            search_count, detect_count, selected_model, mappings)
+            stat_std,
+            significance_level,
+            p_value,
+            inf_p,
+            sup_p,
+            reject_or_not,
+            norm_intervals,
+            search_count,
+            detect_count,
+            selected_model,
+            mappings,
+        )
 
     def _all_search_parametric_inference(
-            self, algorithm, model_selector, significance_level, alternative, popmean,
-            line_search, max_tail, retain_selected_model, retain_mappings,
-            tol, step, dps, max_dps, out_log):
-
+        self,
+        algorithm,
+        model_selector,
+        significance_level,
+        alternative,
+        popmean,
+        line_search,
+        max_tail,
+        retain_selected_model,
+        retain_mappings,
+        tol,
+        step,
+        dps,
+        max_dps,
+        out_log,
+    ):
         self.popmean = popmean
         self.tol = tol
         self.step = step
@@ -548,7 +672,8 @@ class SelectiveInferenceNorm(InferenceNorm):
         self.max_dps = max_dps
         self.out_log = out_log
         self.searched_intervals = union_all(
-            [[NINF, -float(max_tail)], [float(max_tail), INF]], tol=self.tol)
+            [[NINF, -float(max_tail)], [float(max_tail), INF]], tol=self.tol
+        )
 
         mappings = dict() if retain_mappings else None
         result_intervals = list()
@@ -558,14 +683,14 @@ class SelectiveInferenceNorm(InferenceNorm):
 
         z = self._next_search_data(line_search)
         while True:
-
             if z is None:
                 break
 
             search_count += 1
             if search_count > 1e6:
                 raise Exception(
-                    'The number of searches exceeds 100,000 times, suggesting an infinite loop.')
+                    "The number of searches exceeds 100,000 times, suggesting an infinite loop."
+                )
 
             model, interval = algorithm(self.z, self.c, z)
             interval = np.asarray(interval)
@@ -588,32 +713,58 @@ class SelectiveInferenceNorm(InferenceNorm):
                 detect_count += 1
 
             self.searched_intervals = union_all(
-                self.searched_intervals + intervals, tol=self.tol)
+                self.searched_intervals + intervals, tol=self.tol
+            )
 
             z = self._next_search_data(line_search)
 
         stat_std = standardize(self.stat, popmean, self.eta_sigma_eta)
         truncated_intervals = union_all(result_intervals, tol=self.tol)
         norm_intervals = standardize(
-            truncated_intervals, popmean, self.eta_sigma_eta).tolist()
+            truncated_intervals, popmean, self.eta_sigma_eta
+        ).tolist()
         norm_intervals = intersection(norm_intervals, self.restrict)
-        absolute = True if alternative == 'abs' else False
-        F = tn_cdf_mpmath(stat_std, norm_intervals, absolute=absolute,
-                          dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
+        absolute = True if alternative == "abs" else False
+        F = tn_cdf_mpmath(
+            stat_std,
+            norm_intervals,
+            absolute=absolute,
+            dps=self.dps,
+            max_dps=self.max_dps,
+            out_log=self.out_log,
+        )
         p_value = calc_pvalue(F, alternative)
 
         inf_p, sup_p = self._evaluate_pvalue(
-            truncated_intervals, [[-float(max_tail), float(max_tail)]], alternative)
+            truncated_intervals, [[-float(max_tail), float(max_tail)]], alternative
+        )
 
         return SelectiveInferenceResult(
-            stat_std, significance_level, p_value, inf_p, sup_p,
-            (p_value <= significance_level), norm_intervals,
-            search_count, detect_count, selected_model, mappings)
+            stat_std,
+            significance_level,
+            p_value,
+            inf_p,
+            sup_p,
+            (p_value <= significance_level),
+            norm_intervals,
+            search_count,
+            detect_count,
+            selected_model,
+            mappings,
+        )
 
     def _over_conditioned_inference(
-            self, algorithm, significance_level, alternative, popmean,
-            retain_selected_model, tol, dps, max_dps, out_log):
-
+        self,
+        algorithm,
+        significance_level,
+        alternative,
+        popmean,
+        retain_selected_model,
+        tol,
+        dps,
+        max_dps,
+        out_log,
+    ):
         self.popmean = popmean
         self.tol = tol
         self.dps = dps
@@ -625,17 +776,31 @@ class SelectiveInferenceNorm(InferenceNorm):
         intervals = _interval_to_intervals(interval)
 
         stat_std = standardize(self.stat, popmean, self.eta_sigma_eta)
-        norm_intervals = standardize(
-            intervals, popmean, self.eta_sigma_eta).tolist()
+        norm_intervals = standardize(intervals, popmean, self.eta_sigma_eta).tolist()
         norm_intervals = intersection(norm_intervals, self.restrict)
-        absolute = True if alternative == 'abs' else False
-        F = tn_cdf_mpmath(stat_std, norm_intervals, absolute=absolute,
-                          dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
+        absolute = True if alternative == "abs" else False
+        F = tn_cdf_mpmath(
+            stat_std,
+            norm_intervals,
+            absolute=absolute,
+            dps=self.dps,
+            max_dps=self.max_dps,
+            out_log=self.out_log,
+        )
         p_value = calc_pvalue(F, alternative)
 
         inf_p, sup_p = self._evaluate_pvalue(intervals, intervals, alternative)
 
         return SelectiveInferenceResult(
-            stat_std, significance_level, p_value, inf_p, sup_p,
-            (p_value <= significance_level), norm_intervals, 1, 1,
-            None, model if retain_selected_model else None)
+            stat_std,
+            significance_level,
+            p_value,
+            inf_p,
+            sup_p,
+            (p_value <= significance_level),
+            norm_intervals,
+            1,
+            1,
+            None,
+            model if retain_selected_model else None,
+        )

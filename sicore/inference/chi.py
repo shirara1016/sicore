@@ -47,15 +47,14 @@ class InferenceChi(ABC):
         degree: int,
         use_sparse: bool = False,
         use_tf: bool = False,
-        use_torch: bool = False
+        use_torch: bool = False,
     ):
-
         if use_sparse and (use_tf or use_torch):
             raise Exception(
-                'Sparse matrix cannot be used with the deep learning framework at the same time.')
+                "Sparse matrix cannot be used with the deep learning framework at the same time."
+            )
         if use_tf and use_torch:
-            raise Exception(
-                'Only one of tensorflow and pytorch is available.')
+            raise Exception("Only one of tensorflow and pytorch is available.")
 
         self.data = data  # unnecessary
         self.length = len(data)  # unnecessary
@@ -67,14 +66,15 @@ class InferenceChi(ABC):
                 import tensorflow as tf
             except ModuleNotFoundError:
                 raise Exception(
-                    'The option use_tf is activated, but tensorflow was not found.')
+                    "The option use_tf is activated, but tensorflow was not found."
+                )
 
             assert isinstance(data, tf.Tensor)
             assert isinstance(P, tf.Tensor)
 
             self.P_data = tf.tensordot(P, data, axes=1)
             if is_int_or_float(var):
-                whitend_P_data = (var ** -0.5) * self.P_data
+                whitend_P_data = (var**-0.5) * self.P_data
             elif len(var.shape) == 1:
                 vars = tf.constant(var, dtype=data.dtype)
                 whitend_P_data = tf.pow(vars, -0.5) * self.P_data
@@ -82,8 +82,7 @@ class InferenceChi(ABC):
                 cov = np.array(var)
                 inv_sqrt_cov = fractional_matrix_power(cov, -0.5)
                 inv_sqrt_cov = tf.constant(inv_sqrt_cov, dtype=data.dtype)
-                whitend_P_data = tf.tensordot(
-                    inv_sqrt_cov, self.P_data, axes=1)
+                whitend_P_data = tf.tensordot(inv_sqrt_cov, self.P_data, axes=1)
             self.stat = tf.norm(whitend_P_data, ord=2)
 
         elif use_torch:
@@ -91,14 +90,15 @@ class InferenceChi(ABC):
                 import torch
             except ModuleNotFoundError:
                 raise Exception(
-                    'The option use_torch is activated, but pytorch was not found.')
+                    "The option use_torch is activated, but pytorch was not found."
+                )
 
             assert isinstance(data, torch.Tensor)
             assert isinstance(P, torch.Tensor)
 
             self.P_data = torch.mv(P, data)
             if is_int_or_float(var):
-                whitend_P_data = (var ** -0.5) * self.P_data
+                whitend_P_data = (var**-0.5) * self.P_data
             elif len(var.shape) == 1:
                 vars = torch.tensor(var, dtype=data.dtype)
                 whitend_P_data = torch.pow(vars, -0.5) * self.P_data
@@ -114,7 +114,7 @@ class InferenceChi(ABC):
             P = sparse.csr_array(P) if use_sparse else np.array(P)
             self.P_data = P @ data
             if is_int_or_float(var):
-                whitend_P_data = (var ** -0.5) * self.P_data
+                whitend_P_data = (var**-0.5) * self.P_data
             elif len(var.shape) == 1:
                 vars = np.array(var)
                 whitend_P_data = np.power(vars, -0.5) * self.P_data
@@ -212,7 +212,7 @@ class SelectiveInferenceChi(InferenceChi):
         degree: int,
         use_sparse: bool = False,
         use_tf: bool = False,
-        use_torch: bool = False
+        use_torch: bool = False,
     ):
         super().__init__(data, var, P, degree, use_sparse, use_tf, use_torch)
         self.c = self.P_data / self.stat  # `b` vector in para si.
@@ -220,25 +220,27 @@ class SelectiveInferenceChi(InferenceChi):
 
     def inference(
         self,
-        algorithm: Callable[[np.ndarray, np.ndarray, float], Tuple[List[List[float]], Any]],
+        algorithm: Callable[
+            [np.ndarray, np.ndarray, float], Tuple[List[List[float]], Any]
+        ],
         model_selector: Callable[[Any], bool],
         significance_level: float = 0.05,
-        parametric_mode: str = 'p_value',
+        parametric_mode: str = "p_value",
         over_conditioning: bool = False,
-        alternative: str = 'less',
+        alternative: str = "less",
         threshold: float = 1e-3,
         line_search: bool = True,
         max_tail: float = 1e3,
-        choose_method: str = 'near_stat',
+        choose_method: str = "near_stat",
         retain_selected_model: bool = False,
         retain_mappings: bool = False,
         tol: float = 1e-10,
         step: float = 1e-10,
-        dps: int | str = 'auto',
+        dps: int | str = "auto",
         max_dps: int = 5000,
-        out_log: str = 'test_log.log',
+        out_log: str = "test_log.log",
         max_iter: int = 1e6,
-        callback: Callable[[Type[SearchProgress]], Any] = None
+        callback: Callable[[Type[SearchProgress]], Any] = None,
     ) -> Type[SelectiveInferenceResult]:
         """Perform Selective Inference.
 
@@ -316,72 +318,111 @@ class SelectiveInferenceChi(InferenceChi):
 
         if over_conditioning:
             result = self._over_conditioned_inference(
-                algorithm, significance_level, alternative, retain_selected_model,
-                tol, dps, max_dps, out_log)
+                algorithm,
+                significance_level,
+                alternative,
+                retain_selected_model,
+                tol,
+                dps,
+                max_dps,
+                out_log,
+            )
             return result
 
-        elif parametric_mode == 'p_value' or parametric_mode == 'reject_or_not':
+        elif parametric_mode == "p_value" or parametric_mode == "reject_or_not":
             result = self._parametric_inference(
-                algorithm, model_selector, significance_level, parametric_mode,
-                alternative, threshold, choose_method, retain_selected_model, retain_mappings,
-                tol, step, dps, max_dps, out_log, max_iter, callback)
+                algorithm,
+                model_selector,
+                significance_level,
+                parametric_mode,
+                alternative,
+                threshold,
+                choose_method,
+                retain_selected_model,
+                retain_mappings,
+                tol,
+                step,
+                dps,
+                max_dps,
+                out_log,
+                max_iter,
+                callback,
+            )
 
-        elif parametric_mode == 'all_search':
+        elif parametric_mode == "all_search":
             result = self._all_search_parametric_inference(
-                algorithm, model_selector, significance_level, alternative,
-                line_search, max_tail, retain_selected_model, retain_mappings,
-                tol, step, dps, max_dps, out_log)
+                algorithm,
+                model_selector,
+                significance_level,
+                alternative,
+                line_search,
+                max_tail,
+                retain_selected_model,
+                retain_mappings,
+                tol,
+                step,
+                dps,
+                max_dps,
+                out_log,
+            )
 
         else:
             raise Exception(
-                'Please activate either parametric_mode or over_conditioning option.')
+                "Please activate either parametric_mode or over_conditioning option."
+            )
 
         return result
 
     def _evaluate_pvalue(self, truncated_intervals, searched_intervals, alternative):
-
         unsearched_intervals = not_(searched_intervals)
 
         mask_intervals = [[NINF, float(self.stat)]]
 
         inf_intervals = union_all(
-            truncated_intervals +
-            intersection(
-                unsearched_intervals, not_(mask_intervals)),
-            tol=self.tol)
+            truncated_intervals
+            + intersection(unsearched_intervals, not_(mask_intervals)),
+            tol=self.tol,
+        )
         sup_intervals = union_all(
-            truncated_intervals +
-            intersection(
-                unsearched_intervals, mask_intervals),
-            tol=self.tol)
+            truncated_intervals + intersection(unsearched_intervals, mask_intervals),
+            tol=self.tol,
+        )
 
-        chi_inf_intervals = intersection(
-            inf_intervals, [[0.0, INF]])
-        chi_sup_intervals = intersection(
-            sup_intervals, [[0.0, INF]])
+        chi_inf_intervals = intersection(inf_intervals, [[0.0, INF]])
+        chi_sup_intervals = intersection(sup_intervals, [[0.0, INF]])
 
         chi_inf_intervals = intersection(chi_inf_intervals, self.restrict)
         chi_sup_intervals = intersection(chi_sup_intervals, self.restrict)
 
         stat_chi = np.asarray(self.stat)
 
-        inf_F = tc_cdf_mpmath(stat_chi, chi_inf_intervals, self.degree,
-                              dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
-        sup_F = tc_cdf_mpmath(stat_chi, chi_sup_intervals, self.degree,
-                              dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
+        inf_F = tc_cdf_mpmath(
+            stat_chi,
+            chi_inf_intervals,
+            self.degree,
+            dps=self.dps,
+            max_dps=self.max_dps,
+            out_log=self.out_log,
+        )
+        sup_F = tc_cdf_mpmath(
+            stat_chi,
+            chi_sup_intervals,
+            self.degree,
+            dps=self.dps,
+            max_dps=self.max_dps,
+            out_log=self.out_log,
+        )
 
         inf_p, sup_p = calc_prange(inf_F, sup_F, alternative)
 
         return inf_p, sup_p
 
     def _determine_next_search_data(self, choose_method, searched_intervals):
-
-        unsearched_intervals = intersection(
-            not_(searched_intervals), [[0.0, INF]])
+        unsearched_intervals = intersection(not_(searched_intervals), [[0.0, INF]])
         candidates = list()
         mode = np.sqrt(self.degree - 1)
 
-        if choose_method == 'sup_pdf':
+        if choose_method == "sup_pdf":
             for interval in unsearched_intervals:
                 l = interval[0]
                 if np.isinf(interval[1]):
@@ -390,25 +431,34 @@ class SelectiveInferenceChi(InferenceChi):
                     u = interval[1]
                 if u - l > 2 * self.step:
                     candidates += list(
-                        np.linspace(l + self.step, u - self.step,
-                                    int(1000 / len(unsearched_intervals))))
+                        np.linspace(
+                            l + self.step,
+                            u - self.step,
+                            int(1000 / len(unsearched_intervals)),
+                        )
+                    )
 
-        if choose_method == 'near_stat' or choose_method == 'high_pdf':
+        if choose_method == "near_stat" or choose_method == "high_pdf":
             unsearched_lower_stat = intersection(
-                unsearched_intervals, [[NINF, float(self.stat)]])
+                unsearched_intervals, [[NINF, float(self.stat)]]
+            )
             unsearched_upper_stat = intersection(
-                unsearched_intervals, [[float(self.stat), INF]])
+                unsearched_intervals, [[float(self.stat), INF]]
+            )
             if len(unsearched_lower_stat) != 0:
-                candidates.append(
-                    unsearched_lower_stat[-1][-1] - self.step)
+                candidates.append(unsearched_lower_stat[-1][-1] - self.step)
             if len(unsearched_upper_stat) != 0:
-                candidates.append(
-                    unsearched_upper_stat[0][0] + self.step)
+                candidates.append(unsearched_upper_stat[0][0] + self.step)
 
-        if choose_method == 'near_stat':
-            def method(z): return -np.abs(z - float(self.stat))
-        if choose_method == 'high_pdf' or choose_method == 'sup_pdf':
-            def method(z): return chi.logpdf(z, self.degree)
+        if choose_method == "near_stat":
+
+            def method(z):
+                return -np.abs(z - float(self.stat))
+
+        if choose_method == "high_pdf" or choose_method == "sup_pdf":
+
+            def method(z):
+                return chi.logpdf(z, self.degree)
 
         candidates = np.array(candidates)
         return candidates[np.argmax(method(candidates))]
@@ -428,10 +478,24 @@ class SelectiveInferenceChi(InferenceChi):
         self.search_history.append(callback(progress))
 
     def _parametric_inference(
-            self, algorithm, model_selector, significance_level, parametric_mode,
-            alternative, threshold, choose_method, retain_selected_model, retain_mappings,
-            tol, step, dps, max_dps, out_log, max_iter, callback):
-
+        self,
+        algorithm,
+        model_selector,
+        significance_level,
+        parametric_mode,
+        alternative,
+        threshold,
+        choose_method,
+        retain_selected_model,
+        retain_mappings,
+        tol,
+        step,
+        dps,
+        max_dps,
+        out_log,
+        max_iter,
+        callback,
+    ):
         self.tol = tol
         self.step = step
         self.dps = dps
@@ -473,38 +537,59 @@ class SelectiveInferenceChi(InferenceChi):
                 detect_count += 1
 
             self.searched_intervals = union_all(
-                self.searched_intervals + intervals, tol=self.tol)
-            self.search_checker.verify_progress(
-                self.searched_intervals)
+                self.searched_intervals + intervals, tol=self.tol
+            )
+            self.search_checker.verify_progress(self.searched_intervals)
 
             inf_p, sup_p = self._evaluate_pvalue(
-                truncated_intervals, self.searched_intervals, alternative)
+                truncated_intervals, self.searched_intervals, alternative
+            )
 
             if callback is not None:
                 stat_chi = float(self.stat)
                 current_truncated_intervals = union_all(
-                    truncated_intervals, tol=self.tol)
+                    truncated_intervals, tol=self.tol
+                )
                 current_chi_intervals = intersection(
-                    current_truncated_intervals, [[0.0, INF]])
+                    current_truncated_intervals, [[0.0, INF]]
+                )
                 current_chi_intervals = intersection(
-                    current_chi_intervals, self.restrict)
-                F = tc_cdf_mpmath(stat_chi, current_chi_intervals, absolute=False,
-                                  dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
+                    current_chi_intervals, self.restrict
+                )
+                F = tc_cdf_mpmath(
+                    stat_chi,
+                    current_chi_intervals,
+                    absolute=False,
+                    dps=self.dps,
+                    max_dps=self.max_dps,
+                    out_log=self.out_log,
+                )
                 current_p_value = calc_pvalue(F, alternative)
                 current_searched_intervals = intersection(
-                    self.searched_intervals, [[0.0, INF]])
+                    self.searched_intervals, [[0.0, INF]]
+                )
                 searched_point = float(z)
 
                 progress = SearchProgress(
-                    stat_chi, significance_level, current_p_value, inf_p, sup_p,
-                    current_chi_intervals, current_searched_intervals,
-                    searched_point, search_count, detect_count, choose_method, f'chi{self.degree}')
+                    stat_chi,
+                    significance_level,
+                    current_p_value,
+                    inf_p,
+                    sup_p,
+                    current_chi_intervals,
+                    current_searched_intervals,
+                    searched_point,
+                    search_count,
+                    detect_count,
+                    choose_method,
+                    f"chi{self.degree}",
+                )
                 self._execute_callback(callback, progress)
 
-            if parametric_mode == 'p_value':
+            if parametric_mode == "p_value":
                 if np.abs(sup_p - inf_p) < threshold:
                     break
-            if parametric_mode == 'reject_or_not':
+            if parametric_mode == "reject_or_not":
                 if sup_p <= significance_level:
                     reject_or_not = True
                     break
@@ -512,36 +597,63 @@ class SelectiveInferenceChi(InferenceChi):
                     reject_or_not = False
                     break
 
-            z = self._determine_next_search_data(
-                choose_method, self.searched_intervals)
+            z = self._determine_next_search_data(choose_method, self.searched_intervals)
 
         stat_chi = float(self.stat)
         truncated_intervals = union_all(truncated_intervals, tol=self.tol)
         chi_intervals = intersection(truncated_intervals, [[0.0, INF]])
         chi_intervals = intersection(chi_intervals, self.restrict)
-        F = tc_cdf_mpmath(stat_chi, chi_intervals, self.degree, absolute=False,
-                          dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
+        F = tc_cdf_mpmath(
+            stat_chi,
+            chi_intervals,
+            self.degree,
+            absolute=False,
+            dps=self.dps,
+            max_dps=self.max_dps,
+            out_log=self.out_log,
+        )
         p_value = calc_pvalue(F, alternative)
-        if parametric_mode == 'p_value':
-            reject_or_not = (p_value <= significance_level)
+        if parametric_mode == "p_value":
+            reject_or_not = p_value <= significance_level
 
         return SelectiveInferenceResult(
-            stat_chi, significance_level, p_value, inf_p, sup_p,
-            reject_or_not, chi_intervals,
-            search_count, detect_count, selected_model, mappings)
+            stat_chi,
+            significance_level,
+            p_value,
+            inf_p,
+            sup_p,
+            reject_or_not,
+            chi_intervals,
+            search_count,
+            detect_count,
+            selected_model,
+            mappings,
+        )
 
     def _all_search_parametric_inference(
-            self, algorithm, model_selector, significance_level, alternative,
-            line_search, max_tail, retain_selected_model, retain_mappings,
-            tol, step, dps, max_dps, out_log):
-
+        self,
+        algorithm,
+        model_selector,
+        significance_level,
+        alternative,
+        line_search,
+        max_tail,
+        retain_selected_model,
+        retain_mappings,
+        tol,
+        step,
+        dps,
+        max_dps,
+        out_log,
+    ):
         self.tol = tol
         self.step = step
         self.dps = dps
         self.max_dps = max_dps
         self.out_log = out_log
         self.searched_intervals = union_all(
-            [[NINF, 0.0], [float(max_tail), INF]], tol=self.tol)
+            [[NINF, 0.0], [float(max_tail), INF]], tol=self.tol
+        )
 
         mappings = dict() if retain_mappings else None
         result_intervals = list()
@@ -551,14 +663,14 @@ class SelectiveInferenceChi(InferenceChi):
 
         z = self._next_search_data(line_search)
         while True:
-
             if z is None:
                 break
 
             search_count += 1
             if search_count > 1e6:
                 raise Exception(
-                    'The number of searches exceeds 100,000 times, suggesting an infinite loop.')
+                    "The number of searches exceeds 100,000 times, suggesting an infinite loop."
+                )
 
             model, interval = algorithm(self.z, self.c, z)
             interval = np.asarray(interval)
@@ -571,7 +683,8 @@ class SelectiveInferenceChi(InferenceChi):
                         raise Exception(
                             "An interval appeared a second time. Usually, numerical error "
                             "causes this exception. Consider increasing the tol parameter "
-                            "or decreasing max_tail parameter to avoid it.")
+                            "or decreasing max_tail parameter to avoid it."
+                        )
                     mappings[interval] = model
 
             if model_selector(model):
@@ -580,7 +693,8 @@ class SelectiveInferenceChi(InferenceChi):
                 detect_count += 1
 
             self.searched_intervals = union_all(
-                self.searched_intervals + intervals, tol=self.tol)
+                self.searched_intervals + intervals, tol=self.tol
+            )
 
             z = self._next_search_data(line_search)
 
@@ -588,22 +702,46 @@ class SelectiveInferenceChi(InferenceChi):
         truncated_intervals = union_all(result_intervals, tol=self.tol)
         chi_intervals = intersection(truncated_intervals, [[0.0, INF]])
         chi_intervals = intersection(chi_intervals, self.restrict)
-        F = tc_cdf_mpmath(stat_chi, chi_intervals, self.degree, absolute=False,
-                          dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
+        F = tc_cdf_mpmath(
+            stat_chi,
+            chi_intervals,
+            self.degree,
+            absolute=False,
+            dps=self.dps,
+            max_dps=self.max_dps,
+            out_log=self.out_log,
+        )
         p_value = calc_pvalue(F, alternative)
 
         inf_p, sup_p = self._evaluate_pvalue(
-            truncated_intervals, [[1e-5, float(max_tail)]], alternative)
+            truncated_intervals, [[1e-5, float(max_tail)]], alternative
+        )
 
         return SelectiveInferenceResult(
-            stat_chi, significance_level, p_value, inf_p, sup_p,
-            (p_value <= significance_level), chi_intervals,
-            search_count, detect_count, selected_model, mappings)
+            stat_chi,
+            significance_level,
+            p_value,
+            inf_p,
+            sup_p,
+            (p_value <= significance_level),
+            chi_intervals,
+            search_count,
+            detect_count,
+            selected_model,
+            mappings,
+        )
 
     def _over_conditioned_inference(
-            self, algorithm, significance_level, alternative,
-            retain_selected_model, tol, dps, max_dps, out_log):
-
+        self,
+        algorithm,
+        significance_level,
+        alternative,
+        retain_selected_model,
+        tol,
+        dps,
+        max_dps,
+        out_log,
+    ):
         self.tol = tol
         self.dps = dps
         self.max_dps = max_dps
@@ -616,13 +754,29 @@ class SelectiveInferenceChi(InferenceChi):
         stat_chi = float(self.stat)
         chi_intervals = intersection(intervals, [[0.0, INF]])
         chi_intervals = intersection(chi_intervals, self.restrict)
-        F = tc_cdf_mpmath(stat_chi, chi_intervals, self.degree, absolute=False,
-                          dps=self.dps, max_dps=self.max_dps, out_log=self.out_log)
+        F = tc_cdf_mpmath(
+            stat_chi,
+            chi_intervals,
+            self.degree,
+            absolute=False,
+            dps=self.dps,
+            max_dps=self.max_dps,
+            out_log=self.out_log,
+        )
         p_value = calc_pvalue(F, alternative)
 
         inf_p, sup_p = self._evaluate_pvalue(intervals, intervals, alternative)
 
         return SelectiveInferenceResult(
-            stat_chi, significance_level, p_value, inf_p, sup_p,
-            (p_value <= significance_level), chi_intervals, 1, 1,
-            None, model if retain_selected_model else None)
+            stat_chi,
+            significance_level,
+            p_value,
+            inf_p,
+            sup_p,
+            (p_value <= significance_level),
+            chi_intervals,
+            1,
+            1,
+            None,
+            model if retain_selected_model else None,
+        )

@@ -11,7 +11,7 @@ def is_int_or_float(value):
     return np.issubdtype(type_, np.integer) or np.issubdtype(type_, np.floating)
 
 
-class OneVec():
+class OneVec:
     """Vector whose elements from position `i` to `j` are set to 1, and 0 otherwise.
 
     Args:
@@ -39,7 +39,7 @@ class OneVec():
         if j is None:
             vec[i - 1] = 1
         else:
-            vec[i - 1: j] = 1
+            vec[i - 1 : j] = 1
 
         return vec
 
@@ -63,10 +63,8 @@ def construct_projection_matrix(basis, verbose=False):
     P = np.dot(V, V.T)
     if verbose:
         if np.sum(np.abs(P.T - P)) > 1e-5:
-            raise Exception(
-                'The projection matrix is not constructed correctly')
+            raise Exception("The projection matrix is not constructed correctly")
         else:
             if np.sum(np.abs(np.dot(P, P) - P)) > 1e-5:
-                raise Exception(
-                    'The projection matrix is not constructed correctly')
+                raise Exception("The projection matrix is not constructed correctly")
     return P
