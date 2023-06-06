@@ -674,9 +674,6 @@ class SelectiveInferenceChi(InferenceChi):
 
         z = self._next_search_data(line_search)
         while True:
-            if z is None:
-                break
-
             search_count += 1
             if search_count > 3e4:
                 raise Exception(
@@ -707,7 +704,14 @@ class SelectiveInferenceChi(InferenceChi):
                 self.searched_intervals + intervals, tol=self.tol
             )
 
+            prev_z = z
             z = self._next_search_data(line_search)
+
+            if z is None:
+                break
+
+            if np.abs(prev_z - z) < self.step * 0.5:
+                raise InfiniteLoopError
 
         stat_chi = float(self.stat)
         truncated_intervals = union_all(result_intervals, tol=self.tol)
