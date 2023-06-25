@@ -1,18 +1,22 @@
-from abc import ABC, abstractmethod
 import numpy as np
-from typing import Callable, List, Tuple, Type
-from ..utils import is_int_or_float
-from ..intervals import intersection, not_, union_all, _interval_to_intervals
-from ..cdf_mpmath import tn_cdf_mpmath
-from .base import *
-
 from scipy import sparse
 from scipy.stats import norm
 
-import random
+from abc import ABC, abstractmethod
+from collections.abc import Callable
+from typing import Any
 
-INF = np.inf
-NINF = -np.inf
+from ..utils import is_int_or_float
+from ..intervals import intersection, not_, union_all, _interval_to_intervals
+from ..cdf_mpmath import tn_cdf_mpmath
+from .base import (
+    SelectiveInferenceResult,
+    InfiniteLoopError,
+    SearchChecker,
+    calc_pvalue,
+    calc_prange,
+    standardize,
+)
 
 
 class InferenceNorm(ABC):
@@ -213,7 +217,7 @@ class SelectiveInferenceNorm(InferenceNorm):
     def inference(
         self,
         algorithm: Callable[
-            [np.ndarray, np.ndarray, float], Tuple[List[List[float]], Any]
+            [np.ndarray, np.ndarray, float], tuple[list[list[float]], Any]
         ],
         model_selector: Callable[[Any], bool],
         significance_level: float = 0.05,
@@ -234,7 +238,7 @@ class SelectiveInferenceNorm(InferenceNorm):
         out_log: str = "test_log.log",
         max_iter: int = 1e6,
         callback: None = None,
-    ) -> Type[SelectiveInferenceResult]:
+    ) -> SelectiveInferenceResult:
         """Perform Selective Inference.
 
         Args:
@@ -308,7 +312,7 @@ class SelectiveInferenceNorm(InferenceNorm):
             Type[SelectiveInferenceResult]
         """
 
-        lim = max(30, 10 + abs(standardize(self.stat, popmean, self.eta_sigma_eta)))
+        lim = max(30, 10 + np.abs(standardize(self.stat, popmean, self.eta_sigma_eta)))
         self.restrict = [[-lim, lim]]
 
         if over_conditioning:
@@ -375,10 +379,10 @@ class SelectiveInferenceNorm(InferenceNorm):
         unsearched_intervals = not_(searched_intervals)
 
         if alternative == "abs":
-            mask_intervals = [[-abs(float(self.stat)), abs(float(self.stat))]]
+            mask_intervals = [[-np.abs(float(self.stat)), np.abs(float(self.stat))]]
             absolute = True
         else:
-            mask_intervals = [[NINF, float(self.stat)]]
+            mask_intervals = [[-np.inf, float(self.stat)]]
             absolute = False
 
         inf_intervals = union_all(
@@ -463,11 +467,11 @@ class SelectiveInferenceNorm(InferenceNorm):
         if choose_method == "near_stat" or choose_method == "high_pdf":
             unsearched_lower_stat = intersection(
                 unsearched_intervals,
-                [[NINF, standardize(self.stat, self.popmean, self.eta_sigma_eta)]],
+                [[-np.inf, standardize(self.stat, self.popmean, self.eta_sigma_eta)]],
             )
             unsearched_upper_stat = intersection(
                 unsearched_intervals,
-                [[standardize(self.stat, self.popmean, self.eta_sigma_eta), INF]],
+                [[standardize(self.stat, self.popmean, self.eta_sigma_eta), np.inf]],
             )
             if len(unsearched_lower_stat) != 0:
                 candidates.append(unsearched_lower_stat[-1][-1] - self.step)
@@ -498,9 +502,6 @@ class SelectiveInferenceNorm(InferenceNorm):
             return None
         if line_search:
             param = intervals[0][0] + self.step
-        else:
-            s, e = random.choice(intervals)
-            param = (e + s) / 2
         return param
 
     def _execute_callback(self, callback, progress):
@@ -646,7 +647,7 @@ class SelectiveInferenceNorm(InferenceNorm):
         self.max_dps = max_dps
         self.out_log = out_log
         self.searched_intervals = union_all(
-            [[NINF, -float(max_tail)], [float(max_tail), INF]], tol=self.tol
+            [[-np.inf, -float(max_tail)], [float(max_tail), np.inf]], tol=self.tol
         )
 
         mappings = dict() if retain_mappings else None
