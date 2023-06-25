@@ -122,6 +122,8 @@ class InferenceNorm(ABC):
                 self.sigma_eta = cov @ eta
             self.eta_sigma_eta = eta @ self.sigma_eta
 
+        self.scale = np.sqrt(self.eta_sigma_eta)
+
     @abstractmethod
     def inference(self, *args, **kwargs):
         """Perform statistical inference."""
@@ -496,13 +498,11 @@ class SelectiveInferenceNorm(InferenceNorm):
             + self.popmean
         )
 
-    def _next_search_data(self, line_search):
+    def _next_search_data(self):
         intervals = not_(self.searched_intervals)
         if len(intervals) == 0:
             return None
-        if line_search:
-            param = intervals[0][0] + self.step
-        return param
+        return intervals[0][0] + self.step
 
     def _execute_callback(self, callback, progress):
         self.search_history.append(callback(progress))
@@ -656,7 +656,7 @@ class SelectiveInferenceNorm(InferenceNorm):
         search_count = 0
         detect_count = 0
 
-        z = self._next_search_data(line_search)
+        z = self._next_search_data()
         while True:
             search_count += 1
             if search_count > 3e4:
@@ -689,7 +689,7 @@ class SelectiveInferenceNorm(InferenceNorm):
             )
 
             prev_z = z
-            z = self._next_search_data(line_search)
+            z = self._next_search_data()
 
             if z is None:
                 break

@@ -1,19 +1,22 @@
-from abc import ABC, abstractmethod
 import numpy as np
-from typing import Callable, List, Tuple, Type
-from ..utils import is_int_or_float
-from ..intervals import intersection, not_, union_all, _interval_to_intervals
-from ..cdf_mpmath import tc_cdf_mpmath
-from .base import *
-
 from scipy import sparse
 from scipy.stats import chi
 from scipy.linalg import fractional_matrix_power
 
+from abc import ABC, abstractmethod
+from collections.abc import Callable
+from typing import Any
 
-INF = np.inf
-NINF = -np.inf
-import random
+from ..utils import is_int_or_float
+from ..intervals import intersection, not_, union_all, _interval_to_intervals
+from ..cdf_mpmath import tc_cdf_mpmath
+from .base import (
+    SelectiveInferenceResult,
+    InfiniteLoopError,
+    SearchChecker,
+    calc_pvalue,
+    calc_prange,
+)
 
 
 class InferenceChi(ABC):
@@ -49,7 +52,6 @@ class InferenceChi(ABC):
         data: np.ndarray,
         var: float | np.ndarray | sparse.csr_array,
         P: np.ndarray | sparse.csr_array,
-        degree: int,
         use_sparse: bool = False,
         use_tf: bool = False,
         use_torch: bool = False,
@@ -64,7 +66,7 @@ class InferenceChi(ABC):
         self.data = data  # unnecessary
         self.length = len(data)  # unnecessary
         self.P = P  # unnecessary
-        self.degree = degree
+        self.degree = int(np.trace(P) + 1e-3)
 
         if use_tf:
             try:
@@ -214,19 +216,18 @@ class SelectiveInferenceChi(InferenceChi):
         data: np.ndarray,
         var: float | np.ndarray | sparse.csr_array,
         P: np.ndarray | sparse.csr_array,
-        degree: int,
         use_sparse: bool = False,
         use_tf: bool = False,
         use_torch: bool = False,
     ):
-        super().__init__(data, var, P, degree, use_sparse, use_tf, use_torch)
+        super().__init__(data, var, P, use_sparse, use_tf, use_torch)
         self.c = self.P_data / self.stat  # `b` vector in para si.
         self.z = data - self.P_data  # `a` vector in para si.
 
     def inference(
         self,
         algorithm: Callable[
-            [np.ndarray, np.ndarray, float], Tuple[List[List[float]], Any]
+            [np.ndarray, np.ndarray, float], tuple[list[list[float]], Any]
         ],
         model_selector: Callable[[Any], bool],
         significance_level: float = 0.05,
@@ -246,7 +247,7 @@ class SelectiveInferenceChi(InferenceChi):
         out_log: str = "test_log.log",
         max_iter: int = 1e6,
         callback: None = None,
-    ) -> Type[SelectiveInferenceResult]:
+    ) -> SelectiveInferenceResult:
         """Perform Selective Inference.
 
         Args:
@@ -381,7 +382,7 @@ class SelectiveInferenceChi(InferenceChi):
     def _evaluate_pvalue(self, truncated_intervals, searched_intervals, alternative):
         unsearched_intervals = not_(searched_intervals)
 
-        mask_intervals = [[NINF, float(self.stat)]]
+        mask_intervals = [[-np.inf, float(self.stat)]]
 
         inf_intervals = union_all(
             truncated_intervals
@@ -393,8 +394,8 @@ class SelectiveInferenceChi(InferenceChi):
             tol=self.tol,
         )
 
-        chi_inf_intervals = intersection(inf_intervals, [[0.0, INF]])
-        chi_sup_intervals = intersection(sup_intervals, [[0.0, INF]])
+        chi_inf_intervals = intersection(inf_intervals, [[0.0, np.inf]])
+        chi_sup_intervals = intersection(sup_intervals, [[0.0, np.inf]])
 
         flatten = np.ravel(chi_inf_intervals)
         nonfinites = flatten[np.isfinite(flatten)]
@@ -434,7 +435,7 @@ class SelectiveInferenceChi(InferenceChi):
         return inf_p, sup_p
 
     def _determine_next_search_data(self, choose_method, searched_intervals):
-        unsearched_intervals = intersection(not_(searched_intervals), [[0.0, INF]])
+        unsearched_intervals = intersection(not_(searched_intervals), [[0.0, np.inf]])
         candidates = list()
         mode = np.sqrt(self.degree - 1)
 
@@ -456,10 +457,10 @@ class SelectiveInferenceChi(InferenceChi):
 
         if choose_method == "near_stat" or choose_method == "high_pdf":
             unsearched_lower_stat = intersection(
-                unsearched_intervals, [[NINF, float(self.stat)]]
+                unsearched_intervals, [[-np.inf, float(self.stat)]]
             )
             unsearched_upper_stat = intersection(
-                unsearched_intervals, [[float(self.stat), INF]]
+                unsearched_intervals, [[float(self.stat), np.inf]]
             )
             if len(unsearched_lower_stat) != 0:
                 candidates.append(unsearched_lower_stat[-1][-1] - self.step)
@@ -479,16 +480,11 @@ class SelectiveInferenceChi(InferenceChi):
         candidates = np.array(candidates)
         return candidates[np.argmax(method(candidates))]
 
-    def _next_search_data(self, line_search):
+    def _next_search_data(self):
         intervals = not_(self.searched_intervals)
         if len(intervals) == 0:
             return None
-        if line_search:
-            param = intervals[0][0] + self.step
-        else:
-            s, e = random.choice(intervals)
-            param = (e + s) / 2
-        return param
+        return intervals[0][0] + self.step
 
     def _execute_callback(self, callback, progress):
         self.search_history.append(callback(progress))
@@ -576,7 +572,7 @@ class SelectiveInferenceChi(InferenceChi):
 
         stat_chi = float(self.stat)
         truncated_intervals = union_all(truncated_intervals, tol=self.tol)
-        chi_intervals = intersection(truncated_intervals, [[0.0, INF]])
+        chi_intervals = intersection(truncated_intervals, [[0.0, np.inf]])
         chi_intervals = intersection(chi_intervals, self.restrict)
         F = tc_cdf_mpmath(
             stat_chi,
@@ -627,7 +623,7 @@ class SelectiveInferenceChi(InferenceChi):
         self.max_dps = max_dps
         self.out_log = out_log
         self.searched_intervals = union_all(
-            [[NINF, 0.0], [float(max_tail), INF]], tol=self.tol
+            [[-np.inf, 0.0], [float(max_tail), np.inf]], tol=self.tol
         )
 
         mappings = dict() if retain_mappings else None
@@ -636,7 +632,7 @@ class SelectiveInferenceChi(InferenceChi):
         search_count = 0
         detect_count = 0
 
-        z = self._next_search_data(line_search)
+        z = self._next_search_data()
         while True:
             search_count += 1
             if search_count > 3e4:
@@ -669,7 +665,7 @@ class SelectiveInferenceChi(InferenceChi):
             )
 
             prev_z = z
-            z = self._next_search_data(line_search)
+            z = self._next_search_data()
 
             if z is None:
                 break
@@ -679,7 +675,7 @@ class SelectiveInferenceChi(InferenceChi):
 
         stat_chi = float(self.stat)
         truncated_intervals = union_all(result_intervals, tol=self.tol)
-        chi_intervals = intersection(truncated_intervals, [[0.0, INF]])
+        chi_intervals = intersection(truncated_intervals, [[0.0, np.inf]])
         chi_intervals = intersection(chi_intervals, self.restrict)
         F = tc_cdf_mpmath(
             stat_chi,
@@ -731,7 +727,7 @@ class SelectiveInferenceChi(InferenceChi):
         intervals = _interval_to_intervals(interval)
 
         stat_chi = float(self.stat)
-        chi_intervals = intersection(intervals, [[0.0, INF]])
+        chi_intervals = intersection(intervals, [[0.0, np.inf]])
         chi_intervals = intersection(chi_intervals, self.restrict)
         F = tc_cdf_mpmath(
             stat_chi,
