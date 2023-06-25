@@ -9,6 +9,11 @@ from .base import *
 from scipy import sparse
 from scipy.stats import norm
 
+import random
+
+INF = np.inf
+NINF = -np.inf
+
 
 class InferenceNorm(ABC):
     """Base inference class for a test statistic which follows normal distribution under null.
@@ -228,7 +233,7 @@ class SelectiveInferenceNorm(InferenceNorm):
         max_dps: int = 5000,
         out_log: str = "test_log.log",
         max_iter: int = 1e6,
-        callback: Callable[[Type[SearchProgress]], Any] = None,
+        callback: None = None,
     ) -> Type[SelectiveInferenceResult]:
         """Perform Selective Inference.
 
@@ -570,48 +575,6 @@ class SelectiveInferenceNorm(InferenceNorm):
             inf_p, sup_p = self._evaluate_pvalue(
                 truncated_intervals, self.searched_intervals, alternative
             )
-
-            if callback is not None:
-                stat_std = standardize(self.stat, popmean, self.eta_sigma_eta)
-                current_truncated_intervals = union_all(
-                    truncated_intervals, tol=self.tol
-                )
-                current_norm_intervals = standardize(
-                    current_truncated_intervals, popmean, self.eta_sigma_eta
-                ).tolist()
-                current_norm_intervals = intersection(
-                    current_norm_intervals, self.restrict
-                )
-                absolute = True if alternative == "abs" else False
-                F = tn_cdf_mpmath(
-                    stat_std,
-                    current_norm_intervals,
-                    absolute=absolute,
-                    dps=self.dps,
-                    max_dps=self.max_dps,
-                    out_log=self.out_log,
-                )
-                current_p_value = calc_pvalue(F, alternative)
-                current_searched_intervals = standardize(
-                    self.searched_intervals, popmean, self.eta_sigma_eta
-                ).tolist()
-                searched_point = standardize(z, popmean, self.eta_sigma_eta)
-
-                progress = SearchProgress(
-                    stat_std,
-                    significance_level,
-                    current_p_value,
-                    inf_p,
-                    sup_p,
-                    current_norm_intervals,
-                    current_searched_intervals,
-                    searched_point,
-                    search_count,
-                    detect_count,
-                    choose_method,
-                    "norm",
-                )
-                self._execute_callback(callback, progress)
 
             if parametric_mode == "p_value":
                 if np.abs(sup_p - inf_p) < threshold:

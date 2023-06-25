@@ -1,12 +1,8 @@
-import random
 import numpy as np
-from scipy.stats import norm, ttest_ind, ttest_1samp
-
-from ..utils import is_int_or_float
-from ..intervals import intersection
-
-from typing import List, Any, Dict
+from typing import Any
 from dataclasses import dataclass
+
+from ..intervals import intersection
 
 
 @dataclass
@@ -34,33 +30,11 @@ class SelectiveInferenceResult:
     inf_p: float
     sup_p: float
     reject_or_not: bool
-    truncated_intervals: List[List[float]]
+    truncated_intervals: list[list[float]]
     search_count: int
     detect_count: int
     selected_model: Any | None
-    mappings: Dict[tuple[float], Any] | None
-
-
-@dataclass
-class SearchProgress:
-    """
-    This class contains the intermediate results of each search process.
-
-    Attributes:
-    """
-
-    stat: float
-    alpha: float
-    p_value: float
-    inf_p: float
-    sup_p: float
-    truncated_intervals: List[List[float]]
-    searched_intervals: List[List[float]]
-    search_point: float
-    search_count: int
-    detect_count: int
-    choose_method: str
-    null_distribution: str
+    mappings: dict[tuple[float, float], Any] | None
 
 
 class InfiniteLoopError(Exception):
@@ -98,7 +72,7 @@ class SearchChecker:
             width += np.log(interval[1] - interval[0])
         return width
 
-    def verify_progress(self, intervals: List[List[float]]):
+    def verify_progress(self, intervals: list[list[float]]):
         length = len(intervals)
         width = self._compute_logarithm_width(intervals)
         if length == self.last_length and width <= self.last_width:
@@ -110,13 +84,7 @@ class SearchChecker:
         self.num_search += 1
 
 
-INF = float("inf")
-NINF = -INF
-
-random.seed(0)
-
-
-def calc_pvalue(F, alternative):
+def calc_pvalue(F: float, alternative: str):
     """
     Calculate p-value.
 
@@ -182,75 +150,3 @@ def standardize(x, mean=0, var=1):
     """
     sd = np.sqrt(var)
     return (np.asarray(x) - mean) / sd
-
-
-def one_sample_test(data, popmean, var=None, tail="double"):
-    """
-    One sample hypothesis testing for population mean.
-
-    var=float: Z-test
-    var=None: T-test
-
-    Args:
-        data (array-like): Dataset.
-        popmean (float): Population mean of `data` under null hypothesis is
-            true.
-        var (float, optional): Known population variance of the dataset. If
-            None, the population variance is unknown. Defaults to None.
-        tail (str, optional): 'double' for double-tailed test, 'right' for
-            right-tailed test, and 'left' for left-tailed test. Defaults to
-            'double'.
-
-    Returns:
-        float: p-value
-    """
-    if var is None:
-        pvalue, stat = ttest_1samp(data, popmean)
-        F = pvalue / 2 if stat < 0 else 1 - pvalue / 2
-        return calc_pvalue(F, tail=tail)
-    else:
-        estimator = np.mean(data)
-        var = var / len(data)
-        stat = standardize(estimator, popmean, var)
-        F = norm.cdf(stat)
-        return calc_pvalue(F, tail=tail)
-
-
-def two_sample_test(data1, data2, var=None, equal_var=True, tail="double"):
-    """
-    Two sample hypothesis testing for the difference between population means.
-
-    var=float, list: Z-test
-    var=None & equal_var=True: T-test
-    var=None & equal_var=False: Welch's T-test
-
-    Args:
-        data1 (array-like): Dataset1.
-        data2 (array-like): Dataset2.
-        var (float, list, optional): Known population variance of each dataset
-            in the form of single value or tuple `(var1, var2)`. If None, the
-            population variance is unknown. Defaults to None.
-        equal_var (bool, optional): If True, two population variances are
-            assumed to be the same. Defaults to True.
-        tail (str, optional): 'double' for double-tailed test, 'right' for
-            right-tailed test, and 'left' for left-tailed test. Defaults to
-            'double'.
-
-    Returns:
-        float: p-value
-    """
-    if var is None:
-        pvalue, stat = ttest_ind(data1, data2, equal_var=equal_var)
-        F = pvalue / 2 if stat < 0 else 1 - pvalue / 2
-        return calc_pvalue(F, tail=tail)
-    else:
-        if is_int_or_float(var):
-            var1, var2 = var, var
-        else:
-            var1, var2 = var
-
-        estimator = np.mean(data1) - np.mean(data2)
-        var = var1 / len(data1) + var2 / len(data2)
-        stat = standardize(estimator, var=var)
-        F = norm.cdf(stat)
-        return calc_pvalue(F, tail=tail)

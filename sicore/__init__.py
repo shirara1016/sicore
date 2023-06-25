@@ -29,8 +29,6 @@ from .figures import (
 from .inference.base import (
     SelectiveInferenceResult,
     InfiniteLoopError,
-    one_sample_test,
-    two_sample_test,
 )
 from .inference.norm import (
     NaiveInferenceNorm,
@@ -45,8 +43,6 @@ __all__ = [
     "SelectiveInferenceChi",
     "SelectiveInferenceResult",
     "InfiniteLoopError",
-    "one_sample_test",
-    "two_sample_test",
     "tn_cdf",
     "tt_cdf",
     "tc_cdf",

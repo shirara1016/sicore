@@ -11,6 +11,11 @@ from scipy.stats import chi
 from scipy.linalg import fractional_matrix_power
 
 
+INF = np.inf
+NINF = -np.inf
+import random
+
+
 class InferenceChi(ABC):
     """Base inference class for a test statistic which follows chi squared distribution under null.
 
@@ -240,7 +245,7 @@ class SelectiveInferenceChi(InferenceChi):
         max_dps: int = 5000,
         out_log: str = "test_log.log",
         max_iter: int = 1e6,
-        callback: Callable[[Type[SearchProgress]], Any] = None,
+        callback: None = None,
     ) -> Type[SelectiveInferenceResult]:
         """Perform Selective Inference.
 
@@ -555,47 +560,6 @@ class SelectiveInferenceChi(InferenceChi):
             inf_p, sup_p = self._evaluate_pvalue(
                 truncated_intervals, self.searched_intervals, alternative
             )
-
-            if callback is not None:
-                stat_chi = float(self.stat)
-                current_truncated_intervals = union_all(
-                    truncated_intervals, tol=self.tol
-                )
-                current_chi_intervals = intersection(
-                    current_truncated_intervals, [[0.0, INF]]
-                )
-                current_chi_intervals = intersection(
-                    current_chi_intervals, self.restrict
-                )
-                F = tc_cdf_mpmath(
-                    stat_chi,
-                    current_chi_intervals,
-                    absolute=False,
-                    dps=self.dps,
-                    max_dps=self.max_dps,
-                    out_log=self.out_log,
-                )
-                current_p_value = calc_pvalue(F, alternative)
-                current_searched_intervals = intersection(
-                    self.searched_intervals, [[0.0, INF]]
-                )
-                searched_point = float(z)
-
-                progress = SearchProgress(
-                    stat_chi,
-                    significance_level,
-                    current_p_value,
-                    inf_p,
-                    sup_p,
-                    current_chi_intervals,
-                    current_searched_intervals,
-                    searched_point,
-                    search_count,
-                    detect_count,
-                    choose_method,
-                    f"chi{self.degree}",
-                )
-                self._execute_callback(callback, progress)
 
             if parametric_mode == "p_value":
                 if np.abs(sup_p - inf_p) < threshold:
