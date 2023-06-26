@@ -123,6 +123,7 @@ class InferenceNorm(ABC):
             self.eta_sigma_eta = eta @ self.sigma_eta
 
         self.scale = np.sqrt(self.eta_sigma_eta)
+        self.popmean = 0.0
 
     @abstractmethod
     def inference(self, *args, **kwargs):
@@ -245,73 +246,66 @@ class SelectiveInferenceNorm(InferenceNorm):
 
         Args:
             algorithm (Callable[[np.ndarray, np.ndarray, float], Tuple[List[List[float]], Any]]):
-                Callable function which takes two vectors (`a`, `b`)
-                and a scalar `z` that can satisfy `data = a + b * z`
-                as arguments, and returns the selected model (any) and
-                the truncation intervals (array-like). A closure function might be
-                helpful to implement this.
+                Callable function which takes two vectors (`a`, `b`) and a scalar `z`
+                that can satisfy `data = a + b * z` as argument, and
+                returns the obtained model (Any) and the intervals (np.ndarray) where it is obtained.
+                A closure function might be helpful to implement this.
             model_selector (Callable[[Any], bool]):
-                Callable function which takes a selected model (any) as single argument, and
-                returns True if the model is used for the testing, and False otherwise.
+                Callable function which takes a obtained model (any) as single argument, and
+                returns True if the model is observed one, and False otherwise.
             significance_level (float, optional):
-                Significance level for the testing. Defaults to 0.05.
-            parametric_mode (str, optional):
-                Specifies the method used to perform parametric selective inference. This option is
-                ignored when the over_conditioning option is activated.
-                'p_value' for calculation of p-value with guaranteed accuracy specified by the threshold option.
-                'reject_or_not' for only determining whether the null hypothesis is rejected.
-                'all_search' for all searches of the interval specified by the max_tail option.
-            over_conditioning (bool, optional):
-                Over conditioning Inference. Defaults to False.
-            alternative (str, optional):
-                'two-sided' for two-tailed test,
-                'less' for right-tailed test,
-                'greater' for left-tailed test,
-                'abs' for two-tailed test for
-                the distribution of absolute values
-                following the null distribution.
-                Defaults to 'abs'.
-            threshold (float, optional):
-                Guaranteed accuracy when calculating p-value. Defaults to 1e-3.
-            popmean (float, optional):
-                Mean of the null distribution. Defaults to 0.
-            line_search (bool, optional):
-                Wheter to perform a line search or a random search. Defaults to True.
-            max_tail (float, optional):
-                Maximum tail value to be parametrically searched when
-                the parametric_mode option is set to all_search. Defaults to 1e3.
-            choose_method (str, optional):
-                How to determine the search direction when parametric_mode
-                is other than all_search. 'near_stat', 'high_pdf', and 'random'
-                can be specified. Defaults to 'near_stat'.
-            retain_selected_model (bool, optional):
-                Whether retain selected model as returns or not. Defaults to False.
-            retain_mappings (bool, optional):
-                Whether retain mappings as returns or not. Defaults to False.
-            tol (float, optional):
-                Tolerance error parameter for intervals. Defaults to 1e-10.
+                Significance level for the test. Defaults to 0.05.
+            precision (float, optional):
+                Precision required to compute p-value. Defaults to 0.001.
+            termination_criterion (str, optional):
+                Specifies the termination criterion used to perform parametric selective inference.
+                This option is ignored when the `over_conditioning` or `exhaustive` is activated.
+                'precision' for computing p-value with `precision`.
+                'decision' for making decision whether or not to reject at `significance_level`.
+            search_strategy (str, optional):
+                Specifies the search strategy used to perform parametric selective inference.
+                'pi1' focuses on the integral on
+                'pi2', 'pi3' can be specified.
+                Defaults to 'pi3'.
             step (float, optional):
                 Step width for parametric search. Defaults to 1e-10.
-            dps (int | str, optional):
-                dps value for mpmath. Set 'auto' to select dps
-                automatically. Defaults to 'auto'.
-            max_dps (int, optional):
-                Maximum dps value for mpmath. This option is valid
-                when `dps` is set to 'auto'. Defaults to 5000.
-            out_log (str, optional):
-                Name for log file of mpmath. Defaults to 'test_log.log'.
             max_iter (int, optional):
                 Maximum number of times to perform parametric search.
                 If this value is exceeded, the loop is considered
                 to be infinite. Defaults to 1e6.
+            over_conditioning (bool, optional):
+                Over conditioning inference. Defaults to False.
+            exhaustive (bool, optional):
+                Exhaustive search of the range specified by `max_tail`. Defaults to False.
+            max_tail (float, optional):
+                Maximum tail value to be parametrically searched when
+                the parametric_mode option is set to all_search. Defaults to 1e3.
+            alternative (str, optional):
+                'abs' for two-tailed test of the absolute value of test statistic.
+                'two-sided' for two-tailed test.
+                'less' for right-tailed test.
+                'greater' for left-tailed test.
+                Defaults to 'abs'.
+            retain_observed_model (bool, optional):
+                Whether retain observed model as returns or not. Defaults to False.
+            retain_mappings (bool, optional):
+                Whether retain mappings as returns or not. Defaults to False.
+            tol (float, optional):
+                Tolerance error parameter for intervals. Defaults to 1e-10.
+            dps (int | str, optional):
+                dps value for mpmath. Set 'auto' to select dps automatically. Defaults to 'auto'.
+            max_dps (int, optional):
+                Maximum dps value for mpmath. This option is valid when `dps` is set to 'auto'.
+                Defaults to 5000.
+            out_log (str, optional):
+                Name for log file of mpmath. Defaults to 'test_log.log'.
 
         Raises:
             Exception:
-                The parametric_mode option is not p_value, reject_or_not, or all_search,
-                and the over_conditioning option is set False.
+                When `over_conditioning` and `exhaustive` are activated simultaneously
 
         Returns:
-            Type[SelectiveInferenceResult]
+            SelectiveInferenceResult
         """
 
         lim = max(30, 10 + np.abs(standardize(self.stat, popmean, self.eta_sigma_eta)))
