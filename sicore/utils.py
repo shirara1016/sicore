@@ -46,12 +46,16 @@ class OneVec:
         return vec
 
 
-def construct_projection_matrix(basis, verbose=False):
+def construct_projection_matrix(basis, verify=False):
     """Construct projection matrix from basis.
 
     Args:
-        basis (np.ndarray):
+        basis (array-like):
             The basis of the k-dimensional subspace to be projected. The shape is (k, n).
+        verify (bool, optional):
+            If True, check if the constructed matrix are valid or not, and
+            raise exception. Set False for faster computation.
+            Defaults to False.
 
     Raises:
         Exception:
@@ -64,7 +68,7 @@ def construct_projection_matrix(basis, verbose=False):
     basis = np.array(basis)
     U, _, _ = np.linalg.svd(basis.T, full_matrices=False)
     P = U @ U.T
-    if verbose:
+    if verify:
         if np.sum(np.abs(P.T - P)) > 1e-5:
             raise Exception("The projection matrix is not constructed correctly")
         else:
