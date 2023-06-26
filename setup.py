@@ -12,7 +12,7 @@ setup(
     description="Core package for Selective Inference",
     long_description=readme,
     author="Takeuchi Lab",
-    author_email="shiraishi.tomohiro.nagoyaml@gmail.com",
+    author_email="shirara1016@gmail.com",
     url="https://github.com/shirara1016/sicore",
     packages=find_packages(exclude=("tests", "docs")),
     install_requires=[
@@ -22,6 +22,6 @@ setup(
         "scipy>=1.5.2",
         "statsmodels>=0.11.1",
     ],
-    python_requires=">=3.6",
+    python_requires=">=3.10",
     license="MIT License",
 )

@@ -6,7 +6,7 @@ The Japanese version README is [here](/README_ja.md).
 
 ## Installation
 
-This package requires python 3.6 or higher and automatically installs any dependent packages. If you want to use tensorflow and pytorch's tensor, please install the framework manually.
+This package requires python 3.10 or higher and automatically installs any dependent packages. If you want to use tensorflow and pytorch's tensor, please install the framework manually.
 ```
 $ pip install sicore
 ```
@@ -38,31 +38,19 @@ The following fuctions are imported by `from sicore import *`
         - Determining if the null hypothesis is rejected or not.
         - Performing a parametric search of the entire specified range.
     - Inference results are returned as a data class.
-- one_sample_test() : Naive one-sample test.
-- two_sample_test() : Naive two-sample test.
 
 **Truncated Distribution**
 Provides computation with arbitrary precision using mpmath for multiple truncated intervals.
 - tn_cdf() : truncated standard normal distribution
-- tt_cdf() : truncated t distribution
 - tc_cdf() : truncated chi distribution
-- tc2_cdf() : truncated chi squared distribution
-- tf_cdf() : truncated F distribution
 
 **Evaluation Function**
-- false_positive_rate()
-- false_negative_rate()
-- true_negative_rate()
-- true_positive_rate()
-- type1_error_rate() ： Alias for false_positive_rate()
-- type2_error_rate() ： Alias for false_negative_rate()
-- power() : Alias for true_positive_rate()
+- type1_error_rate()
+- power()
 
 **Figure Drawing**
 - pvalues_hist() : Draws a histogram of p-values.
 - pvalues_qqplot() : Draws a uniform Q-Q plot of p-values.
-- FprFigure : Draws a fpr figure.
-- PowerFigure : Draws a power figure.
 
 **Interval Operations**
 - intervals.intersection() : Computes the intersection of two sets of intervals.
