@@ -224,23 +224,21 @@ class SelectiveInferenceNorm(InferenceNorm):
         ],
         model_selector: Callable[[Any], bool],
         significance_level: float = 0.05,
-        parametric_mode: str = "p_value",
+        precision: float = 0.001,
+        termination_criterion: str = "precision",
+        search_strategy: str = "pi3",
+        step: float = 1e-10,
+        max_iter: int = 1e6,
         over_conditioning: bool = False,
-        alternative: str = "abs",
-        threshold: float = 1e-3,
-        popmean: float = 0,
-        line_search: bool = True,
+        exhaustive: bool = False,
         max_tail: float = 1e3,
-        choose_method: str = "near_stat",
-        retain_selected_model: bool = False,
+        alternative: str = "abs",
+        retain_observed_model: bool = False,
         retain_mappings: bool = False,
         tol: float = 1e-10,
-        step: float = 1e-10,
         dps: int | str = "auto",
         max_dps: int = 5000,
         out_log: str = "test_log.log",
-        max_iter: int = 1e6,
-        callback: None = None,
     ) -> SelectiveInferenceResult:
         """Perform Selective Inference.
 
@@ -262,6 +260,7 @@ class SelectiveInferenceNorm(InferenceNorm):
                 This option is ignored when the `over_conditioning` or `exhaustive` is activated.
                 'precision' for computing p-value with `precision`.
                 'decision' for making decision whether or not to reject at `significance_level`.
+                Defaults to 'precision'.
             search_strategy (str, optional):
                 Specifies the search strategy used to perform parametric selective inference.
                 'pi1' focuses on the integral on
@@ -271,15 +270,14 @@ class SelectiveInferenceNorm(InferenceNorm):
                 Step width for parametric search. Defaults to 1e-10.
             max_iter (int, optional):
                 Maximum number of times to perform parametric search.
-                If this value is exceeded, the loop is considered
-                to be infinite. Defaults to 1e6.
+                If this value is exceeded, the loop is considered to be infinite.
+                Defaults to 1e6.
             over_conditioning (bool, optional):
                 Over conditioning inference. Defaults to False.
             exhaustive (bool, optional):
                 Exhaustive search of the range specified by `max_tail`. Defaults to False.
             max_tail (float, optional):
-                Maximum tail value to be parametrically searched when
-                the parametric_mode option is set to all_search. Defaults to 1e3.
+                Specifies the range to be searched when exhaustive is activated. Defaults to 1e3.
             alternative (str, optional):
                 'abs' for two-tailed test of the absolute value of test statistic.
                 'two-sided' for two-tailed test.
@@ -308,16 +306,22 @@ class SelectiveInferenceNorm(InferenceNorm):
             SelectiveInferenceResult
         """
 
-        lim = max(30, 10 + np.abs(standardize(self.stat, popmean, self.eta_sigma_eta)))
+        lim = max(
+            30, 10 + np.abs(standardize(self.stat, self.popmean, self.eta_sigma_eta))
+        )
         self.restrict = [[-lim, lim]]
+
+        if over_conditioning and exhaustive:
+            raise Exception(
+                "over_conditioning and exhaustive are activated simultaneously"
+            )
 
         if over_conditioning:
             result = self._over_conditioned_inference(
                 algorithm,
                 significance_level,
                 alternative,
-                popmean,
-                retain_selected_model,
+                retain_observed_model,
                 tol,
                 dps,
                 max_dps,
@@ -325,49 +329,41 @@ class SelectiveInferenceNorm(InferenceNorm):
             )
             return result
 
-        elif parametric_mode == "p_value" or parametric_mode == "reject_or_not":
-            result = self._parametric_inference(
+        if exhaustive:
+            result = self._exhaustive_parametric_inference(
                 algorithm,
                 model_selector,
                 significance_level,
-                parametric_mode,
-                alternative,
-                threshold,
-                popmean,
-                choose_method,
-                retain_selected_model,
-                retain_mappings,
-                tol,
                 step,
-                dps,
-                max_dps,
-                out_log,
                 max_iter,
-                callback,
-            )
-
-        elif parametric_mode == "all_search":
-            result = self._all_search_parametric_inference(
-                algorithm,
-                model_selector,
-                significance_level,
-                alternative,
-                popmean,
-                line_search,
                 max_tail,
-                retain_selected_model,
+                alternative,
+                retain_observed_model,
                 retain_mappings,
                 tol,
-                step,
                 dps,
                 max_dps,
                 out_log,
             )
+            return result
 
-        else:
-            raise Exception(
-                "Please activate either parametric_mode or over_conditioning option."
-            )
+        result = self._parametric_inference(
+            algorithm,
+            model_selector,
+            significance_level,
+            precision,
+            termination_criterion,
+            search_strategy,
+            step,
+            max_iter,
+            alternative,
+            retain_observed_model,
+            retain_mappings,
+            tol,
+            dps,
+            max_dps,
+            out_log,
+        )
 
         return result
 
@@ -434,14 +430,14 @@ class SelectiveInferenceNorm(InferenceNorm):
 
         return inf_p, sup_p
 
-    def _determine_next_search_data(self, choose_method, searched_intervals):
+    def _determine_next_search_data(self, search_strategy, searched_intervals):
         unsearched_intervals = standardize(
             not_(searched_intervals), self.popmean, self.eta_sigma_eta
         ).tolist()
         candidates = list()
         mode = 0
 
-        if choose_method == "sup_pdf":
+        if search_strategy == "pi2":
             for interval in unsearched_intervals:
                 if np.isinf(interval[0]):
                     l = min(mode - 2, interval[1] - 2)
@@ -460,7 +456,7 @@ class SelectiveInferenceNorm(InferenceNorm):
                         )
                     )
 
-        if choose_method == "near_stat" or choose_method == "high_pdf":
+        if search_strategy == "pi1" or search_strategy == "pi3":
             unsearched_lower_stat = intersection(
                 unsearched_intervals,
                 [[-np.inf, standardize(self.stat, self.popmean, self.eta_sigma_eta)]],
@@ -474,14 +470,14 @@ class SelectiveInferenceNorm(InferenceNorm):
             if len(unsearched_upper_stat) != 0:
                 candidates.append(unsearched_upper_stat[0][0] + self.step)
 
-        if choose_method == "near_stat":
+        if search_strategy == "pi1":
 
             def method(z):
                 return -np.abs(
                     z - standardize(self.stat, self.popmean, self.eta_sigma_eta)
                 )
 
-        if choose_method == "high_pdf" or choose_method == "sup_pdf":
+        if search_strategy == "pi3" or search_strategy == "pi2":
 
             def method(z):
                 return norm.logpdf(z)
@@ -498,30 +494,24 @@ class SelectiveInferenceNorm(InferenceNorm):
             return None
         return intervals[0][0] + self.step
 
-    def _execute_callback(self, callback, progress):
-        self.search_history.append(callback(progress))
-
     def _parametric_inference(
         self,
         algorithm,
         model_selector,
         significance_level,
-        parametric_mode,
+        precision,
+        termination_criterion,
+        search_strategy,
+        step,
+        max_iter,
         alternative,
-        threshold,
-        popmean,
-        choose_method,
-        retain_selected_model,
+        retain_observed_model,
         retain_mappings,
         tol,
-        step,
         dps,
         max_dps,
         out_log,
-        max_iter,
-        callback,
     ):
-        self.popmean = popmean
         self.tol = tol
         self.step = step
         self.dps = dps
@@ -558,7 +548,7 @@ class SelectiveInferenceNorm(InferenceNorm):
                     mappings[interval] = model
 
             if model_selector(model):
-                selected_model = model if retain_selected_model else None
+                selected_model = model if retain_observed_model else None
                 truncated_intervals += intervals
                 detect_count += 1
 
@@ -571,10 +561,10 @@ class SelectiveInferenceNorm(InferenceNorm):
                 truncated_intervals, self.searched_intervals, alternative
             )
 
-            if parametric_mode == "p_value":
-                if np.abs(sup_p - inf_p) < threshold:
+            if termination_criterion == "precision":
+                if np.abs(sup_p - inf_p) < precision:
                     break
-            if parametric_mode == "reject_or_not":
+            if termination_criterion == "decision":
                 if sup_p <= significance_level:
                     reject_or_not = True
                     break
@@ -582,12 +572,14 @@ class SelectiveInferenceNorm(InferenceNorm):
                     reject_or_not = False
                     break
 
-            z = self._determine_next_search_data(choose_method, self.searched_intervals)
+            z = self._determine_next_search_data(
+                search_strategy, self.searched_intervals
+            )
 
-        stat_std = standardize(self.stat, popmean, self.eta_sigma_eta)
+        stat_std = standardize(self.stat, self.popmean, self.eta_sigma_eta)
         truncated_intervals = union_all(truncated_intervals, tol=self.tol)
         norm_intervals = standardize(
-            truncated_intervals, popmean, self.eta_sigma_eta
+            truncated_intervals, self.popmean, self.eta_sigma_eta
         ).tolist()
         norm_intervals = intersection(norm_intervals, self.restrict)
         absolute = True if alternative == "abs" else False
@@ -600,7 +592,7 @@ class SelectiveInferenceNorm(InferenceNorm):
             out_log=self.out_log,
         )
         p_value = calc_pvalue(F, alternative)
-        if parametric_mode == "p_value":
+        if termination_criterion == "precision":
             reject_or_not = p_value <= significance_level
 
         return SelectiveInferenceResult(
@@ -617,24 +609,22 @@ class SelectiveInferenceNorm(InferenceNorm):
             mappings,
         )
 
-    def _all_search_parametric_inference(
+    def _exhaustive_parametric_inference(
         self,
         algorithm,
         model_selector,
         significance_level,
-        alternative,
-        popmean,
-        line_search,
+        step,
+        max_iter,
         max_tail,
-        retain_selected_model,
+        alternative,
+        retain_observed_model,
         retain_mappings,
         tol,
-        step,
         dps,
         max_dps,
         out_log,
     ):
-        self.popmean = popmean
         self.tol = tol
         self.step = step
         self.dps = dps
@@ -653,9 +643,9 @@ class SelectiveInferenceNorm(InferenceNorm):
         z = self._next_search_data()
         while True:
             search_count += 1
-            if search_count > 3e4:
+            if search_count > max_iter:
                 raise Exception(
-                    "The number of searches exceeds 100,000 times, suggesting an infinite loop."
+                    f"The number of searches exceeds {int(max_iter)} times, suggesting an infinite loop."
                 )
 
             model, interval = algorithm(self.z, self.c, z)
@@ -674,7 +664,7 @@ class SelectiveInferenceNorm(InferenceNorm):
                     mappings[interval] = model
 
             if model_selector(model):
-                selected_model = model if retain_selected_model else None
+                selected_model = model if retain_observed_model else None
                 result_intervals += intervals
                 detect_count += 1
 
@@ -691,10 +681,10 @@ class SelectiveInferenceNorm(InferenceNorm):
             if np.abs(prev_z - z) < self.step * 0.5:
                 raise InfiniteLoopError
 
-        stat_std = standardize(self.stat, popmean, self.eta_sigma_eta)
+        stat_std = standardize(self.stat, self.popmean, self.eta_sigma_eta)
         truncated_intervals = union_all(result_intervals, tol=self.tol)
         norm_intervals = standardize(
-            truncated_intervals, popmean, self.eta_sigma_eta
+            truncated_intervals, self.popmean, self.eta_sigma_eta
         ).tolist()
         norm_intervals = intersection(norm_intervals, self.restrict)
         absolute = True if alternative == "abs" else False
@@ -731,14 +721,12 @@ class SelectiveInferenceNorm(InferenceNorm):
         algorithm,
         significance_level,
         alternative,
-        popmean,
-        retain_selected_model,
+        retain_observed_model,
         tol,
         dps,
         max_dps,
         out_log,
     ):
-        self.popmean = popmean
         self.tol = tol
         self.dps = dps
         self.max_dps = max_dps
@@ -748,8 +736,10 @@ class SelectiveInferenceNorm(InferenceNorm):
         interval = np.asarray(interval)
         intervals = _interval_to_intervals(interval)
 
-        stat_std = standardize(self.stat, popmean, self.eta_sigma_eta)
-        norm_intervals = standardize(intervals, popmean, self.eta_sigma_eta).tolist()
+        stat_std = standardize(self.stat, self.popmean, self.eta_sigma_eta)
+        norm_intervals = standardize(
+            intervals, self.popmean, self.eta_sigma_eta
+        ).tolist()
         norm_intervals = intersection(norm_intervals, self.restrict)
         absolute = True if alternative == "abs" else False
         F = tn_cdf_mpmath(
@@ -775,5 +765,5 @@ class SelectiveInferenceNorm(InferenceNorm):
             1,
             1,
             None,
-            model if retain_selected_model else None,
+            model if retain_observed_model else None,
         )
