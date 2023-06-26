@@ -155,8 +155,6 @@ class NaiveInferenceChi(InferenceChi):
         P (np.ndarray, tf.Tensor, torch.Tensor, sparse.csr_array):
             Projection matrix in 2-D array. When given as
             a tensor or a sparse array, activate the corresponding option.
-        degree (int):
-            Dimension of the space projected by P matrix.
         use_sparse (boolean, optional):
             Whether to use sparse matrix or not. Defaults to False.
         use_tf (boolean, optional):
@@ -201,8 +199,6 @@ class SelectiveInferenceChi(InferenceChi):
         P (np.ndarray, tf.Tensor, torch.Tensor, sparse.csr_array):
             Projection matrix in 2-D array. When given as
             a tensor or a sparse array, activate the corresponding option.
-        degree (int):
-            Dimension of the space projected by P matrix.
         use_sparse (boolean, optional):
             Whether to use sparse matrix or not. Defaults to False.
         use_tf (boolean, optional):
@@ -231,103 +227,102 @@ class SelectiveInferenceChi(InferenceChi):
         ],
         model_selector: Callable[[Any], bool],
         significance_level: float = 0.05,
-        parametric_mode: str = "p_value",
+        precision: float = 0.001,
+        termination_criterion: str = "precision",
+        search_strategy: str = "pi3",
+        step: float = 1e-10,
+        max_iter: int = 1e6,
         over_conditioning: bool = False,
-        alternative: str = "less",
-        threshold: float = 1e-3,
-        line_search: bool = True,
+        exhaustive: bool = False,
         max_tail: float = 1e3,
-        choose_method: str = "near_stat",
-        retain_selected_model: bool = False,
+        alternative: str = "abs",
+        retain_observed_model: bool = False,
         retain_mappings: bool = False,
         tol: float = 1e-10,
-        step: float = 1e-10,
         dps: int | str = "auto",
         max_dps: int = 5000,
         out_log: str = "test_log.log",
-        max_iter: int = 1e6,
-        callback: None = None,
     ) -> SelectiveInferenceResult:
         """Perform Selective Inference.
 
         Args:
             algorithm (Callable[[np.ndarray, np.ndarray, float], Tuple[List[List[float]], Any]]):
-                Callable function which takes two vectors (`a`, `b`)
-                and a scalar `z` that can satisfy `data = a + b * z`
-                as arguments, and returns the selected model (any) and
-                the truncation intervals (array-like). A closure function might be
-                helpful to implement this.
+                Callable function which takes two vectors (`a`, `b`) and a scalar `z`
+                that can satisfy `data = a + b * z` as argument, and
+                returns the obtained model (Any) and the intervals (np.ndarray) where it is obtained.
+                A closure function might be helpful to implement this.
             model_selector (Callable[[Any], bool]):
-                Callable function which takes a selected model (any) as single argument, and
-                returns True if the model is used for the testing, and False otherwise.
+                Callable function which takes a obtained model (any) as single argument, and
+                returns True if the model is observed one, and False otherwise.
             significance_level (float, optional):
-                Significance level for the testing. Defaults to 0.05.
-            parametric_mode (str, optional):
-                Specifies the method used to perform parametric selective inference. This option is
-                ignored when the over_conditioning option is activated.
-                'p_value' for calculation of p-value with guaranteed accuracy specified by the threshold option.
-                'reject_or_not' for only determining whether the null hypothesis is rejected.
-                'all_search' for all searches of the interval specified by the max_tail option.
+                Significance level for the test. Defaults to 0.05.
+            precision (float, optional):
+                Precision required to compute p-value. Defaults to 0.001.
+            termination_criterion (str, optional):
+                Specifies the termination criterion used to perform parametric selective inference.
+                This option is ignored when the `over_conditioning` or `exhaustive` is activated.
+                'precision' for computing p-value with `precision`.
+                'decision' for making decision whether or not to reject at `significance_level`.
+                Defaults to 'precision'.
+            search_strategy (str, optional):
+                Specifies the search strategy used to perform parametric selective inference.
+                'pi1' focuses on the integral on
+                'pi2', 'pi3' can be specified.
+                Defaults to 'pi3'.
+            step (float, optional):
+                Step width for parametric search. Defaults to 1e-10.
+            max_iter (int, optional):
+                Maximum number of times to perform parametric search.
+                If this value is exceeded, the loop is considered to be infinite.
+                Defaults to 1e6.
             over_conditioning (bool, optional):
-                Over conditioning Inference. Defaults to False.
-            alternative (str, optional):
-                'two-sided' for two-tailed test,
-                'less' for right-tailed test,
-                'greater' for left-tailed test,
-                'abs' for two-tailed test for
-                the distribution of absolute values
-                following the null distribution.
-                Defaults to 'less'.
-            threshold (float, optional):
-                Guaranteed accuracy when calculating p-value. Defaults to 1e-3.
-            line_search (bool, optional):
-                Wheter to perform a line search or a random search. Defaults to True.
+                Over conditioning inference. Defaults to False.
+            exhaustive (bool, optional):
+                Exhaustive search of the range specified by `max_tail`. Defaults to False.
             max_tail (float, optional):
-                Maximum tail value to be parametrically searched when
-                the parametric_mode option is set to all_search. Defaults to 1e3.
-            choose_method (str, optional):
-                How to determine the search direction when parametric_mode
-                is other than all_search. 'near_stat', 'high_pdf', and 'random'
-                can be specified. Defaults to 'near_stat'.
-            retain_selected_model (bool, optional):
-                Whether retain selected model as returns or not. Defaults to False.
+                Specifies the range to be searched when exhaustive is activated. Defaults to 1e3.
+            alternative (str, optional):
+                'abs' for two-tailed test of the absolute value of test statistic.
+                'two-sided' for two-tailed test.
+                'less' for right-tailed test.
+                'greater' for left-tailed test.
+                Defaults to 'abs'.
+            retain_observed_model (bool, optional):
+                Whether retain observed model as returns or not. Defaults to False.
             retain_mappings (bool, optional):
                 Whether retain mappings as returns or not. Defaults to False.
             tol (float, optional):
                 Tolerance error parameter for intervals. Defaults to 1e-10.
-            step (float, optional):
-                Step width for parametric search. Defaults to 1e-10.
             dps (int | str, optional):
-                dps value for mpmath. Set 'auto' to select dps
-                automatically. Defaults to 'auto'.
+                dps value for mpmath. Set 'auto' to select dps automatically. Defaults to 'auto'.
             max_dps (int, optional):
-                Maximum dps value for mpmath. This option is valid
-                when `dps` is set to 'auto'. Defaults to 5000.
+                Maximum dps value for mpmath. This option is valid when `dps` is set to 'auto'.
+                Defaults to 5000.
             out_log (str, optional):
                 Name for log file of mpmath. Defaults to 'test_log.log'.
-            max_iter (int, optional):
-                Maximum number of times to perform parametric search.
-                If this value is exceeded, the loop is considered
-                to be infinite. Defaults to 1e6.
 
         Raises:
             Exception:
-                The parametric_mode option is not p_value, reject_or_not, or all_search,
-                and the over_conditioning option is set False.
+                When `over_conditioning` and `exhaustive` are activated simultaneously
 
         Returns:
-            Type[SelectiveInferenceResult]
+            SelectiveInferenceResult
         """
 
         lim = max(20 + np.sqrt(self.degree - 1), 10 + float(self.stat))
         self.restrict = [[-lim, lim]]
+
+        if over_conditioning and exhaustive:
+            raise Exception(
+                "over_conditioning and exhaustive are activated simultaneously"
+            )
 
         if over_conditioning:
             result = self._over_conditioned_inference(
                 algorithm,
                 significance_level,
                 alternative,
-                retain_selected_model,
+                retain_observed_model,
                 tol,
                 dps,
                 max_dps,
@@ -335,47 +330,41 @@ class SelectiveInferenceChi(InferenceChi):
             )
             return result
 
-        elif parametric_mode == "p_value" or parametric_mode == "reject_or_not":
-            result = self._parametric_inference(
+        if exhaustive:
+            result = self._exhaustive_parametric_inference(
                 algorithm,
                 model_selector,
                 significance_level,
-                parametric_mode,
-                alternative,
-                threshold,
-                choose_method,
-                retain_selected_model,
-                retain_mappings,
-                tol,
                 step,
-                dps,
-                max_dps,
-                out_log,
                 max_iter,
-                callback,
-            )
-
-        elif parametric_mode == "all_search":
-            result = self._all_search_parametric_inference(
-                algorithm,
-                model_selector,
-                significance_level,
-                alternative,
-                line_search,
                 max_tail,
-                retain_selected_model,
+                alternative,
+                retain_observed_model,
                 retain_mappings,
                 tol,
-                step,
                 dps,
                 max_dps,
                 out_log,
             )
+            return result
 
-        else:
-            raise Exception(
-                "Please activate either parametric_mode or over_conditioning option."
-            )
+        result = self._parametric_inference(
+            algorithm,
+            model_selector,
+            significance_level,
+            precision,
+            termination_criterion,
+            search_strategy,
+            step,
+            max_iter,
+            alternative,
+            retain_observed_model,
+            retain_mappings,
+            tol,
+            dps,
+            max_dps,
+            out_log,
+        )
 
         return result
 
@@ -434,12 +423,12 @@ class SelectiveInferenceChi(InferenceChi):
 
         return inf_p, sup_p
 
-    def _determine_next_search_data(self, choose_method, searched_intervals):
+    def _determine_next_search_data(self, search_strategy, searched_intervals):
         unsearched_intervals = intersection(not_(searched_intervals), [[0.0, np.inf]])
         candidates = list()
         mode = np.sqrt(self.degree - 1)
 
-        if choose_method == "sup_pdf":
+        if search_strategy == "pi2":
             for interval in unsearched_intervals:
                 l = interval[0]
                 if np.isinf(interval[1]):
@@ -455,7 +444,7 @@ class SelectiveInferenceChi(InferenceChi):
                         )
                     )
 
-        if choose_method == "near_stat" or choose_method == "high_pdf":
+        if search_strategy == "pi1" or search_strategy == "pi3":
             unsearched_lower_stat = intersection(
                 unsearched_intervals, [[-np.inf, float(self.stat)]]
             )
@@ -467,12 +456,12 @@ class SelectiveInferenceChi(InferenceChi):
             if len(unsearched_upper_stat) != 0:
                 candidates.append(unsearched_upper_stat[0][0] + self.step)
 
-        if choose_method == "near_stat":
+        if search_strategy == "pi1":
 
             def method(z):
                 return -np.abs(z - float(self.stat))
 
-        if choose_method == "high_pdf" or choose_method == "sup_pdf":
+        if search_strategy == "pi3" or search_strategy == "pi2":
 
             def method(z):
                 return chi.logpdf(z, self.degree)
@@ -494,19 +483,18 @@ class SelectiveInferenceChi(InferenceChi):
         algorithm,
         model_selector,
         significance_level,
-        parametric_mode,
+        precision,
+        termination_criterion,
+        search_strategy,
+        step,
+        max_iter,
         alternative,
-        threshold,
-        choose_method,
-        retain_selected_model,
+        retain_observed_model,
         retain_mappings,
         tol,
-        step,
         dps,
         max_dps,
         out_log,
-        max_iter,
-        callback,
     ):
         self.tol = tol
         self.step = step
@@ -544,7 +532,7 @@ class SelectiveInferenceChi(InferenceChi):
                     mappings[interval] = model
 
             if model_selector(model):
-                selected_model = model if retain_selected_model else None
+                selected_model = model if retain_observed_model else None
                 truncated_intervals += intervals
                 detect_count += 1
 
@@ -557,10 +545,10 @@ class SelectiveInferenceChi(InferenceChi):
                 truncated_intervals, self.searched_intervals, alternative
             )
 
-            if parametric_mode == "p_value":
-                if np.abs(sup_p - inf_p) < threshold:
+            if termination_criterion == "precision":
+                if np.abs(sup_p - inf_p) < precision:
                     break
-            if parametric_mode == "reject_or_not":
+            if termination_criterion == "decision":
                 if sup_p <= significance_level:
                     reject_or_not = True
                     break
@@ -568,7 +556,9 @@ class SelectiveInferenceChi(InferenceChi):
                     reject_or_not = False
                     break
 
-            z = self._determine_next_search_data(choose_method, self.searched_intervals)
+            z = self._determine_next_search_data(
+                search_strategy, self.searched_intervals
+            )
 
         stat_chi = float(self.stat)
         truncated_intervals = union_all(truncated_intervals, tol=self.tol)
@@ -584,7 +574,7 @@ class SelectiveInferenceChi(InferenceChi):
             out_log=self.out_log,
         )
         p_value = calc_pvalue(F, alternative)
-        if parametric_mode == "p_value":
+        if termination_criterion == "precision":
             reject_or_not = p_value <= significance_level
 
         return SelectiveInferenceResult(
@@ -601,18 +591,18 @@ class SelectiveInferenceChi(InferenceChi):
             mappings,
         )
 
-    def _all_search_parametric_inference(
+    def _exhaustive_parametric_inference(
         self,
         algorithm,
         model_selector,
         significance_level,
-        alternative,
-        line_search,
+        step,
+        max_iter,
         max_tail,
-        retain_selected_model,
+        alternative,
+        retain_observed_model,
         retain_mappings,
         tol,
-        step,
         dps,
         max_dps,
         out_log,
@@ -635,9 +625,9 @@ class SelectiveInferenceChi(InferenceChi):
         z = self._next_search_data()
         while True:
             search_count += 1
-            if search_count > 3e4:
+            if search_count > max_iter:
                 raise Exception(
-                    "The number of searches exceeds 100,000 times, suggesting an infinite loop."
+                    f"The number of searches exceeds {int(max_iter)} times, suggesting an infinite loop."
                 )
 
             model, interval = algorithm(self.z, self.c, z)
@@ -656,7 +646,7 @@ class SelectiveInferenceChi(InferenceChi):
                     mappings[interval] = model
 
             if model_selector(model):
-                selected_model = model if retain_selected_model else None
+                selected_model = model if retain_observed_model else None
                 result_intervals += intervals
                 detect_count += 1
 
@@ -711,7 +701,7 @@ class SelectiveInferenceChi(InferenceChi):
         algorithm,
         significance_level,
         alternative,
-        retain_selected_model,
+        retain_observed_model,
         tol,
         dps,
         max_dps,
@@ -753,5 +743,5 @@ class SelectiveInferenceChi(InferenceChi):
             1,
             1,
             None,
-            model if retain_selected_model else None,
+            model if retain_observed_model else None,
         )
