@@ -2,7 +2,7 @@
 Core package for selective inference.
 """
 from . import intervals
-from .intervals import polytope_to_interval, poly_lt_zero
+from .intervals import polytope_to_interval, poly_lt_zero, intersection
 from .utils import OneVec, construct_projection_matrix
 from .evaluation import (
     power,
@@ -42,6 +42,7 @@ __all__ = [
     "intervals",
     "polytope_to_interval",
     "poly_lt_zero",
+    "intersection",
     "construct_projection_matrix",
     "OneVec",
 ]

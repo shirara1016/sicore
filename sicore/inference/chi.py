@@ -266,8 +266,9 @@ class SelectiveInferenceChi(InferenceChi):
                 Defaults to 'precision'.
             search_strategy (str, optional):
                 Specifies the search strategy used to perform parametric selective inference.
-                'pi1' focuses on the integral on
-                'pi2', 'pi3' can be specified.
+                'pi1' focuses on the integral on truncated intervals.
+                'pi2' focuses on the integral on searched intervals.
+                'pi3' focuses on the both of integrals.
                 Defaults to 'pi3'.
             step (float, optional):
                 Step width for parametric search. Defaults to 1e-10.

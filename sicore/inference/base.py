@@ -17,11 +17,11 @@ class SelectiveInferenceResult:
         inf_p (float): Lower bound of p-value.
         sup_p (float): Upper bound of p-value.
         reject_or_not (bool): Whether or not to reject the null hypothesis.
-        truncated_intervals (List[List[float]]): Intervals from which the selected model is obtained.
+        truncated_intervals (list[list[float]]): Intervals from which the selected model is obtained.
         search_count (int): Number of times the truncated intervals were searched.
         detect_count (int): Number of times that the same model as the observed model was obtained.
         selected_model (Any | None): The model selected for the observed test statistic.
-        mappings (Dict[tuple[float], Any] | None): A dictionary that holds the model obtained at any point.
+        mappings (dict[tuple[float], Any] | None): A dictionary that holds the model obtained at any point.
     """
 
     stat: float

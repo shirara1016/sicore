@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="sicore package" href="sicore.html" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" />
 
     <!-- Generated with Sphinx 6.1.3 and Furo 2022.12.07 -->
         <title>sicore 1.0.0 documentation</title>
@@ -134,7 +134,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -154,9 +154,8 @@
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
-  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1 has-children"><a class="reference internal" href="sicore.html">sicore package</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
+  <ul class="current">
+<li class="toctree-l1 current has-children current-page"><a class="current reference internal" href="#">sicore package</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="simple">
 </ul>
 </li>
 </ul>
@@ -187,27 +186,695 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
         <article role="main">
-          <section id="welcome-to-sicore-s-documentation">
-<h1>Welcome to sicore’s documentation!<a class="headerlink" href="#welcome-to-sicore-s-documentation" title="Permalink to this heading">#</a></h1>
+          <section id="sicore-package">
+<h1>sicore package<a class="headerlink" href="#sicore-package" title="Permalink to this heading">#</a></h1>
 <div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="sicore.html">sicore package</a></li>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">sicore package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-sicore">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sicore.InfiniteLoopError"><code class="docutils literal notranslate"><span class="pre">InfiniteLoopError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sicore.NaiveInferenceChi"><code class="docutils literal notranslate"><span class="pre">NaiveInferenceChi</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sicore.NaiveInferenceNorm"><code class="docutils literal notranslate"><span class="pre">NaiveInferenceNorm</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sicore.OneVec"><code class="docutils literal notranslate"><span class="pre">OneVec</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sicore.SelectiveInferenceChi"><code class="docutils literal notranslate"><span class="pre">SelectiveInferenceChi</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sicore.SelectiveInferenceNorm"><code class="docutils literal notranslate"><span class="pre">SelectiveInferenceNorm</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sicore.SelectiveInferenceResult"><code class="docutils literal notranslate"><span class="pre">SelectiveInferenceResult</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sicore.construct_projection_matrix"><code class="docutils literal notranslate"><span class="pre">construct_projection_matrix()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sicore.intersection"><code class="docutils literal notranslate"><span class="pre">intersection()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sicore.poly_lt_zero"><code class="docutils literal notranslate"><span class="pre">poly_lt_zero()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sicore.polytope_to_interval"><code class="docutils literal notranslate"><span class="pre">polytope_to_interval()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sicore.power"><code class="docutils literal notranslate"><span class="pre">power()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sicore.pvalues_hist"><code class="docutils literal notranslate"><span class="pre">pvalues_hist()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sicore.pvalues_qqplot"><code class="docutils literal notranslate"><span class="pre">pvalues_qqplot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sicore.tc_cdf_mpmath"><code class="docutils literal notranslate"><span class="pre">tc_cdf_mpmath()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sicore.tn_cdf_mpmath"><code class="docutils literal notranslate"><span class="pre">tn_cdf_mpmath()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sicore.type1_error_rate"><code class="docutils literal notranslate"><span class="pre">type1_error_rate()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </div>
-</section>
-<section id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this heading">#</a></h1>
-<ul class="simple">
-<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
-<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+<section id="module-sicore">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-sicore" title="Permalink to this heading">#</a></h2>
+<p>Core package for selective inference.</p>
+<dl class="py exception">
+<dt class="sig sig-object py" id="sicore.InfiniteLoopError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">InfiniteLoopError</span></span><a class="headerlink" href="#sicore.InfiniteLoopError" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sicore.NaiveInferenceChi">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">NaiveInferenceChi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">csr_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">csr_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_sparse</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_tf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_torch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sicore.NaiveInferenceChi" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">InferenceChi</span></code></p>
+<p>Naive inference for a test statistic which follows chi squared distribution under null.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>np.ndarray</em><em>, </em><em>tf.Tensor</em><em>, </em><em>torch.Tensor</em>) – Observation data in 1-D array. When given as a tensor,
+activate the corresponding option.</p></li>
+<li><p><strong>var</strong> (<em>float</em><em>, </em><em>np.ndarray</em><em>, </em><em>tf.Tensor</em><em>, </em><em>torch.Tensor</em><em>, </em><em>sparse.csr_array</em>) – Value of known variance covariance. Assuming that
+the shape of the input is a scalar or 1-D array or 2-D array,
+the variance-covariance matrix Cov is interpreted as follows.
+When the input is a scalar, Cov = input * Identity.
+When the input is a 1-D array, Cov = diag(input).
+When the input is a 2-D array, Cov = input.
+Also, activate the option, when given as a sparse array.</p></li>
+<li><p><strong>P</strong> (<em>np.ndarray</em><em>, </em><em>tf.Tensor</em><em>, </em><em>torch.Tensor</em><em>, </em><em>sparse.csr_array</em>) – Projection matrix in 2-D array. When given as
+a tensor or a sparse array, activate the corresponding option.</p></li>
+<li><p><strong>use_sparse</strong> (<em>boolean</em><em>, </em><em>optional</em>) – Whether to use sparse matrix or not. Defaults to False.</p></li>
+<li><p><strong>use_tf</strong> (<em>boolean</em><em>, </em><em>optional</em>) – Whether to use tensorflow or not. Defaults to False.</p></li>
+<li><p><strong>use_torch</strong> (<em>boolean</em><em>, </em><em>optional</em>) – Whether to use pytorch or not. Defaults to False.</p></li>
 </ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="sicore.NaiveInferenceChi.inference">
+<span class="sig-name descname"><span class="pre">inference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alternative</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'less'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sicore.NaiveInferenceChi.inference" title="Permalink to this definition">#</a></dt>
+<dd><p>Perform naive statistical inference.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>alternative</strong> (<em>str</em><em>, </em><em>optional</em>) – ‘two-sided’ for two-tailed test,
+‘less’ for right-tailed test,
+‘greater’ for left-tailed test.
+Defaults to ‘less’.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>p-value</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sicore.NaiveInferenceNorm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">NaiveInferenceNorm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">csr_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_sparse</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_tf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_torch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sicore.NaiveInferenceNorm" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">InferenceNorm</span></code></p>
+<p>Naive inference for a test statistic which follows normal distribution under null.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>np.ndarray</em><em>, </em><em>List</em><em>[</em><em>float</em><em>]</em><em>, </em><em>tf.Tensor</em><em>, </em><em>torch.Tensor</em>) – Observation data in 1-D array. When given as a tensor,
+activate the corresponding option.</p></li>
+<li><p><strong>var</strong> (<em>float</em><em>, </em><em>np.ndarray</em><em>, </em><em>tf.Tensor</em><em>, </em><em>torch.Tensor</em><em>, </em><em>sparse.csr_array</em>) – Value of known variance covariance. Assuming that
+the shape of the input is a scalar or 1-D array or 2-D array,
+the variance-covariance matrix Cov is interpreted as follows.
+When the input is a scalar, Cov = input * Identity.
+When the input is a 1-D array, Cov = diag(input).
+When the input is a 2-D array, Cov = input.
+Also, activate the option, when given as a sparse array.</p></li>
+<li><p><strong>eta</strong> (<em>np.ndarray</em><em>, </em><em>List</em><em>[</em><em>float</em><em>]</em><em>, </em><em>tf.Tensor</em><em>, </em><em>torch.Tensor</em>) – Contrast vector in 1-D array. When given as a tensor,
+activate the corresponding option.</p></li>
+<li><p><strong>use_sparse</strong> (<em>boolean</em><em>, </em><em>optional</em>) – Whether to use sparse array or not. Defaults to False.</p></li>
+<li><p><strong>use_tf</strong> (<em>boolean</em><em>, </em><em>optional</em>) – Whether to use tensorflow or not. Defaults to False.</p></li>
+<li><p><strong>use_torch</strong> (<em>boolean</em><em>, </em><em>optional</em>) – Whether to use pytorch or not. Defaults to False.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="sicore.NaiveInferenceNorm.inference">
+<span class="sig-name descname"><span class="pre">inference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alternative</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'two-sided'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">popmean</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sicore.NaiveInferenceNorm.inference" title="Permalink to this definition">#</a></dt>
+<dd><p>Perform naive statistical inference.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>alternative</strong> (<em>str</em><em>, </em><em>optional</em>) – ‘two-sided’ for two-tailed test,
+‘less’ for right-tailed test,
+‘greater’ for left-tailed test.
+Defaults to ‘two-sided’.</p></li>
+<li><p><strong>popmean</strong> (<em>float</em><em>, </em><em>optional</em>) – Population mean of the test statistic under null hypothesis.
+Defaults to 0.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>p-value</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sicore.OneVec">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">OneVec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sicore.OneVec" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Vector whose elements from position <cite>i</cite> to <cite>j</cite> are set to 1, and 0 otherwise.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>length</strong> (<em>int</em>) – Dimension of the vector.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="sicore.OneVec.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sicore.OneVec.get" title="Permalink to this definition">#</a></dt>
+<dd><p>Get the vector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>i</strong> (<em>int</em>) – Start index of 1 (1&lt;=i&lt;=`length`).</p></li>
+<li><p><strong>j</strong> (<em>int</em><em>, </em><em>optional</em>) – End index of 1 (1&lt;=j&lt;=`length`). If None, it returns a
+vector whose <a href="#id1"><span class="problematic" id="id2">`</span></a>i`th element is set to 1, and 0 otherwise.
+Defaults toNone.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>one-zero vector</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sicore.SelectiveInferenceChi">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">SelectiveInferenceChi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">csr_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">csr_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_sparse</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_tf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_torch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sicore.SelectiveInferenceChi" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">InferenceChi</span></code></p>
+<p>Selective inference for a test statistic which follows chi squared distribution under null.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>np.ndarray</em><em>, </em><em>tf.Tensor</em><em>, </em><em>torch.Tensor</em>) – Observation data in 1-D array. When given as a tensor,
+activate the corresponding option.</p></li>
+<li><p><strong>var</strong> (<em>float</em><em>, </em><em>np.ndarray</em><em>, </em><em>tf.Tensor</em><em>, </em><em>torch.Tensor</em><em>, </em><em>sparse.csr_array</em>) – Value of known variance covariance. Assuming that
+the shape of the input is a scalar or 1-D array or 2-D array,
+the variance-covariance matrix Cov is interpreted as follows.
+When the input is a scalar, Cov = input * Identity.
+When the input is a 1-D array, Cov = diag(input).
+When the input is a 2-D array, Cov = input.
+Also, activate the option, when given as a sparse array.</p></li>
+<li><p><strong>P</strong> (<em>np.ndarray</em><em>, </em><em>tf.Tensor</em><em>, </em><em>torch.Tensor</em><em>, </em><em>sparse.csr_array</em>) – Projection matrix in 2-D array. When given as
+a tensor or a sparse array, activate the corresponding option.</p></li>
+<li><p><strong>use_sparse</strong> (<em>boolean</em><em>, </em><em>optional</em>) – Whether to use sparse matrix or not. Defaults to False.</p></li>
+<li><p><strong>use_tf</strong> (<em>boolean</em><em>, </em><em>optional</em>) – Whether to use tensorflow or not. Defaults to False.</p></li>
+<li><p><strong>use_torch</strong> (<em>boolean</em><em>, </em><em>optional</em>) – Whether to use pytorch or not. Defaults to False.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="sicore.SelectiveInferenceChi.inference">
+<span class="sig-name descname"><span class="pre">inference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algorithm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_selector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">significance_level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">termination_criterion</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'precision'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_strategy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'pi3'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">over_conditioning</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exhaustive</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_tail</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alternative</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'abs'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retain_observed_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retain_mappings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_dps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_log</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'test_log.log'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#sicore.SelectiveInferenceResult" title="sicore.inference.base.SelectiveInferenceResult"><span class="pre">SelectiveInferenceResult</span></a></span></span><a class="headerlink" href="#sicore.SelectiveInferenceChi.inference" title="Permalink to this definition">#</a></dt>
+<dd><p>Perform Selective Inference.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>algorithm</strong> (<em>Callable</em><em>[</em><em>[</em><em>np.ndarray</em><em>, </em><em>np.ndarray</em><em>, </em><em>float</em><em>]</em><em>, </em><em>Tuple</em><em>[</em><em>List</em><em>[</em><em>List</em><em>[</em><em>float</em><em>]</em><em>]</em><em>, </em><em>Any</em><em>]</em><em>]</em>) – Callable function which takes two vectors (<cite>a</cite>, <cite>b</cite>) and a scalar <cite>z</cite>
+that can satisfy <cite>data = a + b * z</cite> as argument, and
+returns the obtained model (Any) and the intervals (np.ndarray) where it is obtained.
+A closure function might be helpful to implement this.</p></li>
+<li><p><strong>model_selector</strong> (<em>Callable</em><em>[</em><em>[</em><em>Any</em><em>]</em><em>, </em><em>bool</em><em>]</em>) – Callable function which takes a obtained model (any) as single argument, and
+returns True if the model is observed one, and False otherwise.</p></li>
+<li><p><strong>significance_level</strong> (<em>float</em><em>, </em><em>optional</em>) – Significance level for the test. Defaults to 0.05.</p></li>
+<li><p><strong>precision</strong> (<em>float</em><em>, </em><em>optional</em>) – Precision required to compute p-value. Defaults to 0.001.</p></li>
+<li><p><strong>termination_criterion</strong> (<em>str</em><em>, </em><em>optional</em>) – Specifies the termination criterion used to perform parametric selective inference.
+This option is ignored when the <cite>over_conditioning</cite> or <cite>exhaustive</cite> is activated.
+‘precision’ for computing p-value with <cite>precision</cite>.
+‘decision’ for making decision whether or not to reject at <cite>significance_level</cite>.
+Defaults to ‘precision’.</p></li>
+<li><p><strong>search_strategy</strong> (<em>str</em><em>, </em><em>optional</em>) – Specifies the search strategy used to perform parametric selective inference.
+‘pi1’ focuses on the integral on truncated intervals.
+‘pi2’ focuses on the integral on searched intervals.
+‘pi3’ focuses on the both of integrals.
+Defaults to ‘pi3’.</p></li>
+<li><p><strong>step</strong> (<em>float</em><em>, </em><em>optional</em>) – Step width for parametric search. Defaults to 1e-10.</p></li>
+<li><p><strong>max_iter</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum number of times to perform parametric search.
+If this value is exceeded, the loop is considered to be infinite.
+Defaults to 1e6.</p></li>
+<li><p><strong>over_conditioning</strong> (<em>bool</em><em>, </em><em>optional</em>) – Over conditioning inference. Defaults to False.</p></li>
+<li><p><strong>exhaustive</strong> (<em>bool</em><em>, </em><em>optional</em>) – Exhaustive search of the range specified by <cite>max_tail</cite>. Defaults to False.</p></li>
+<li><p><strong>max_tail</strong> (<em>float</em><em>, </em><em>optional</em>) – Specifies the range to be searched when exhaustive is activated. Defaults to 1e3.</p></li>
+<li><p><strong>alternative</strong> (<em>str</em><em>, </em><em>optional</em>) – ‘abs’ for two-tailed test of the absolute value of test statistic.
+‘two-sided’ for two-tailed test.
+‘less’ for right-tailed test.
+‘greater’ for left-tailed test.
+Defaults to ‘abs’.</p></li>
+<li><p><strong>retain_observed_model</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether retain observed model as returns or not. Defaults to False.</p></li>
+<li><p><strong>retain_mappings</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether retain mappings as returns or not. Defaults to False.</p></li>
+<li><p><strong>tol</strong> (<em>float</em><em>, </em><em>optional</em>) – Tolerance error parameter for intervals. Defaults to 1e-10.</p></li>
+<li><p><strong>dps</strong> (<em>int</em><em> | </em><em>str</em><em>, </em><em>optional</em>) – dps value for mpmath. Set ‘auto’ to select dps automatically. Defaults to ‘auto’.</p></li>
+<li><p><strong>max_dps</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum dps value for mpmath. This option is valid when <cite>dps</cite> is set to ‘auto’.
+Defaults to 5000.</p></li>
+<li><p><strong>out_log</strong> (<em>str</em><em>, </em><em>optional</em>) – Name for log file of mpmath. Defaults to ‘test_log.log’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Exception</strong> – When <cite>over_conditioning</cite> and <cite>exhaustive</cite> are activated simultaneously</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>SelectiveInferenceResult</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sicore.SelectiveInferenceNorm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">SelectiveInferenceNorm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">csr_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_sparse</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_tf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_torch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sicore.SelectiveInferenceNorm" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">InferenceNorm</span></code></p>
+<p>Selective inference for a test statistic which follows normal distribution under null.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>np.ndarray</em><em>, </em><em>List</em><em>[</em><em>float</em><em>]</em><em>, </em><em>tf.Tensor</em><em>, </em><em>torch.Tensor</em>) – Observation data in 1-D array. When given as a tensor,
+activate the corresponding option.</p></li>
+<li><p><strong>var</strong> (<em>float</em><em>, </em><em>np.ndarray</em><em>, </em><em>tf.Tensor</em><em>, </em><em>torch.Tensor</em><em>, </em><em>sparse.csr_array</em>) – Value of known variance covariance. Assuming that
+the shape of the input is a scalar or 1-D array or 2-D array,
+the variance-covariance matrix Cov is interpreted as follows.
+When the input is a scalar, Cov = input * Identity.
+When the input is a 1-D array, Cov = diag(input).
+When the input is a 2-D array, Cov = input.
+Also, activate the option, when given as a sparse array.</p></li>
+<li><p><strong>eta</strong> (<em>np.ndarray</em><em>, </em><em>List</em><em>[</em><em>float</em><em>]</em><em>, </em><em>tf.Tensor</em><em>, </em><em>torch.Tensor</em>) – Contrast vector in 1-D array. When given as a tensor,
+activate the corresponding option.</p></li>
+<li><p><strong>use_sparse</strong> (<em>boolean</em><em>, </em><em>optional</em>) – Whether to use sparse array or not. Defaults to False.</p></li>
+<li><p><strong>use_tf</strong> (<em>boolean</em><em>, </em><em>optional</em>) – Whether to use tensorflow or not. Defaults to False.</p></li>
+<li><p><strong>use_torch</strong> (<em>boolean</em><em>, </em><em>optional</em>) – Whether to use pytorch or not. Defaults to False.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="sicore.SelectiveInferenceNorm.inference">
+<span class="sig-name descname"><span class="pre">inference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algorithm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_selector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">significance_level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">termination_criterion</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'precision'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_strategy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'pi3'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">over_conditioning</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exhaustive</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_tail</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alternative</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'abs'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retain_observed_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retain_mappings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_dps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_log</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'test_log.log'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#sicore.SelectiveInferenceResult" title="sicore.inference.base.SelectiveInferenceResult"><span class="pre">SelectiveInferenceResult</span></a></span></span><a class="headerlink" href="#sicore.SelectiveInferenceNorm.inference" title="Permalink to this definition">#</a></dt>
+<dd><p>Perform Selective Inference.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>algorithm</strong> (<em>Callable</em><em>[</em><em>[</em><em>np.ndarray</em><em>, </em><em>np.ndarray</em><em>, </em><em>float</em><em>]</em><em>, </em><em>Tuple</em><em>[</em><em>List</em><em>[</em><em>List</em><em>[</em><em>float</em><em>]</em><em>]</em><em>, </em><em>Any</em><em>]</em><em>]</em>) – Callable function which takes two vectors (<cite>a</cite>, <cite>b</cite>) and a scalar <cite>z</cite>
+that can satisfy <cite>data = a + b * z</cite> as argument, and
+returns the obtained model (Any) and the intervals (np.ndarray) where it is obtained.
+A closure function might be helpful to implement this.</p></li>
+<li><p><strong>model_selector</strong> (<em>Callable</em><em>[</em><em>[</em><em>Any</em><em>]</em><em>, </em><em>bool</em><em>]</em>) – Callable function which takes a obtained model (any) as single argument, and
+returns True if the model is observed one, and False otherwise.</p></li>
+<li><p><strong>significance_level</strong> (<em>float</em><em>, </em><em>optional</em>) – Significance level for the test. Defaults to 0.05.</p></li>
+<li><p><strong>precision</strong> (<em>float</em><em>, </em><em>optional</em>) – Precision required to compute p-value. Defaults to 0.001.</p></li>
+<li><p><strong>termination_criterion</strong> (<em>str</em><em>, </em><em>optional</em>) – Specifies the termination criterion used to perform parametric selective inference.
+This option is ignored when the <cite>over_conditioning</cite> or <cite>exhaustive</cite> is activated.
+‘precision’ for computing p-value with <cite>precision</cite>.
+‘decision’ for making decision whether or not to reject at <cite>significance_level</cite>.
+Defaults to ‘precision’.</p></li>
+<li><p><strong>search_strategy</strong> (<em>str</em><em>, </em><em>optional</em>) – Specifies the search strategy used to perform parametric selective inference.
+‘pi1’ focuses on the integral on truncated intervals.
+‘pi2’ focuses on the integral on searched intervals.
+‘pi3’ focuses on the both of integrals.
+Defaults to ‘pi3’.</p></li>
+<li><p><strong>step</strong> (<em>float</em><em>, </em><em>optional</em>) – Step width for parametric search. Defaults to 1e-10.</p></li>
+<li><p><strong>max_iter</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum number of times to perform parametric search.
+If this value is exceeded, the loop is considered to be infinite.
+Defaults to 1e6.</p></li>
+<li><p><strong>over_conditioning</strong> (<em>bool</em><em>, </em><em>optional</em>) – Over conditioning inference. Defaults to False.</p></li>
+<li><p><strong>exhaustive</strong> (<em>bool</em><em>, </em><em>optional</em>) – Exhaustive search of the range specified by <cite>max_tail</cite>. Defaults to False.</p></li>
+<li><p><strong>max_tail</strong> (<em>float</em><em>, </em><em>optional</em>) – Specifies the range to be searched when exhaustive is activated. Defaults to 1e3.</p></li>
+<li><p><strong>alternative</strong> (<em>str</em><em>, </em><em>optional</em>) – ‘abs’ for two-tailed test of the absolute value of test statistic.
+‘two-sided’ for two-tailed test.
+‘less’ for right-tailed test.
+‘greater’ for left-tailed test.
+Defaults to ‘abs’.</p></li>
+<li><p><strong>retain_observed_model</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether retain observed model as returns or not. Defaults to False.</p></li>
+<li><p><strong>retain_mappings</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether retain mappings as returns or not. Defaults to False.</p></li>
+<li><p><strong>tol</strong> (<em>float</em><em>, </em><em>optional</em>) – Tolerance error parameter for intervals. Defaults to 1e-10.</p></li>
+<li><p><strong>dps</strong> (<em>int</em><em> | </em><em>str</em><em>, </em><em>optional</em>) – dps value for mpmath. Set ‘auto’ to select dps automatically. Defaults to ‘auto’.</p></li>
+<li><p><strong>max_dps</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum dps value for mpmath. This option is valid when <cite>dps</cite> is set to ‘auto’.
+Defaults to 5000.</p></li>
+<li><p><strong>out_log</strong> (<em>str</em><em>, </em><em>optional</em>) – Name for log file of mpmath. Defaults to ‘test_log.log’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Exception</strong> – When <cite>over_conditioning</cite> and <cite>exhaustive</cite> are activated simultaneously</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>SelectiveInferenceResult</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="sicore.SelectiveInferenceResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">SelectiveInferenceResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inf_p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sup_p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reject_or_not</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">truncated_intervals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_count</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detect_count</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mappings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sicore.SelectiveInferenceResult" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This class contains the results of selective inference.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sicore.SelectiveInferenceResult.stat">
+<span class="sig-name descname"><span class="pre">stat</span></span><a class="headerlink" href="#sicore.SelectiveInferenceResult.stat" title="Permalink to this definition">#</a></dt>
+<dd><p>Observed value of test statistic.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sicore.SelectiveInferenceResult.alpha">
+<span class="sig-name descname"><span class="pre">alpha</span></span><a class="headerlink" href="#sicore.SelectiveInferenceResult.alpha" title="Permalink to this definition">#</a></dt>
+<dd><p>Significance level.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sicore.SelectiveInferenceResult.p_value">
+<span class="sig-name descname"><span class="pre">p_value</span></span><a class="headerlink" href="#sicore.SelectiveInferenceResult.p_value" title="Permalink to this definition">#</a></dt>
+<dd><p>p-value from test performed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sicore.SelectiveInferenceResult.inf_p">
+<span class="sig-name descname"><span class="pre">inf_p</span></span><a class="headerlink" href="#sicore.SelectiveInferenceResult.inf_p" title="Permalink to this definition">#</a></dt>
+<dd><p>Lower bound of p-value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sicore.SelectiveInferenceResult.sup_p">
+<span class="sig-name descname"><span class="pre">sup_p</span></span><a class="headerlink" href="#sicore.SelectiveInferenceResult.sup_p" title="Permalink to this definition">#</a></dt>
+<dd><p>Upper bound of p-value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sicore.SelectiveInferenceResult.reject_or_not">
+<span class="sig-name descname"><span class="pre">reject_or_not</span></span><a class="headerlink" href="#sicore.SelectiveInferenceResult.reject_or_not" title="Permalink to this definition">#</a></dt>
+<dd><p>Whether or not to reject the null hypothesis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sicore.SelectiveInferenceResult.truncated_intervals">
+<span class="sig-name descname"><span class="pre">truncated_intervals</span></span><a class="headerlink" href="#sicore.SelectiveInferenceResult.truncated_intervals" title="Permalink to this definition">#</a></dt>
+<dd><p>Intervals from which the selected model is obtained.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[list[float]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sicore.SelectiveInferenceResult.search_count">
+<span class="sig-name descname"><span class="pre">search_count</span></span><a class="headerlink" href="#sicore.SelectiveInferenceResult.search_count" title="Permalink to this definition">#</a></dt>
+<dd><p>Number of times the truncated intervals were searched.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sicore.SelectiveInferenceResult.detect_count">
+<span class="sig-name descname"><span class="pre">detect_count</span></span><a class="headerlink" href="#sicore.SelectiveInferenceResult.detect_count" title="Permalink to this definition">#</a></dt>
+<dd><p>Number of times that the same model as the observed model was obtained.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sicore.SelectiveInferenceResult.selected_model">
+<span class="sig-name descname"><span class="pre">selected_model</span></span><a class="headerlink" href="#sicore.SelectiveInferenceResult.selected_model" title="Permalink to this definition">#</a></dt>
+<dd><p>The model selected for the observed test statistic.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Any | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sicore.SelectiveInferenceResult.mappings">
+<span class="sig-name descname"><span class="pre">mappings</span></span><a class="headerlink" href="#sicore.SelectiveInferenceResult.mappings" title="Permalink to this definition">#</a></dt>
+<dd><p>A dictionary that holds the model obtained at any point.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict[tuple[float], Any] | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sicore.construct_projection_matrix">
+<span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">construct_projection_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">basis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verify</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sicore.construct_projection_matrix" title="Permalink to this definition">#</a></dt>
+<dd><p>Construct projection matrix from basis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>basis</strong> (<em>array-like</em>) – The basis of the k-dimensional subspace to be projected. The shape is (k, n).</p></li>
+<li><p><strong>verify</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, check if the constructed matrix are valid or not, and
+raise exception. Set False for faster computation.
+Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Exception</strong> – When the constructed matrix does not satisfy the definition of a projection matrix.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>projection matrix</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sicore.intersection">
+<span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">intersection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interval1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verify</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sicore.intersection" title="Permalink to this definition">#</a></dt>
+<dd><p>Take intersection of two intervals.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>interval1</strong> (<em>array-like</em>) – Interval [l1, u1] or the union of intervals
+[[l1, u1], [l2, u2], …].</p></li>
+<li><p><strong>interval2</strong> (<em>array-like</em>) – Interval [l1, u1] or the union of intervals
+[[l1, u1], [l2, u2], …].</p></li>
+<li><p><strong>verify</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, check if the intervals are valid or not at
+the beginning, and raise exception. Set False for faster computation.
+Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Intersection of the intervals [[L1, U1], [L2, U2], …].</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sicore.poly_lt_zero">
+<span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">poly_lt_zero</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">poly_or_coef</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sicore.poly_lt_zero" title="Permalink to this definition">#</a></dt>
+<dd><p>Given a polynomial <cite>f(x)</cite>, find the intervals of <cite>x</cite> where <cite>f(x) &lt;= 0</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>poly_or_coef</strong> (<em>np.poly1d</em><em>, </em><em>array-like</em>) – np.poly1d object or coefficients of the
+polynomial e.g. [a, b, c] for <cite>f(x) = ax^2 + bx + c</cite>.</p></li>
+<li><p><strong>tol</strong> (<em>float</em><em>, </em><em>optional</em>) – Tolerance error parameter. It is recommended to set a
+large value (about 1e-5) for high order polynomial (&gt;= 3) or a polynomial
+with multiple root. Defaults to 1e-10.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Intervals [[L1, U1], [L2, U2], …] of <cite>x</cite> where <cite>f(x) &lt;= 0</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sicore.polytope_to_interval">
+<span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">polytope_to_interval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a_vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b_vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_sparse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sicore.polytope_to_interval" title="Permalink to this definition">#</a></dt>
+<dd><p>Compute truncation intervals obtained from a polytope <cite>{x’Ax+b’x+c&lt;=0}</cite> as a selection event.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a_vec</strong> (<em>array-like</em>) – Vectors which satisfy <cite>observed_data = a_vec + b_vec * observed_test_static</cite></p></li>
+<li><p><strong>b_vec</strong> (<em>array-like</em>) – Vectors which satisfy <cite>observed_data = a_vec + b_vec * observed_test_static</cite></p></li>
+<li><p><strong>A</strong> (<em>array-like</em><em>, </em><em>optional</em>) – <cite>N`*`N</cite> matrix. Set None if <cite>A</cite> is unused.
+Defaults to None.</p></li>
+<li><p><strong>b</strong> (<em>array-like</em><em>, </em><em>optional</em>) – <cite>N</cite> dimensional vector. Set None if <cite>b</cite> is unused.
+Defaults to None.</p></li>
+<li><p><strong>c</strong> (<em>float</em><em>, </em><em>optional</em>) – Constant. Set None if <cite>c</cite> is unused. Defaults to None.</p></li>
+<li><p><strong>tol</strong> (<em>float</em><em>, </em><em>optional</em>) – Tolerance error parameter. Defaults to 1e-10.</p></li>
+<li><p><strong>use_sparse</strong> (<em>boolean</em><em>, </em><em>optional</em>) – Whether to use sparse array or not. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>truncation intervals [[L1, U1], [L2, U2], …].</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array-like</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sicore.power">
+<span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">power</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pvalues</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sicore.power" title="Permalink to this definition">#</a></dt>
+<dd><p>Calculate true positive rate of p-values under alternative.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pvalues</strong> (<em>array-like</em>) – List of p-values.</p></li>
+<li><p><strong>alpha</strong> (<em>float</em><em>, </em><em>optional</em>) – Significance level.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True positive rate.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sicore.pvalues_hist">
+<span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">pvalues_hist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pvalues</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(6,</span> <span class="pre">4)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sicore.pvalues_hist" title="Permalink to this definition">#</a></dt>
+<dd><p>Plot histogram of p-values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pvalues</strong> (<em>array-like</em>) – List of p-values.</p></li>
+<li><p><strong>bins</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of bins. Defaults to 20.</p></li>
+<li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – Title of the figure. Defaults to None.</p></li>
+<li><p><strong>fname</strong> (<em>str</em><em>, </em><em>optional</em>) – File name. If <cite>fname</cite> is given, the plotted figure will
+be saved as a file. Defaults to None.</p></li>
+<li><p><strong>figsize</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Size of the figure. Defaults to (6, 4).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sicore.pvalues_qqplot">
+<span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">pvalues_qqplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pvalues</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(4,</span> <span class="pre">4)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sicore.pvalues_qqplot" title="Permalink to this definition">#</a></dt>
+<dd><p>Plot uniform Q-Q plot of p-values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pvalues</strong> (<em>array-like</em>) – List of p-values.</p></li>
+<li><p><strong>plot_pos</strong> (<em>array-like</em><em>, </em><em>optional</em>) – Plotting positions. If None, default plotting
+positions will be used. Defaults to None.</p></li>
+<li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – Title of the figure. Defaults to None.</p></li>
+<li><p><strong>fname</strong> (<em>str</em><em>, </em><em>optional</em>) – File name. If <cite>fname</cite> is given, the plotted figure will
+be saved as a file. Defaults to None.</p></li>
+<li><p><strong>figsize</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Size of the figure. Defaults to (4, 4).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sicore.tc_cdf_mpmath">
+<span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">tc_cdf_mpmath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sicore.tc_cdf_mpmath" title="Permalink to this definition">#</a></dt>
+<dd><p>CDF of a truncated chi distribution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>float</em>) – Return the value at <cite>x</cite>.</p></li>
+<li><p><strong>interval</strong> (<em>array-like</em>) – Truncation interval [L, U] or intervals
+[[L1, U1], [L2, U2],…].</p></li>
+<li><p><strong>df</strong> (<em>float</em>) – Degree of freedom.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>CDF value at <cite>x</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sicore.tn_cdf_mpmath">
+<span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">tn_cdf_mpmath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sicore.tn_cdf_mpmath" title="Permalink to this definition">#</a></dt>
+<dd><p>CDF of a truncated normal distribution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>float</em>) – Return the value at <cite>x</cite>.</p></li>
+<li><p><strong>interval</strong> (<em>array-like</em>) – Truncation interval [L, U] or intervals
+[[L1, U1], [L2, U2],…].</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>CDF value at <cite>x</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sicore.type1_error_rate">
+<span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">type1_error_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pvalues</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sicore.type1_error_rate" title="Permalink to this definition">#</a></dt>
+<dd><p>Calculate false positive rate of p-values under null.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pvalues</strong> (<em>array-like</em>) – List of p-values.</p></li>
+<li><p><strong>alpha</strong> (<em>float</em><em>, </em><em>optional</em>) – Significance level.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>False positive rate.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 </section>
 
         </article>
@@ -215,15 +882,7 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="sicore.html">
-              <div class="page-info">
-                <div class="context">
-                  <span>Next</span>
-                </div>
-                <div class="title">sicore package</div>
-              </div>
-              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
-            </a>
+          
           
         </div>
         <div class="bottom-of-page">
@@ -243,8 +902,74 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">sicore package</a><ul>
+<li><a class="reference internal" href="#module-sicore">Module contents</a><ul>
+<li><a class="reference internal" href="#sicore.InfiniteLoopError"><code class="docutils literal notranslate"><span class="pre">InfiniteLoopError</span></code></a></li>
+<li><a class="reference internal" href="#sicore.NaiveInferenceChi"><code class="docutils literal notranslate"><span class="pre">NaiveInferenceChi</span></code></a><ul>
+<li><a class="reference internal" href="#sicore.NaiveInferenceChi.inference"><code class="docutils literal notranslate"><span class="pre">NaiveInferenceChi.inference()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sicore.NaiveInferenceNorm"><code class="docutils literal notranslate"><span class="pre">NaiveInferenceNorm</span></code></a><ul>
+<li><a class="reference internal" href="#sicore.NaiveInferenceNorm.inference"><code class="docutils literal notranslate"><span class="pre">NaiveInferenceNorm.inference()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sicore.OneVec"><code class="docutils literal notranslate"><span class="pre">OneVec</span></code></a><ul>
+<li><a class="reference internal" href="#sicore.OneVec.get"><code class="docutils literal notranslate"><span class="pre">OneVec.get()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sicore.SelectiveInferenceChi"><code class="docutils literal notranslate"><span class="pre">SelectiveInferenceChi</span></code></a><ul>
+<li><a class="reference internal" href="#sicore.SelectiveInferenceChi.inference"><code class="docutils literal notranslate"><span class="pre">SelectiveInferenceChi.inference()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sicore.SelectiveInferenceNorm"><code class="docutils literal notranslate"><span class="pre">SelectiveInferenceNorm</span></code></a><ul>
+<li><a class="reference internal" href="#sicore.SelectiveInferenceNorm.inference"><code class="docutils literal notranslate"><span class="pre">SelectiveInferenceNorm.inference()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sicore.SelectiveInferenceResult"><code class="docutils literal notranslate"><span class="pre">SelectiveInferenceResult</span></code></a><ul>
+<li><a class="reference internal" href="#sicore.SelectiveInferenceResult.stat"><code class="docutils literal notranslate"><span class="pre">SelectiveInferenceResult.stat</span></code></a></li>
+<li><a class="reference internal" href="#sicore.SelectiveInferenceResult.alpha"><code class="docutils literal notranslate"><span class="pre">SelectiveInferenceResult.alpha</span></code></a></li>
+<li><a class="reference internal" href="#sicore.SelectiveInferenceResult.p_value"><code class="docutils literal notranslate"><span class="pre">SelectiveInferenceResult.p_value</span></code></a></li>
+<li><a class="reference internal" href="#sicore.SelectiveInferenceResult.inf_p"><code class="docutils literal notranslate"><span class="pre">SelectiveInferenceResult.inf_p</span></code></a></li>
+<li><a class="reference internal" href="#sicore.SelectiveInferenceResult.sup_p"><code class="docutils literal notranslate"><span class="pre">SelectiveInferenceResult.sup_p</span></code></a></li>
+<li><a class="reference internal" href="#sicore.SelectiveInferenceResult.reject_or_not"><code class="docutils literal notranslate"><span class="pre">SelectiveInferenceResult.reject_or_not</span></code></a></li>
+<li><a class="reference internal" href="#sicore.SelectiveInferenceResult.truncated_intervals"><code class="docutils literal notranslate"><span class="pre">SelectiveInferenceResult.truncated_intervals</span></code></a></li>
+<li><a class="reference internal" href="#sicore.SelectiveInferenceResult.search_count"><code class="docutils literal notranslate"><span class="pre">SelectiveInferenceResult.search_count</span></code></a></li>
+<li><a class="reference internal" href="#sicore.SelectiveInferenceResult.detect_count"><code class="docutils literal notranslate"><span class="pre">SelectiveInferenceResult.detect_count</span></code></a></li>
+<li><a class="reference internal" href="#sicore.SelectiveInferenceResult.selected_model"><code class="docutils literal notranslate"><span class="pre">SelectiveInferenceResult.selected_model</span></code></a></li>
+<li><a class="reference internal" href="#sicore.SelectiveInferenceResult.mappings"><code class="docutils literal notranslate"><span class="pre">SelectiveInferenceResult.mappings</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sicore.construct_projection_matrix"><code class="docutils literal notranslate"><span class="pre">construct_projection_matrix()</span></code></a></li>
+<li><a class="reference internal" href="#sicore.intersection"><code class="docutils literal notranslate"><span class="pre">intersection()</span></code></a></li>
+<li><a class="reference internal" href="#sicore.poly_lt_zero"><code class="docutils literal notranslate"><span class="pre">poly_lt_zero()</span></code></a></li>
+<li><a class="reference internal" href="#sicore.polytope_to_interval"><code class="docutils literal notranslate"><span class="pre">polytope_to_interval()</span></code></a></li>
+<li><a class="reference internal" href="#sicore.power"><code class="docutils literal notranslate"><span class="pre">power()</span></code></a></li>
+<li><a class="reference internal" href="#sicore.pvalues_hist"><code class="docutils literal notranslate"><span class="pre">pvalues_hist()</span></code></a></li>
+<li><a class="reference internal" href="#sicore.pvalues_qqplot"><code class="docutils literal notranslate"><span class="pre">pvalues_qqplot()</span></code></a></li>
+<li><a class="reference internal" href="#sicore.tc_cdf_mpmath"><code class="docutils literal notranslate"><span class="pre">tc_cdf_mpmath()</span></code></a></li>
+<li><a class="reference internal" href="#sicore.tn_cdf_mpmath"><code class="docutils literal notranslate"><span class="pre">tn_cdf_mpmath()</span></code></a></li>
+<li><a class="reference internal" href="#sicore.type1_error_rate"><code class="docutils literal notranslate"><span class="pre">type1_error_rate()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>
