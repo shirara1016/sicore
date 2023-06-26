@@ -26,13 +26,15 @@ class OneVec:
         Get the vector.
 
         Args:
-            i (int): Start index of 1 (1<=i<=`length`).
-            j (int, optional): End index of 1 (1<=j<=`length`). If None, it returns a
-                vector whose `i`th element is set to 1, and 0 otherwise. Defaults to
-                None.
+            i (int):
+                Start index of 1 (1<=i<=`length`).
+            j (int, optional):
+                End index of 1 (1<=j<=`length`). If None, it returns a
+                vector whose `i`th element is set to 1, and 0 otherwise.
+                Defaults toNone.
 
         Returns:
-            np.ndarray
+            np.ndarray: one-zero vector
         """
         vec = np.zeros(self.length)
 
@@ -48,23 +50,24 @@ def construct_projection_matrix(basis, verbose=False):
     """Construct projection matrix from basis.
 
     Args:
-        basis (np.ndarray, List[float]): List of basis of the space to be projected
+        basis (np.ndarray):
+            The basis of the k-dimensional subspace to be projected. The shape is (k, n).
 
     Raises:
-        Exception: When the constructed matrix does not satisfy
-            the definition of a projection matrix.
+        Exception:
+            When the constructed matrix does not satisfy the definition of a projection matrix.
 
     Returns:
         np.ndarray: projection matrix
     """
 
     basis = np.array(basis)
-    V = np.linalg.qr(basis.T)[0]
-    P = np.dot(V, V.T)
+    U, _, _ = np.linalg.svd(basis.T, full_matrices=False)
+    P = U @ U.T
     if verbose:
         if np.sum(np.abs(P.T - P)) > 1e-5:
             raise Exception("The projection matrix is not constructed correctly")
         else:
-            if np.sum(np.abs(np.dot(P, P) - P)) > 1e-5:
+            if np.sum(np.abs(P @ P - P)) > 1e-5:
                 raise Exception("The projection matrix is not constructed correctly")
     return P
