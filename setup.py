@@ -11,6 +11,7 @@ setup(
     version="1.0.0",
     description="Core package for Selective Inference",
     long_description=readme,
+    long_description_content_type="text/markdown",
     author="Takeuchi Lab",
     author_email="shirara1016@gmail.com",
     url="https://github.com/shirara1016/sicore",
