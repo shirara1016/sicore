@@ -148,5 +148,5 @@ def standardize(x, mean=0, var=1):
         mean (float, optional): Mean. Defaults to 0.
         var (float, optional): Variance. Defaults to 1.
     """
-    sd = np.sqrt(var)
+    sd = np.sqrt(float(var))
     return (np.asarray(x) - mean) / sd
