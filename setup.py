@@ -8,7 +8,7 @@ with open("LICENSE", "r", encoding="utf8") as f:
 
 setup(
     name="sicore",
-    version="1.0.0",
+    version="1.0.1",
     description="Core package for Selective Inference",
     long_description=readme,
     long_description_content_type="text/markdown",
