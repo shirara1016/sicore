@@ -220,6 +220,7 @@ class Inference:
         Returns:
             SelectiveInferenceResult: The result of the selective inference.
         """
+        # TODO: warning the pattern matching
 
         self.n_jobs = n_jobs
         self.step = step
@@ -383,6 +384,7 @@ class Inference:
         Returns:
             Callable[[RealSubset], list[float]]: The search strategy.
         """
+        # TODO: warning the pattern matching
         match inference_mode, search_strategy_name:
             case "exhaustive", _:
                 return lambda searched_intervals: (
@@ -486,6 +488,8 @@ class Inference:
         Returns:
             Callable[[RealSubset, RealSubset], list[float]]: The termination criterion.
         """
+        # TODO: warning the pattern matching
+
         match inference_mode, termination_criterion_name:
             case "exhaustive", _:
 
