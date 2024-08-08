@@ -2,17 +2,9 @@ import numpy as np
 from scipy import sparse
 from scipy.stats import norm
 
-from typing import Callable
-
 from .real_subset import RealSubset
 from .cdf import tn_cdf
-from .base import (
-    SelectiveInferenceResult,
-    InfiniteLoopError,
-    Inference,
-    compute_pvalue,
-    compute_pvalue_bounds,
-)
+from .base import Inference
 
 
 class SelectiveInferenceNorm(Inference):
