@@ -222,6 +222,50 @@ class SelectiveInferenceNorm(Inference):
 
                 return search_strategy
 
+            # case "parametric", "pi1":
+
+            #     def search_strategy(intervals: RealSubset) -> list[float]:
+            #         if intervals == RealSubset():
+            #             return [self.stat]
+            #         for lower, upper in intervals.intervals:
+            #             if lower <= self.stat <= upper:
+            #                 if np.abs(self.stat - lower) < np.abs(self.stat - upper):
+            #                     return [lower - self.step]
+            #                 else:
+            #                     return [upper + self.step]
+
+            #     return search_strategy
+
+            # case "parametric", "pi2":
+
+            #     def search_strategy(intervals: RealSubset) -> list[float]:
+            #         if intervals == RealSubset():
+            #             return [self.stat]
+            #         if 0.0 not in intervals:
+            #             return [0.0]
+            #         for lower, upper in intervals.intervals:
+            #             if lower <= self.mode <= upper:
+            #                 if norm.logpdf(lower) > norm.logpdf(upper):
+            #                     return [lower - self.step]
+            #                 else:
+            #                     return [upper + self.step]
+
+            #     return search_strategy
+
+            # case "parametric", "pi3":
+
+            #     def search_strategy(intervals: RealSubset) -> list[float]:
+            #         if intervals == RealSubset():
+            #             return [self.stat]
+            #         for lower, upper in intervals.intervals:
+            #             if lower <= self.stat <= upper:
+            #                 if norm.logpdf(lower) > norm.logpdf(upper):
+            #                     return [lower - self.step]
+            #                 else:
+            #                     return [upper + self.step]
+
+            #     return search_strategy
+
             case _, "parallel":
 
                 def search_strategy(intervals: RealSubset) -> list[float]:
