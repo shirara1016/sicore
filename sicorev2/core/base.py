@@ -7,7 +7,6 @@ from joblib import Parallel, delayed
 from typing import Any, Callable
 
 from .real_subset import RealSubset
-from .cdf import tn_cdf, tc_cdf
 
 
 @dataclass
@@ -110,10 +109,37 @@ def compute_pvalue_bounds(
 
 
 class Inference:
-    def __init__(self, data: np.ndarray, var: float | np.ndarray | sparse.csr_matrix):
-        self.data = data
-        self.var = var
+    """An abstract class conducting selective inference
 
+    This class provides the basic structure for conducting selective inference.
+    The user can inherit this class and implement the `__init__` method.
+    """
+
+    def __init__(
+        self,
+        data: np.ndarray,
+        var: float | np.ndarray | sparse.csr_matrix,
+        use_sparse: bool = False,
+        use_tf: bool = False,
+        use_torch: bool = False,
+    ):
+        """Initialize a Inference object.
+
+        Args:
+            data (np.ndarray): Observed data in 1D array.
+            var (float | np.ndarray | sparse.csr_matrix): Known covariance matrix.
+                If float, covariance matrix equals to the scalar times identity matrix.
+                If 1D array, covariance matrix equals to the diagonal matrix with the given array.
+                If 2D array, covariance matrix equals to the given array.
+            use_sparse (bool, optional): Whether to use sparse matrix.
+                If True, the `var` must be given as a sparse matrix. Defaults to False.
+            use_tf (bool, optional): Whether to use TensorFlow.
+                If True, the `data` and `var` must be given as TensorFlow tensors.
+                Defaults to False.
+            use_torch (bool, optional): Whether to use PyTorch.
+                If True, the `data` and `var` must be given as PyTorch tensors.
+                Defaults to False.
+        """
         self.stat = None
 
         self.a = None
@@ -132,17 +158,68 @@ class Inference:
         algorithm: Callable[[np.ndarray, np.ndarray, float], Any],
         model_selector: Callable[[Any], bool],
         alternative: str = "abs",
-        inference_mode: str = "parametric",  # parametric, exhaustive, or over_conditioning
+        inference_mode: str = "parametric",
         search_strategy: Callable[[RealSubset], list[float]] | str = "pi3",
         termination_criterion: (
             Callable[[RealSubset, RealSubset], bool] | str
         ) = "precision",
         max_iter: int = 1e6,
         n_jobs: int = 1,
-        step: float = 1e-10,
+        step: float = 1e-6,
         significance_level: float = 0.05,
         precision: float = 0.001,
     ) -> SelectiveInferenceResult:
+        """Conduct selective inference.
+
+        Args:
+            algorithm (Callable[[np.ndarray, np.ndarray, float], Any]): Callable function which
+                takes two vectors a (np.ndarray) and b (np.ndarray), and
+                a scalar z (float), and returns a model (Any) and intervals (list[list[float]]).
+                For any point in the intervals, the same model must be selected.
+            model_selector (Callable[[Any], bool]): Callable function which takes a model (Any)
+                and returns a boolean value, indicating whether the model is the same as
+                the selected model.
+            alternative (str): Must be one of 'two-sided', 'less', 'greater', or 'abs'.
+                If 'two sided', the p-value is computed for the two-tailed test.
+                If 'less', the p-value is computed for the right-tailed test.
+                If 'greater', the p-value is computed for the left-tailed test.
+                If 'abs', the p-value is computed for the two-tailed test with distribution
+                of absolute values.
+            inference_mode (str, optional): Must be one of 'parametric', 'exhaustive',
+                or 'over_conditioning'. Defaults to 'parametric'.
+            search_strategy (Callable[[RealSubset], list[float]] | str, optional): Callable
+                function which takes a searched_intervals (RealSubset) and returns next
+                search points (list[float]).
+                If str, it must be one of 'pi1', 'pi2', 'pi3', or 'parallel'.
+                If 'pi1', the search strategy focuses on the truncated intervals.
+                If 'pi2', the search strategy focuses on the searched intervals.
+                If 'pi3', the search strategy focuses on the both of the truncated and searched intervals.
+                If 'parallel', the search strategy focuses on the both of the
+                truncated and searched intervals for the parallel computing.
+                Defaults to 'pi3'.
+            termination_criterion (Callable[[RealSubset, RealSubset], bool] | str, optional):
+                Callable function which takes searched_intervals (RealSubset) and truncated_intervals (RealSubset) and returns a boolean value, indicating
+                whether the search should be terminated.
+                If str, it must be one of 'precision' or 'decision'.
+                If 'precision', the termination criterion is based on
+                the precision in the computation of the p-value.
+                If 'decision', the termination criterion is based on
+                the decision result by the p-value
+            max_iter (int, optional): Maximum number of iterations. Defaults to 1e6.
+            n_jobs (int, optional): Number of jobs to run in parallel. Defaults to 1.
+            step (float, optional): Step size for the search strategy. Defaults to 1e-6.
+            significance_level (float, optional): Significance level for
+                the termination criterion. Defaults to 0.05.
+            precision (float, optional): Precision for the termination criterion.
+                Defaults to 0.001.
+
+        Raises:
+            ValueError: If `n_jobs` is not a positive integer.
+            InfiniteLoopError: If the search is conducted on the same search points.
+
+        Returns:
+            SelectiveInferenceResult: The result of the selective inference.
+        """
 
         self.n_jobs = n_jobs
         self.step = step
