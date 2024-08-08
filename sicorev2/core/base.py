@@ -104,3 +104,115 @@ def compute_pvalue_bounds(
     p_value_from_sup = compute_pvalue(sup_F, alternative)
     inf_p, sup_p = np.sort([p_value_from_inf, p_value_from_sup])
     return inf_p, sup_p
+
+
+class Inference:
+    def __init__(self, data: np.ndarray, var: float | np.ndarray | sparse.csr_matrix):
+        self.data = data
+        self.var = var
+
+        self.stat = None
+        self.a = None
+        self.b = None
+
+        self._compute_pvalue = None
+        self._evaluate_pvalue_bounds = None
+
+        self.restlictions = None
+
+    def _create_search_strategy(self):
+        raise NotImplementedError()
+
+    def _create_termination_criterion(self):
+        raise NotImplementedError()
+
+    def inference(
+        self,
+        algorithm: Callable[[np.ndarray, np.ndarray, float], Any],
+        model_selector: Callable[[Any], bool],
+        alternative: str = "abs",
+        inference_mode: str = "parametric",  # parametric, exhaustive, or over_conditioning
+        search_strategy: Callable[[RealSubset], list[float]] | str = "pi3",
+        termination_criterion: (
+            Callable[[RealSubset, RealSubset], bool] | str
+        ) = "precision",
+        max_iter: int = 1e6,
+        n_jobs: int = 1,
+        step: float = 1e-10,
+        significance_level: float = 0.05,
+        precision: float = 0.001,
+    ) -> SelectiveInferenceResult:
+
+        self.n_jobs = n_jobs
+        self.step = step
+        self.significance_level = significance_level
+        self.precision = precision
+
+        if isinstance(search_strategy, str):
+            search_strategy = self._create_search_strategy(
+                inference_mode, search_strategy
+            )
+        if isinstance(termination_criterion, str):
+            termination_criterion = self._create_termination_criterion(
+                inference_mode, termination_criterion
+            )
+
+        self.alternative = alternative
+
+        searched_intervals = RealSubset()
+        truncated_intervals = RealSubset()
+        search_count, detect_count = 0, 0
+
+        before_searched_intervals = RealSubset()
+        while True:
+            z_list = search_strategy(searched_intervals)
+
+            if n_jobs == 1:
+                results = []
+                for z in z_list:
+                    model, intervals = algorithm(self.a, self.b, z)
+                    results.append((model, intervals))
+            elif n_jobs > 1:
+                with Parallel(n_jobs=n_jobs) as parallel:
+                    results = parallel(
+                        delayed(algorithm)(self.a, self.b, z) for z in z_list
+                    )
+            else:
+                raise ValueError("The n_jobs must be positive integer.")
+
+            for model, intervals in results:
+                intervals = RealSubset(intervals)
+
+                search_count += 1
+                searched_intervals = searched_intervals | intervals
+
+                if model_selector(model):
+                    detect_count += 1
+                    truncated_intervals = truncated_intervals | intervals
+
+            if (
+                search_count > max_iter
+                or searched_intervals == before_searched_intervals
+            ):
+                raise InfiniteLoopError()
+            before_searched_intervals = searched_intervals
+
+            if termination_criterion(searched_intervals, truncated_intervals):
+                break
+
+        p_value = self._compute_pvalue(truncated_intervals)
+        inf_p, sup_p = self._evaluate_pvalue_bounds(
+            searched_intervals, truncated_intervals
+        )
+
+        return SelectiveInferenceResult(
+            self.stat,
+            significance_level,
+            p_value,
+            inf_p,
+            sup_p,
+            p_value <= significance_level,
+            truncated_intervals.intervals,
+            search_count,
+            detect_count,
+        )
