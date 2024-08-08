@@ -19,6 +19,7 @@ class SelectiveInferenceResult:
         p_value (float): Selective p-value.
         inf_p (float): Lower bound of selective p-value.
         sup_p (float): Upper bound of selective p-value.
+        naive_p (float): Naive p-value.
         reject_or_not (bool): Whether to reject the null hypothesis.
         truncated_intervals (list[list[float]]): Intervals from which
             the selected_model is obtained.
@@ -31,6 +32,7 @@ class SelectiveInferenceResult:
     p_value: float
     inf_p: float
     sup_p: float
+    naive_p: float
     reject_or_not: bool
     truncated_intervals: list[list[float]]
     search_count: int
@@ -118,7 +120,11 @@ class Inference:
         self._compute_pvalue = None
         self._evaluate_pvalue_bounds = None
 
-        self.restlictions = None
+        self.mode = None
+        self.limits = None
+        self.support = None
+        self.null_rv = None
+        self.cdf = None
 
     def _create_search_strategy(self):
         raise NotImplementedError()
@@ -204,6 +210,7 @@ class Inference:
         inf_p, sup_p = self._evaluate_pvalue_bounds(
             searched_intervals, truncated_intervals
         )
+        naive_p = self._compute_pvalue(self.support)
 
         return SelectiveInferenceResult(
             self.stat,
@@ -211,6 +218,7 @@ class Inference:
             p_value,
             inf_p,
             sup_p,
+            naive_p,
             p_value <= significance_level,
             truncated_intervals.intervals,
             search_count,
