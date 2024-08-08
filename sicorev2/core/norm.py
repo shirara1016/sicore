@@ -103,13 +103,13 @@ class SelectiveInferenceNorm(Inference):
         self.b = sigma_eta / sqrt_eta_sigma_eta
         self.a = data - self.stat * self.b
 
+        self.mode = 0.0
         self.support = RealSubset([[-np.inf, np.inf]])
         self.limits = (
             RealSubset([[-10.0 - np.abs(self.stat), 10.0 + np.abs(self.stat)]])
             & self.support
         )
         self.null_rv = norm()
-        self.mode = 0.0
 
         self.truncated_cdf = lambda z, intervals, absolute: tn_cdf(
             z, intervals, absolute=absolute
