@@ -261,4 +261,6 @@ class RealSubset:
         Returns:
             bool: True if z is in the subset, False otherwise.
         """
+        if len(self.intervals) == 0:
+            return False
         return np.any((self.intervals[:, 0] <= z) & (z <= self.intervals[:, 1]))
