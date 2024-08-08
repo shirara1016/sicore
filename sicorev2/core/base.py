@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import numpy as np
 from scipy import sparse
+from scipy.stats import binom, norm
 from joblib import Parallel, delayed
 
 from typing import Any, Callable
@@ -334,18 +335,21 @@ class Inference:
             case _, "parallel":
 
                 def search_strategy(intervals: RealSubset) -> list[float]:
-                    rng = np.random.default_rng(0)
+                    seed = 0
                     z_list = [self.stat] if intervals == RealSubset() else []
                     while len(z_list) < self.n_jobs * 5:
-                        num = rng.binomial(n=4000, p=0.5)
-                        samples_null = rng.normal(size=num) * 1.5
-                        sample_stat = rng.normal(
-                            loc=self.stat, scale=1.5, size=4000 - num
+                        num = binom.rvs(n=100, p=0.5, random_state=seed)
+                        samples_null = (
+                            self.null_rv.rvs(size=num, random_state=seed) * 1.5
+                        )
+                        sample_stat = norm.rvs(
+                            loc=self.stat, scale=1.5, size=100 - num, random_state=seed
                         )
                         samples = np.concatenate([samples_null, sample_stat])
                         for z in samples:
                             if z not in intervals:
                                 z_list.append(z)
+                        seed += 1
                     return z_list[: self.n_jobs * 5]
 
                 return search_strategy
