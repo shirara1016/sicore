@@ -52,16 +52,16 @@ class SelectiveInferenceNorm(Inference):
             assert isinstance(eta, tf.Tensor), "eta must be a TensorFlow tensor."
 
             if isinstance(var, float):
-                self.sigma_eta = var * eta
+                sigma_eta = var * eta
             elif len(var.shape) == 1:
                 vars = tf.constant(var, dtype=data.dtype)
-                self.sigma_eta = vars * eta
+                sigma_eta = vars * eta
             elif len(var.shape) == 2:
                 cov = tf.constant(var, dtype=data.dtype)
-                self.sigma_eta = tf.tensordot(cov, eta, axes=1)
-            self.eta_sigma_eta = tf.tensordot(eta, self.sigma_eta, axes=1)
-            self.sqrt_eta_sigma_eta = tf.sqrt(self.eta_sigma_eta)
-            self.stat = tf.tensordot(eta, data, axes=1) / self.sqrt_eta_sigma_eta
+                sigma_eta = tf.tensordot(cov, eta, axes=1)
+            eta_sigma_eta = tf.tensordot(eta, sigma_eta, axes=1)
+            sqrt_eta_sigma_eta = tf.sqrt(eta_sigma_eta)
+            self.stat = tf.tensordot(eta, data, axes=1) / sqrt_eta_sigma_eta
 
         elif use_torch:
             try:
@@ -73,34 +73,34 @@ class SelectiveInferenceNorm(Inference):
             assert isinstance(eta, torch.Tensor), "eta must be a PyTorch tensor."
 
             if isinstance(var, float):
-                self.sigma_eta = var * eta
+                sigma_eta = var * eta
             elif len(var.shape) == 1:
                 vars = torch.tensor(var, dtype=data.dtype)
-                self.sigma_eta = vars * eta
+                sigma_eta = vars * eta
             elif len(var.shape) == 2:
                 cov = torch.tensor(var, dtype=data.dtype)
-                self.sigma_eta = torch.mv(cov, eta)
-            self.eta_sigma_eta = torch.dot(eta, self.sigma_eta)
-            self.sqrt_eta_sigma_eta = torch.sqrt(self.eta_sigma_eta)
-            self.stat = torch.dot(eta, data) / self.sqrt_eta_sigma_eta
+                sigma_eta = torch.mv(cov, eta)
+            eta_sigma_eta = torch.dot(eta, sigma_eta)
+            sqrt_eta_sigma_eta = torch.sqrt(eta_sigma_eta)
+            self.stat = torch.dot(eta, data) / sqrt_eta_sigma_eta
 
         else:
             data, eta = np.array(data), np.array(eta)
             if isinstance(var, float):
-                self.sigma_eta = var * eta
+                sigma_eta = var * eta
             elif len(var.shape) == 1:
                 vars = np.array(var)
-                self.sigma_eta = vars * eta
+                sigma_eta = vars * eta
             elif len(var.shape) == 2:
                 cov = sparse.csr_array(var) if use_sparse else np.array(var)
-                self.sigma_eta = cov @ eta
-            self.eta_sigma_eta = eta @ self.sigma_eta
-            self.sqrt_eta_sigma_eta = np.sqrt(self.eta_sigma_eta)
-            self.stat = eta @ data / self.sqrt_eta_sigma_eta
+                sigma_eta = cov @ eta
+            eta_sigma_eta = eta @ sigma_eta
+            sqrt_eta_sigma_eta = np.sqrt(eta_sigma_eta)
+            self.stat = eta @ data / sqrt_eta_sigma_eta
 
         self.stat = float(self.stat)
 
-        self.b = self.sigma_eta / self.sqrt_eta_sigma_eta
+        self.b = sigma_eta / sqrt_eta_sigma_eta
         self.a = data - self.stat * self.b
 
         self.support = RealSubset([[-np.inf, np.inf]])
