@@ -201,7 +201,15 @@ class Inference:
             if termination_criterion(searched_intervals, truncated_intervals):
                 break
 
-        p_value = self._compute_pvalue(truncated_intervals)
+        finites = truncated_intervals.intervals[
+            np.isfinite(truncated_intervals.intervals)
+        ]
+        min_finite, max_finite = np.min(finites), np.max(finites)
+        if min_finite not in self.limits and max_finite not in self.limits:
+            p_value = self._compute_pvalue(truncated_intervals & self.limits)
+        else:
+            p_value = self._compute_pvalue(truncated_intervals)
+
         inf_p, sup_p = self._evaluate_pvalue_bounds(
             searched_intervals, truncated_intervals
         )
@@ -258,7 +266,18 @@ class Inference:
         inf_intervals = truncated_intervals | (unserched_intervals - mask_intervals)
         sup_intervals = truncated_intervals | (unserched_intervals & mask_intervals)
 
-        # TODO: Restrict intervals
+        inf_intervals = inf_intervals & self.support
+        sup_intervals = sup_intervals & self.support
+
+        inf_finites = inf_intervals.intervals[np.isfinite(inf_intervals.intervals)]
+        inf_min_finite, inf_max_finite = np.min(inf_finites), np.max(inf_finites)
+        if inf_min_finite not in self.limits and inf_max_finite not in self.limits:
+            inf_intervals = inf_intervals & self.limits
+
+        sup_finites = sup_intervals.intervals[np.isfinite(sup_intervals.intervals)]
+        sup_min_finite, sup_max_finite = np.min(sup_finites), np.max(sup_finites)
+        if sup_min_finite not in self.limits and sup_max_finite not in self.limits:
+            sup_intervals = sup_intervals & self.limits
 
         inf_F = self.truncated_cdf(self.stat, inf_intervals, absolute)
         sup_F = self.truncated_cdf(self.stat, sup_intervals, absolute)
@@ -335,7 +354,7 @@ class Inference:
 
                 return search_strategy
 
-            case _, "parallel":
+            case "parametric", "parallel":
 
                 def search_strategy(intervals: RealSubset) -> list[float]:
                     seed = 0
@@ -377,7 +396,7 @@ class Inference:
                 the decision result by the p-value
 
         Returns:
-            Callable[[RealSubset], list[float]]: The termination criterion.
+            Callable[[RealSubset, RealSubset], list[float]]: The termination criterion.
         """
         match inference_mode, termination_criterion_name:
             case "exhaustive", _:
