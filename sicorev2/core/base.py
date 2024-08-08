@@ -356,23 +356,34 @@ class Inference:
 
             case "parametric", "parallel":
 
-                def search_strategy(intervals: RealSubset) -> list[float]:
+                def search_strategy(searched_intervals: RealSubset) -> list[float]:
+                    num_execute = 5
+                    num_sample = 200
+                    scale = 1.5
+
                     seed = 0
-                    z_list = [self.stat] if intervals == RealSubset() else []
-                    while len(z_list) < self.n_jobs * 5:
-                        num = binom.rvs(n=100, p=0.5, random_state=seed)
+                    z_list = [self.stat] if searched_intervals == RealSubset() else []
+                    while len(z_list) < self.n_jobs * num_execute:
+                        num = binom.rvs(n=num_sample, p=0.5, random_state=seed)
                         samples_null = (
-                            self.null_rv.rvs(size=num, random_state=seed) * 1.5
+                            self.null_rv.rvs(size=num, random_state=seed) * scale
                         )
                         sample_stat = norm.rvs(
-                            loc=self.stat, scale=1.5, size=100 - num, random_state=seed
+                            loc=self.stat,
+                            scale=scale,
+                            size=num_sample - num,
+                            random_state=seed,
                         )
                         samples = np.concatenate([samples_null, sample_stat])
-                        for z in samples:
-                            if z not in intervals:
-                                z_list.append(z)
+                        intervals = searched_intervals.intervals
+                        mask = np.any(
+                            (intervals[:, 0] <= samples[:, np.newaxis])
+                            & (samples[:, np.newaxis] <= intervals[:, 1]),
+                            axis=1,
+                        )
+                        z_list += samples[~mask].tolist()
                         seed += 1
-                    return z_list[: self.n_jobs * 5]
+                    return z_list[: self.n_jobs * num_execute]
 
                 return search_strategy
 
