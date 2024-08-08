@@ -115,13 +115,16 @@ class Inference:
         self.var = var
 
         self.stat = None
+
         self.a = None
         self.b = None
 
-        self.mode = None
-        self.limits = None
         self.support = None
+        self.limits = None
+
         self.null_rv = None
+        self.mode = None
+
         self.truncated_cdf = None
 
     def inference(
