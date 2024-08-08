@@ -106,3 +106,7 @@ class SelectiveInferenceNorm(Inference):
         )
         self.mode = 0.0
         self.null_rv = norm()
+
+        self.truncated_cdf = lambda z, intervals, absolute: tn_cdf(
+            z, intervals, absolute=absolute
+        )

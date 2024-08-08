@@ -117,20 +117,11 @@ class Inference:
         self.a = None
         self.b = None
 
-        self._compute_pvalue = None
-        self._evaluate_pvalue_bounds = None
-
         self.mode = None
         self.limits = None
         self.support = None
         self.null_rv = None
-        self.cdf = None
-
-    def _create_search_strategy(self):
-        raise NotImplementedError()
-
-    def _create_termination_criterion(self):
-        raise NotImplementedError()
+        self.truncated_cdf = None
 
     def inference(
         self,
@@ -235,7 +226,7 @@ class Inference:
             float: The p-value from the truncated intervals.
         """
         absolute = self.alternative == "abs"
-        F = tn_cdf(self.stat, truncated_intervals, absolute=absolute)
+        F = self.truncated_cdf(self.stat, truncated_intervals, absolute)
         return compute_pvalue(F, self.alternative)
 
     def _evaluate_pvalue_bounds(
@@ -265,8 +256,8 @@ class Inference:
 
         # TODO: Restrict intervals
 
-        inf_F = tn_cdf(self.stat, inf_intervals, absolute=absolute)
-        sup_F = tn_cdf(self.stat, sup_intervals, absolute=absolute)
+        inf_F = self.truncated_cdf(self.stat, inf_intervals, absolute)
+        sup_F = self.truncated_cdf(self.stat, sup_intervals, absolute)
 
         inf_p, sup_p = compute_pvalue_bounds(inf_F, sup_F, self.alternative)
         return inf_p, sup_p
