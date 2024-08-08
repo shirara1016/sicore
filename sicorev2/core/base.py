@@ -115,31 +115,8 @@ class Inference:
     The user can inherit this class and implement the `__init__` method.
     """
 
-    def __init__(
-        self,
-        data: np.ndarray,
-        var: float | np.ndarray | sparse.csr_matrix,
-        use_sparse: bool = False,
-        use_tf: bool = False,
-        use_torch: bool = False,
-    ):
-        """Initialize a Inference object.
-
-        Args:
-            data (np.ndarray): Observed data in 1D array.
-            var (float | np.ndarray | sparse.csr_matrix): Known covariance matrix.
-                If float, covariance matrix equals to the scalar times identity matrix.
-                If 1D array, covariance matrix equals to the diagonal matrix with the given array.
-                If 2D array, covariance matrix equals to the given array.
-            use_sparse (bool, optional): Whether to use sparse matrix.
-                If True, the `var` must be given as a sparse matrix. Defaults to False.
-            use_tf (bool, optional): Whether to use TensorFlow.
-                If True, the `data` and `var` must be given as TensorFlow tensors.
-                Defaults to False.
-            use_torch (bool, optional): Whether to use PyTorch.
-                If True, the `data` and `var` must be given as PyTorch tensors.
-                Defaults to False.
-        """
+    def __init__(self):
+        """Initialize a Inference object."""
         self.stat = None
 
         self.a = None
