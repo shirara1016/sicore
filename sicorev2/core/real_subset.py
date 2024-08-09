@@ -57,30 +57,6 @@ def complement(intervals: np.ndarray) -> np.ndarray:
     return _simplify(np.array(result))
 
 
-def intersection(intervals1: np.ndarray, intervals2: np.ndarray) -> np.ndarray:
-    """Take intersection of two intervals.
-
-    Args:
-        intervals1 (np.ndarray): Intervals [[l1, u1], [l2, u2], ...].
-        intervals2 (np.ndarray): Intervals [[l1, u1], [l2, u2], ...].
-
-    Returns:
-        np.ndarray: Intersection of the two input intervals [[l1', u1'], [l2', u2'], ...].
-    """
-    result = []
-    i, j = 0, 0
-    while i < len(intervals1) and j < len(intervals2):
-        low = np.max([intervals1[i][0], intervals2[j][0]])
-        high = np.min([intervals1[i][1], intervals2[j][1]])
-        if low < high:
-            result.append([low, high])
-        if intervals1[i][1] < intervals2[j][1]:
-            i += 1
-        else:
-            j += 1
-    return _simplify(np.array(result))
-
-
 def union(intervals1: np.ndarray, intervals2: np.ndarray) -> np.ndarray:
     """Take union of two intervals.
 
@@ -93,6 +69,31 @@ def union(intervals1: np.ndarray, intervals2: np.ndarray) -> np.ndarray:
     """
     intervals = np.vstack([intervals1, intervals2])
     return _simplify(intervals)
+
+
+def intersection(intervals1: np.ndarray, intervals2: np.ndarray) -> np.ndarray:
+    """Take intersection of two intervals.
+
+    Args:
+        intervals1 (np.ndarray): Intervals [[l1, u1], [l2, u2], ...].
+        intervals2 (np.ndarray): Intervals [[l1, u1], [l2, u2], ...].
+
+    Returns:
+        np.ndarray: Intersection of the two input intervals [[l1', u1'], [l2', u2'], ...].
+    """
+    # result = []
+    # i, j = 0, 0
+    # while i < len(intervals1) and j < len(intervals2):
+    #     low = np.max([intervals1[i][0], intervals2[j][0]])
+    #     high = np.min([intervals1[i][1], intervals2[j][1]])
+    #     if low < high:
+    #         result.append([low, high])
+    #     if intervals1[i][1] < intervals2[j][1]:
+    #         i += 1
+    #     else:
+    #         j += 1
+    # return _simplify(np.array(result))
+    return complement(union(complement(intervals1), complement(intervals2)))
 
 
 class RealSubset:
@@ -157,17 +158,6 @@ class RealSubset:
         """
         return RealSubset(complement(self.intervals), simplify=False)
 
-    def intersection(self, other: RealSubset) -> RealSubset:
-        """Take the intersection of the subset with another subset.
-
-        Args:
-            other (RealSubset): Another subset to take intersection with.
-
-        Returns:
-            RealSubset: Intersection of the two subsets.
-        """
-        return RealSubset(intersection(self.intervals, other.intervals), simplify=False)
-
     def union(self, other: RealSubset) -> RealSubset:
         """Take the union of the subset with another subset.
 
@@ -178,6 +168,17 @@ class RealSubset:
             RealSubset: Union of the two subsets.
         """
         return RealSubset(union(self.intervals, other.intervals), simplify=False)
+
+    def intersection(self, other: RealSubset) -> RealSubset:
+        """Take the intersection of the subset with another subset.
+
+        Args:
+            other (RealSubset): Another subset to take intersection with.
+
+        Returns:
+            RealSubset: Intersection of the two subsets.
+        """
+        return RealSubset(intersection(self.intervals, other.intervals), simplify=False)
 
     def is_empty(self) -> bool:
         """Check if the subset is empty.
