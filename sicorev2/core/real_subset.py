@@ -158,6 +158,14 @@ class RealSubset:
         """
         return RealSubset(complement(self.intervals), simplify=False)
 
+    def __invert__(self) -> RealSubset:
+        """Take the complement of the subset
+
+        Returns:
+            RealSubset: Complement of the subset.
+        """
+        return self.complement()
+
     def union(self, other: RealSubset) -> RealSubset:
         """Take the union of the subset with another subset.
 
@@ -169,6 +177,17 @@ class RealSubset:
         """
         return RealSubset(union(self.intervals, other.intervals), simplify=False)
 
+    def __or__(self, other: RealSubset) -> RealSubset:
+        """Take the union of the subset with another subset.
+
+        Args:
+            other (RealSubset): Another subset to take union with.
+
+        Returns:
+            RealSubset: Union of the two subsets.
+        """
+        return self.union(other)
+
     def intersection(self, other: RealSubset) -> RealSubset:
         """Take the intersection of the subset with another subset.
 
@@ -178,7 +197,18 @@ class RealSubset:
         Returns:
             RealSubset: Intersection of the two subsets.
         """
-        return RealSubset(intersection(self.intervals, other.intervals), simplify=False)
+        return ~((~self) | (~other))
+
+    def __and__(self, other: RealSubset) -> RealSubset:
+        """Take the intersection of the subset with another subset.
+
+        Args:
+            other (RealSubset): Another subset to take intersection with.
+
+        Returns:
+            RealSubset: Intersection of the two subsets.
+        """
+        return self.intersection(other)
 
     def is_empty(self) -> bool:
         """Check if the subset is empty.
@@ -206,36 +236,6 @@ class RealSubset:
                 "RealSubset([[a, b], [c, d], ...])".
         """
         return f"RealSubset({self.intervals.tolist()})"
-
-    def __invert__(self) -> RealSubset:
-        """Take the complement of the subset
-
-        Returns:
-            RealSubset: Complement of the subset.
-        """
-        return self.complement()
-
-    def __and__(self, other: RealSubset) -> RealSubset:
-        """Take the intersection of the subset with another subset.
-
-        Args:
-            other (RealSubset): Another subset to take intersection with.
-
-        Returns:
-            RealSubset: Intersection of the two subsets.
-        """
-        return self.intersection(other)
-
-    def __or__(self, other: RealSubset) -> RealSubset:
-        """Take the union of the subset with another subset.
-
-        Args:
-            other (RealSubset): Another subset to take union with.
-
-        Returns:
-            RealSubset: Union of the two subsets.
-        """
-        return self.union(other)
 
     def __sub__(self, other: RealSubset) -> RealSubset:
         """Take the difference of the subset with another subset.
