@@ -188,6 +188,26 @@ class RealSubset:
         """
         return self.union(other)
 
+    def union_update(self, other: RealSubset) -> None:
+        """Update the subset with the union of itself and another subset.
+
+        Args:
+            other (RealSubset): Another subset to take union with.
+        """
+        self.intervals = (self | other).intervals
+
+    def __ior__(self, other: RealSubset) -> RealSubset:
+        """Update the subset with the union of itself and another subset.
+
+        Args:
+            other (RealSubset): Another subset to take union with.
+
+        Returns:
+            RealSubset: Updated subset with the union of itself and another subset.
+        """
+        self.union_update(other)
+        return self
+
     def intersection(self, other: RealSubset) -> RealSubset:
         """Take the intersection of the subset with another subset.
 
@@ -209,6 +229,26 @@ class RealSubset:
             RealSubset: Intersection of the two subsets.
         """
         return self.intersection(other)
+
+    def intersection_update(self, other: RealSubset) -> None:
+        """Update the subset with the intersection of itself and another subset.
+
+        Args:
+            other (RealSubset): Another subset to take intersection with.
+        """
+        self.intervals = (self & other).intervals
+
+    def __iand__(self, other: RealSubset) -> RealSubset:
+        """Update the subset with the intersection of itself and another subset.
+
+        Args:
+            other (RealSubset): Another subset to take intersection with.
+
+        Returns:
+            RealSubset: Updated subset with the intersection of itself and another subset.
+        """
+        self.intersection_update(other)
+        return self
 
     def difference(self, other: RealSubset) -> RealSubset:
         """Take the difference of the subset with another subset.
@@ -232,6 +272,26 @@ class RealSubset:
         """
         return self.difference(other)
 
+    def difference_update(self, other: RealSubset) -> None:
+        """Update the subset with the difference of itself with another subset.
+
+        Args:
+            other (RealSubset): Another subset to take difference with.
+        """
+        self.intervals = (self - other).intervals
+
+    def __isub__(self, other: RealSubset) -> RealSubset:
+        """Update the subset with the difference of itself with another subset.
+
+        Args:
+            other (RealSubset): Another subset to take difference with.
+
+        Returns:
+            RealSubset: Updated subset with the difference of itself with another subset.
+        """
+        self.difference_update(other)
+        return self
+
     def symmetric_difference(self, other: RealSubset) -> RealSubset:
         """Take the symmetric difference of the subset with another subset.
 
@@ -253,6 +313,26 @@ class RealSubset:
             RealSubset: Symmetric difference of the subset with another subset.
         """
         return self.symmetric_difference(other)
+
+    def symmetric_difference_update(self, other: RealSubset) -> None:
+        """Update the subset with the symmetric difference of itself with another subset.
+
+        Args:
+            other (RealSubset): Another subset to take symmetric difference with.
+        """
+        self.intervals = (self ^ other).intervals
+
+    def __ixor__(self, other: RealSubset) -> RealSubset:
+        """Update the subset with the symmetric difference of itself with another subset.
+
+        Args:
+            other (RealSubset): Another subset to take symmetric difference with.
+
+        Returns:
+            RealSubset: Updated subset with the symmetric difference of itself with another subset.
+        """
+        self.symmetric_difference_update(other)
+        return self
 
     def is_empty(self) -> bool:
         """Check if the subset is empty.
