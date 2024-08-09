@@ -74,7 +74,7 @@ def compute_pvalue(F: float, alternative: str) -> float:
             )
 
 
-def compute_pvalue_bounds(
+def evaluate_pvalue_bounds(
     inf_F: float, sup_F: float, alternative: str
 ) -> tuple[float, float]:
     """Evaluate the lower and upper bounds of the p-value from the lower and upper bounds of the CDF values.
@@ -337,7 +337,7 @@ class Inference:
         inf_F = self.truncated_cdf(self.stat, inf_intervals, absolute)
         sup_F = self.truncated_cdf(self.stat, sup_intervals, absolute)
 
-        inf_p, sup_p = compute_pvalue_bounds(inf_F, sup_F, self.alternative)
+        inf_p, sup_p = evaluate_pvalue_bounds(inf_F, sup_F, self.alternative)
         return inf_p, sup_p
 
     def _create_search_strategy(
@@ -365,9 +365,9 @@ class Inference:
         match inference_mode, search_strategy_name:
             case "exhaustive", _:
                 return lambda searched_intervals: (
-                    [searched_intervals.intervals[0][1] + self.step]
-                    if searched_intervals != RealSubset()
-                    else [self.limits.intervals[0][0]]
+                    [self.limits.intervals[0][0]]
+                    if searched_intervals.is_empty()
+                    else [searched_intervals.intervals[0][1] + self.step]
                 )
 
             case "over_conditioning", _:
@@ -386,7 +386,7 @@ class Inference:
                         metric = lambda z: -self.null_rv.logpdf(z)
 
                 def search_strategy(searched_intervals: RealSubset) -> list[float]:
-                    if searched_intervals == RealSubset():
+                    if searched_intervals.is_empty():
                         return [self.stat]
                     unsearched_intervals = self.support - searched_intervals
                     if target_value in unsearched_intervals:
@@ -398,10 +398,10 @@ class Inference:
                     unsearched_upper_intervals = unsearched_intervals & upper_mask
 
                     candidates = []
-                    if unsearched_lower_intervals != RealSubset():
+                    if not unsearched_lower_intervals.is_empty():
                         edge = unsearched_lower_intervals.intervals[-1][1]
                         candidates.append(edge - self.step)
-                    if unsearched_upper_intervals != RealSubset():
+                    if not unsearched_upper_intervals.is_empty():
                         edge = unsearched_upper_intervals.intervals[0][0]
                         candidates.append(edge + self.step)
                     candidates = np.array(candidates)
@@ -418,7 +418,7 @@ class Inference:
                     scale = 1.5
 
                     seed = 0
-                    z_list = [self.stat] if searched_intervals == RealSubset() else []
+                    z_list = [self.stat] if searched_intervals.is_empty() else []
                     while len(z_list) < self.n_jobs * num_execute:
                         num = binom.rvs(n=num_sample, p=0.5, random_state=seed)
                         samples_null = (
@@ -473,7 +473,7 @@ class Inference:
                 def termination_criterion(
                     searched_intervals: RealSubset, truncated_intervals: RealSubset
                 ) -> bool:
-                    return (self.limits - searched_intervals) == RealSubset()
+                    return self.limits <= searched_intervals
 
                 return termination_criterion
 
