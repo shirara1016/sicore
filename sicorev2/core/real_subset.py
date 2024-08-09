@@ -342,6 +342,96 @@ class RealSubset:
         """
         return len(self.intervals) == 0
 
+    def __eq__(self, other: RealSubset) -> bool:
+        """Check if two subsets are equal.
+
+        Args:
+            other (RealSubset): Another subset to compare with.
+
+        Returns:
+            bool: True if the two subsets are equal, False otherwise.
+        """
+        if self.intervals.shape != other.intervals.shape:
+            return False
+        return np.allclose(self.intervals, other.intervals)  # TODO: Tune atol and rtol
+
+    def issubset(self, other: RealSubset) -> bool:
+        """Check if the subset is a subset of another subset.
+
+        Args:
+            other (RealSubset): Another subset to check for subset.
+
+        Returns:
+            bool: True if the subset is a subset of another subset, False otherwise.
+        """
+        return (self - other).is_empty()
+
+    def __le__(self, other: RealSubset) -> bool:
+        """Check if the subset is a subset of another subset.
+
+        Args:
+            other (RealSubset): Another subset to check for subset.
+
+        Returns:
+            bool: True if the subset is a subset of another subset, False otherwise.
+        """
+        return self.issubset(other)
+
+    def __lt__(self, other: RealSubset) -> bool:
+        """Check if the subset is a proper subset of another subset.
+
+        Args:
+            other (RealSubset): Another subset to check for proper subset.
+
+        Returns:
+            bool: True if the subset is a proper subset of another subset, False otherwise.
+        """
+        return self.issubset(other) and self != other
+
+    def issuperset(self, other: RealSubset) -> bool:
+        """Check if the subset is a superset of another subset.
+
+        Args:
+            other (RealSubset): Another subset to check for superset.
+
+        Returns:
+            bool: True if the subset is a superset of another subset, False otherwise.
+        """
+        return other.issubset(self)
+
+    def __ge__(self, other: RealSubset) -> bool:
+        """Check if the subset is a superset of another subset.
+
+        Args:
+            other (RealSubset): Another subset to check for superset.
+
+        Returns:
+            bool: True if the subset is a superset of another subset, False otherwise.
+        """
+        return self.issuperset(other)
+
+    def __gt__(self, other: RealSubset) -> bool:
+        """Check if the subset is a proper superset of another subset.
+
+        Args:
+            other (RealSubset): Another subset to check for proper superset.
+
+        Returns:
+            bool: True if the subset is a proper superset of another subset, False otherwise.
+        """
+        return self.issuperset(other) and self != other
+
+    def isdisjoint(self, other: RealSubset) -> bool:
+        """Check if the subset is disjoint with another subset.
+
+        Args:
+            other (RealSubset): Another subset to check for disjoint.
+
+        Returns:
+            bool: True if the subset is disjoint with another subset, False otherwise.
+        """
+        return (self & other).is_empty()
+
     def __str__(self) -> str:
         """Return a string representation of the subset.
 
@@ -360,19 +450,6 @@ class RealSubset:
                 "RealSubset([[a, b], [c, d], ...])".
         """
         return f"RealSubset({self.intervals.tolist()})"
-
-    def __eq__(self, other: RealSubset) -> bool:
-        """Check if two RealSubset objects are equal.
-
-        Args:
-            other (RealSubset): Another RealSubset object to compare with.
-
-        Returns:
-            bool: True if the two RealSubset objects are equal, False otherwise.
-        """
-        if self.intervals.shape != other.intervals.shape:
-            return False
-        return np.allclose(self.intervals, other.intervals)  # TODO: Tune atol and rtol
 
     def __contains__(self, z: float) -> bool:
         """Check if a real number is in the subset.
