@@ -210,6 +210,50 @@ class RealSubset:
         """
         return self.intersection(other)
 
+    def difference(self, other: RealSubset) -> RealSubset:
+        """Take the difference of the subset with another subset.
+
+        Args:
+            other (RealSubset): Another subset to take difference with.
+
+        Returns:
+            RealSubset: Difference of the subset with another subset.
+        """
+        return self & ~other
+
+    def __sub__(self, other: RealSubset) -> RealSubset:
+        """Take the difference of the subset with another subset.
+
+        Args:
+            other (RealSubset): Another subset to take difference with.
+
+        Returns:
+            RealSubset: Difference of the subset with another subset.
+        """
+        return self.difference(other)
+
+    def symmetric_difference(self, other: RealSubset) -> RealSubset:
+        """Take the symmetric difference of the subset with another subset.
+
+        Args:
+            other (RealSubset): Another subset to take symmetric difference with.
+
+        Returns:
+            RealSubset: Symmetric difference of the subset with another subset.
+        """
+        return (self - other) | (other - self)
+
+    def __xor__(self, other: RealSubset) -> RealSubset:
+        """Take the symmetric difference of the subset with another subset.
+
+        Args:
+            other (RealSubset): Another subset to take symmetric difference with.
+
+        Returns:
+            RealSubset: Symmetric difference of the subset with another subset.
+        """
+        return self.symmetric_difference(other)
+
     def is_empty(self) -> bool:
         """Check if the subset is empty.
 
@@ -236,17 +280,6 @@ class RealSubset:
                 "RealSubset([[a, b], [c, d], ...])".
         """
         return f"RealSubset({self.intervals.tolist()})"
-
-    def __sub__(self, other: RealSubset) -> RealSubset:
-        """Take the difference of the subset with another subset.
-
-        Args:
-            other (RealSubset): Another subset to take difference with.
-
-        Returns:
-            RealSubset: Difference of the subset with another subset.
-        """
-        return self.intersection(~other)
 
     def __eq__(self, other: RealSubset) -> bool:
         """Check if two RealSubset objects are equal.
