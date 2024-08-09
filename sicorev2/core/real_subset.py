@@ -179,6 +179,14 @@ class RealSubset:
         """
         return RealSubset(union(self.intervals, other.intervals), simplify=False)
 
+    def is_empty(self) -> bool:
+        """Check if the subset is empty.
+
+        Returns:
+            bool: True if the subset is empty, False otherwise.
+        """
+        return len(self.intervals) == 0
+
     def __str__(self) -> str:
         """Return a string representation of the subset.
 
