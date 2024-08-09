@@ -445,6 +445,14 @@ class RealSubset:
             return False
         return np.any((self.intervals[:, 0] <= z) & (z <= self.intervals[:, 1]))
 
+    def __len__(self) -> int:
+        """Return the number of intervals in the subset.
+
+        Returns:
+            int: Number of intervals in the subset.
+        """
+        return len(self.intervals)
+
     def __str__(self) -> str:
         """Return a string representation of the subset.
 
