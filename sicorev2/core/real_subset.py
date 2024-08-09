@@ -353,7 +353,9 @@ class RealSubset:
         """
         if self.intervals.shape != other.intervals.shape:
             return False
-        return np.allclose(self.intervals, other.intervals)  # TODO: Tune atol and rtol
+        return np.allclose(
+            self.intervals, other.intervals, rtol=1e-10, atol=1e-10
+        )  # TODO: Tune atol and rtol
 
     def issubset(self, other: RealSubset) -> bool:
         """Check if the subset is a subset of another subset.
