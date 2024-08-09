@@ -432,6 +432,19 @@ class RealSubset:
         """
         return (self & other).is_empty()
 
+    def __contains__(self, z: float) -> bool:
+        """Check if a real number is in the subset.
+
+        Args:
+            z (float): Real number to check for membership.
+
+        Returns:
+            bool: True if z is in the subset, False otherwise.
+        """
+        if len(self.intervals) == 0:
+            return False
+        return np.any((self.intervals[:, 0] <= z) & (z <= self.intervals[:, 1]))
+
     def __str__(self) -> str:
         """Return a string representation of the subset.
 
@@ -450,16 +463,3 @@ class RealSubset:
                 "RealSubset([[a, b], [c, d], ...])".
         """
         return f"RealSubset({self.intervals.tolist()})"
-
-    def __contains__(self, z: float) -> bool:
-        """Check if a real number is in the subset.
-
-        Args:
-            z (float): Real number to check for membership.
-
-        Returns:
-            bool: True if z is in the subset, False otherwise.
-        """
-        if len(self.intervals) == 0:
-            return False
-        return np.any((self.intervals[:, 0] <= z) & (z <= self.intervals[:, 1]))
