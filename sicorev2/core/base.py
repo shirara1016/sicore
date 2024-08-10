@@ -395,31 +395,17 @@ class Inference:
                     if target_value in unsearched_intervals:
                         return [target_value]
 
-                    lower_mask = RealSubset([[-np.inf, target_value]])
-                    upper_mask = RealSubset([[target_value, np.inf]])
-                    unsearched_lower_intervals = unsearched_intervals & lower_mask
-                    unsearched_upper_intervals = unsearched_intervals & upper_mask
-
                     candidates = []
-                    if not unsearched_lower_intervals.is_empty():
-                        edge = unsearched_lower_intervals.intervals[-1][1]
-                        step = self.step
-                        while step > 1e-14:
-                            candidate = edge - step
-                            if candidate in unsearched_intervals:
-                                candidates.append(candidate)
-                                break
-                            step /= 10
-                    if not unsearched_upper_intervals.is_empty():
-                        edge = unsearched_upper_intervals.intervals[0][0]
-                        while step > 1e-14:
-                            candidate = edge + step
-                            if candidate in unsearched_intervals:
-                                candidates.append(candidate)
-                                break
-                            step /= 10
-                    candidates = np.array(candidates)
+                    l, u = searched_intervals.find_interval_containing(target_value)
+                    for candidate, step in [(l, -self.step), (u, self.step)]:
+                        if candidate in unsearched_intervals and np.isfinite(candidate):
+                            while np.abs(step) > 1e-11:
+                                if candidate + step in unsearched_intervals:
+                                    candidates.append(candidate + step)
+                                    break
+                                step /= 10
 
+                    candidates = np.array(candidates)
                     return [candidates[np.argmin(metric(candidates))]]
 
                 return search_strategy
