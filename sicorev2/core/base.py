@@ -20,7 +20,6 @@ class SelectiveInferenceResult:
         inf_p (float): Lower bound of selective p-value.
         sup_p (float): Upper bound of selective p-value.
         naive_p (float): Naive p-value.
-        reject_or_not (bool): Whether to reject the null hypothesis.
         truncated_intervals (list[list[float]]): Intervals from which
             the selected_model is obtained.
         search_count (int): Number of times the truncated intervals were computed.
@@ -33,10 +32,33 @@ class SelectiveInferenceResult:
     inf_p: float
     sup_p: float
     naive_p: float
-    reject_or_not: bool
     truncated_intervals: list[list[float]]
     search_count: int
     detect_count: int
+
+    def __str__(self):
+        precision = 6
+        truncated_intervals_literal = (
+            "["
+            + ", ".join(
+                [
+                    f"[{l:.{precision}f}, {u:.{precision}f}]"
+                    for l, u in self.truncated_intervals
+                ]
+            )
+            + "]"
+        )
+        litarals = [
+            f"stat: {self.stat:.{precision}f}",
+            f"p_value: {self.p_value:.{precision}f}",
+            f"inf_p: {self.inf_p:.{precision}f}",
+            f"sup_p: {self.sup_p:.{precision}f}",
+            f"naive_p: {self.naive_p:.{precision}f}",
+            f"truncated_intervals: {truncated_intervals_literal}",
+            f"search_count: {self.search_count}",
+            f"detect_count: {self.detect_count}",
+        ]
+        return "\n".join(litarals)
 
 
 class InfiniteLoopError(Exception):
@@ -227,7 +249,7 @@ class Inference:
                 results = []
                 for z in z_list:
                     model, intervals = algorithm(self.a, self.b, z)
-                    print(z, intervals)
+                    # print(z, intervals)
                     results.append((model, intervals))
             elif n_jobs > 1:
                 with Parallel(n_jobs=n_jobs) as parallel:
@@ -280,8 +302,7 @@ class Inference:
             inf_p,
             sup_p,
             naive_p,
-            p_value <= significance_level,
-            truncated_intervals.intervals,
+            truncated_intervals.intervals.tolist(),
             search_count,
             detect_count,
         )
@@ -439,7 +460,6 @@ class Inference:
                         )
                         z_list += samples[~mask].tolist()
                         seed += 1
-                    print("made")
                     return z_list[: self.n_jobs * num_execute]
 
                 return search_strategy

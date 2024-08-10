@@ -480,7 +480,7 @@ class RealSubset:
         """
         if len(self.intervals) == 0:
             return "[]"
-        return "[" + ", ".join([f"[{a}, {b}]" for a, b in self.intervals]) + "]"
+        return "[" + ", ".join([f"[{l:.6f}, {u:.6f}]" for l, u in self.intervals]) + "]"
 
     def __repr__(self) -> str:
         """Return a string representation of the RealSubset that can be used to recreate the object.
