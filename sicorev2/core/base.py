@@ -30,6 +30,7 @@ class SelectiveInferenceResult:
     inf_p: float
     sup_p: float
     naive_p: float
+    searched_intervals: list[list[float]]
     truncated_intervals: list[list[float]]
     search_count: int
     detect_count: int
@@ -300,6 +301,7 @@ class Inference:
             inf_p,
             sup_p,
             naive_p,
+            searched_intervals.intervals.tolist(),
             truncated_intervals.intervals.tolist(),
             search_count,
             detect_count,
