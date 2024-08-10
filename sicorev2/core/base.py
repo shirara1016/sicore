@@ -227,6 +227,7 @@ class Inference:
                 results = []
                 for z in z_list:
                     model, intervals = algorithm(self.a, self.b, z)
+                    print(z, intervals)
                     results.append((model, intervals))
             elif n_jobs > 1:
                 with Parallel(n_jobs=n_jobs) as parallel:
@@ -250,6 +251,8 @@ class Inference:
                 search_count > max_iter
                 or searched_intervals == before_searched_intervals
             ):
+                # print(searched_intervals)
+                # print(before_searched_intervals)
                 raise InfiniteLoopError()
             before_searched_intervals = searched_intervals
 
@@ -400,10 +403,21 @@ class Inference:
                     candidates = []
                     if not unsearched_lower_intervals.is_empty():
                         edge = unsearched_lower_intervals.intervals[-1][1]
-                        candidates.append(edge - self.step)
+                        step = self.step
+                        while step > 1e-14:
+                            candidate = edge - step
+                            if candidate in unsearched_intervals:
+                                candidates.append(candidate)
+                                break
+                            step /= 10
                     if not unsearched_upper_intervals.is_empty():
                         edge = unsearched_upper_intervals.intervals[0][0]
-                        candidates.append(edge + self.step)
+                        while step > 1e-14:
+                            candidate = edge + step
+                            if candidate in unsearched_intervals:
+                                candidates.append(candidate)
+                                break
+                            step /= 10
                     candidates = np.array(candidates)
 
                     return [candidates[np.argmin(metric(candidates))]]
@@ -413,20 +427,20 @@ class Inference:
             case "parametric", "parallel":
 
                 def search_strategy(searched_intervals: RealSubset) -> list[float]:
-                    num_execute = 5
-                    num_sample = 200
-                    scale = 1.5
+                    num_execute = 10  # 5
+                    num_sample = 2000  # 200
+                    # scale = 3.0  # 1.5
 
                     seed = 0
                     z_list = [self.stat] if searched_intervals.is_empty() else []
                     while len(z_list) < self.n_jobs * num_execute:
                         num = binom.rvs(n=num_sample, p=0.5, random_state=seed)
                         samples_null = (
-                            self.null_rv.rvs(size=num, random_state=seed) * scale
+                            self.null_rv.rvs(size=num, random_state=seed) * 3.0
                         )
                         sample_stat = norm.rvs(
                             loc=self.stat,
-                            scale=scale,
+                            scale=0.5,
                             size=num_sample - num,
                             random_state=seed,
                         )
@@ -439,6 +453,7 @@ class Inference:
                         )
                         z_list += samples[~mask].tolist()
                         seed += 1
+                    print("made")
                     return z_list[: self.n_jobs * num_execute]
 
                 return search_strategy
