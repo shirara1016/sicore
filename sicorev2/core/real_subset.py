@@ -81,18 +81,6 @@ def intersection(intervals1: np.ndarray, intervals2: np.ndarray) -> np.ndarray:
     Returns:
         np.ndarray: Intersection of the two input intervals [[l1', u1'], [l2', u2'], ...].
     """
-    # result = []
-    # i, j = 0, 0
-    # while i < len(intervals1) and j < len(intervals2):
-    #     low = np.max([intervals1[i][0], intervals2[j][0]])
-    #     high = np.min([intervals1[i][1], intervals2[j][1]])
-    #     if low < high:
-    #         result.append([low, high])
-    #     if intervals1[i][1] < intervals2[j][1]:
-    #         i += 1
-    #     else:
-    #         j += 1
-    # return _simplify(np.array(result))
     return complement(union(complement(intervals1), complement(intervals2)))
 
 
@@ -120,12 +108,12 @@ class RealSubset:
     Examples:
         >>> A = RealSubset([[1.0, 3.0], [5.0, 7.0]])
         >>> B = RealSubset([[2.0, 4.0], [6.0, 8.0]])
-        >>> print(A & B)  # Intersection
-        [[2.0, 3.0], [6.0, 7.0]]
-        >>> print(A | B)  # Union
-        [[1.0, 4.0], [5.0, 8.0]]
         >>> print(~A)     # Complement
         [[-inf, 1.0], [3.0, 5.0], [7.0, inf]]
+        >>> print(A | B)  # Union
+        [[1.0, 4.0], [5.0, 8.0]]
+        >>> print(A & B)  # Intersection
+        [[2.0, 3.0], [6.0, 7.0]]
     """
 
     def __init__(
