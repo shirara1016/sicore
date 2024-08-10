@@ -1,7 +1,5 @@
 from dataclasses import dataclass
 import numpy as np
-from scipy import sparse
-from scipy.stats import binom, norm
 from joblib import Parallel, delayed
 
 from typing import Any, Callable
@@ -162,7 +160,7 @@ class Inference:
         termination_criterion: (
             Callable[[RealSubset, RealSubset], bool] | str
         ) = "precision",
-        max_iter: int = 1e6,
+        max_iter: int = 100_000,
         n_jobs: int = 1,
         step: float = 1e-6,
         significance_level: float = 0.05,
@@ -204,7 +202,7 @@ class Inference:
                 the precision in the computation of the p-value.
                 If 'decision', the termination criterion is based on
                 the decision result by the p-value
-            max_iter (int, optional): Maximum number of iterations. Defaults to 1e6.
+            max_iter (int, optional): Maximum number of iterations. Defaults to 100_000.
             n_jobs (int, optional): Number of jobs to run in parallel. Defaults to 1.
             step (float, optional): Step size for the search strategy. Defaults to 1e-6.
             significance_level (float, optional): Significance level for
@@ -434,33 +432,63 @@ class Inference:
             case "parametric", "parallel":
 
                 def search_strategy(searched_intervals: RealSubset) -> list[float]:
-                    num_execute = 10  # 5
-                    num_sample = 2000  # 200
-                    # scale = 3.0  # 1.5
+                    # num_points_per_core = 2
+                    # scale = 0.5
 
-                    seed = 0
-                    z_list = [self.stat] if searched_intervals.is_empty() else []
-                    while len(z_list) < self.n_jobs * num_execute:
-                        num = binom.rvs(n=num_sample, p=0.5, random_state=seed)
-                        samples_null = (
-                            self.null_rv.rvs(size=num, random_state=seed) * 3.0
+                    # num_points = self.n_jobs * num_points_per_core
+                    # num_samples = np.min([10000, num_points * 3])
+                    # rng = np.random.default_rng(0)
+
+                    # unsearched_intervals = self.support - searched_intervals
+                    # if self.stat in unsearched_intervals:
+                    #     z_list = [self.stat]
+                    #     loc = self.stat
+                    # else:
+                    #     z_list = []
+                    #     edges = searched_intervals.find_interval_containing(self.stat)
+                    #     loc = edges[np.argmin(-self.null_rv.logpdf(edges))]
+
+                    # print(loc, len(searched_intervals))
+
+                    # intervals = unsearched_intervals.intervals
+                    # while len(z_list) < num_points:
+                    #     samples = rng.normal(loc=loc, scale=scale, size=num_samples)
+                    #     mask = np.any(
+                    #         (intervals[:, 0] <= samples[:, np.newaxis])
+                    #         & (samples[:, np.newaxis] <= intervals[:, 1]),
+                    #         axis=1,
+                    #     )
+                    #     z_list += samples[mask].tolist()
+                    # return z_list[:num_points]
+
+                    num_points_per_core = 4
+                    num_points = self.n_jobs * num_points_per_core
+                    expand_width = 0.5
+
+                    unsearched_intervals = self.support - searched_intervals
+                    if self.stat in unsearched_intervals:
+                        z_list = [self.stat]
+                        loc = self.stat
+                    else:
+                        z_list = []
+                        edges = searched_intervals.find_interval_containing(self.stat)
+                        loc = edges[np.argmin(-self.null_rv.logpdf(edges))]
+
+                    tail = 0.0
+                    while len(z_list) < num_points:
+                        inner, outer = tail, tail + expand_width
+                        intervals = unsearched_intervals & RealSubset(
+                            [[loc - outer, loc - inner], [loc + inner, loc + outer]]
                         )
-                        sample_stat = norm.rvs(
-                            loc=self.stat,
-                            scale=0.5,
-                            size=num_sample - num,
-                            random_state=seed,
-                        )
-                        samples = np.concatenate([samples_null, sample_stat])
-                        intervals = searched_intervals.intervals
-                        mask = np.any(
-                            (intervals[:, 0] <= samples[:, np.newaxis])
-                            & (samples[:, np.newaxis] <= intervals[:, 1]),
-                            axis=1,
-                        )
-                        z_list += samples[~mask].tolist()
-                        seed += 1
-                    return z_list[: self.n_jobs * num_execute]
+                        for l, u in intervals.intervals:
+                            if l + self.step < u:
+                                z_list += np.arange(
+                                    l + self.step, u, self.step
+                                ).tolist()
+                            else:
+                                z_list.append((l + u) / 2)
+                        tail = outer
+                    return z_list[:num_points]
 
                 return search_strategy
 
