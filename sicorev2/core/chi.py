@@ -4,10 +4,10 @@ from scipy.stats import chi
 
 from .real_subset import RealSubset
 from .cdf import tc_cdf
-from .base import Inference
+from .base import SelectiveInference
 
 
-class SelectiveInferenceChi(Inference):
+class SelectiveInferenceChi(SelectiveInference):
     """A class conducting selective inference for the normal distribution."""
 
     def __init__(

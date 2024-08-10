@@ -4,10 +4,10 @@ from scipy.stats import norm
 
 from .real_subset import RealSubset
 from .cdf import tn_cdf
-from .base import Inference
+from .base import SelectiveInference
 
 
-class SelectiveInferenceNorm(Inference):
+class SelectiveInferenceNorm(SelectiveInference):
     """A class conducting selective inference for the normal distribution."""
 
     def __init__(

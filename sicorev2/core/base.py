@@ -129,7 +129,7 @@ def evaluate_pvalue_bounds(
     return inf_p, sup_p
 
 
-class Inference:
+class SelectiveInference:
     """An abstract class conducting selective inference
 
     This class provides the basic structure for conducting selective inference.
@@ -137,7 +137,7 @@ class Inference:
     """
 
     def __init__(self):
-        """Initialize a Inference object."""
+        """Initialize a SelectiveInference object."""
         self.stat = None
 
         self.a = None
