@@ -447,6 +447,23 @@ class RealSubset:
             return False
         return np.any((self.intervals[:, 0] <= z) & (z <= self.intervals[:, 1]))
 
+    def find_interval_containing(self, z: float) -> tuple[float, float] | None:
+        """Find the interval containing a real number.
+
+        Args:
+            z (float): Real number to find the interval containing it.
+
+        Returns:
+            tuple[float, float] | None: Interval containing z if found, None otherwise.
+        """
+        if len(self.intervals) == 0:
+            return None
+        mask = (self.intervals[:, 0] <= z) & (z <= self.intervals[:, 1])
+        if np.sum(mask) == 0:
+            return None
+        assert np.sum(mask) == 1
+        return self.intervals[mask][0]
+
     def __len__(self) -> int:
         """Return the number of intervals in the subset.
 
