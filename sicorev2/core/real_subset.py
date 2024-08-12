@@ -2,7 +2,7 @@ from __future__ import annotations
 import numpy as np
 
 
-def _simplify(intervals: np.ndarray, tol: float = 1e-10) -> np.ndarray:
+def simplify(intervals: np.ndarray, tol: float = 1e-10) -> np.ndarray:
     """Simplify (merge overlapping) intervals.
 
     Args:
@@ -17,12 +17,7 @@ def _simplify(intervals: np.ndarray, tol: float = 1e-10) -> np.ndarray:
     if len(intervals) == 0:
         return np.array([]).reshape(0, 2)
 
-    # TODO: Delete try-except block
-    try:
-        intervals = intervals[np.argsort(intervals[:, 0])]
-    except:
-        print(intervals)
-        print(np.argsort(intervals[:, 0]))
+    intervals = intervals[np.argsort(intervals[:, 0])]
     simplified = [intervals[0]]
     for interval in intervals[1:]:
         if interval[0] <= simplified[-1][1] + tol:
@@ -54,7 +49,7 @@ def complement(intervals: np.ndarray) -> np.ndarray:
     if intervals[-1][1] < np.inf:
         result.append([intervals[-1][1], np.inf])
 
-    return _simplify(np.array(result))
+    return simplify(np.array(result))
 
 
 def union(intervals1: np.ndarray, intervals2: np.ndarray) -> np.ndarray:
@@ -68,7 +63,7 @@ def union(intervals1: np.ndarray, intervals2: np.ndarray) -> np.ndarray:
         np.ndarray: Union of the two input intervals [[l1', u1'], [l2', u2'], ...].
     """
     intervals = np.vstack([intervals1, intervals2])
-    return _simplify(intervals)
+    return simplify(intervals)
 
 
 def intersection(intervals1: np.ndarray, intervals2: np.ndarray) -> np.ndarray:
@@ -132,11 +127,11 @@ class RealSubset:
         else:
             self.intervals = np.array(intervals).reshape(-1, 2)
             if simplify:
-                self._simplify()
+                self.simplify()
 
-    def _simplify(self) -> None:
+    def simplify(self) -> None:
         """Simplify the intervals of the subset"""
-        self.intervals = _simplify(self.intervals)
+        self.intervals = simplify(self.intervals)
 
     def complement(self) -> RealSubset:
         """Take the complement of the subset.
