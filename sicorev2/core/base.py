@@ -153,7 +153,9 @@ class SelectiveInference:
 
     def inference(
         self,
-        algorithm: Callable[[np.ndarray, np.ndarray, float], Any],
+        algorithm: Callable[
+            [np.ndarray, np.ndarray, float], tuple[Any, list[list[float]] | RealSubset]
+        ],
         model_selector: Callable[[Any], bool],
         alternative: str = "abs",
         inference_mode: str = "parametric",
@@ -170,10 +172,11 @@ class SelectiveInference:
         """Conduct selective inference.
 
         Args:
-            algorithm (Callable[[np.ndarray, np.ndarray, float], Any]): Callable function which
-                takes two vectors a (np.ndarray) and b (np.ndarray), and
-                a scalar z (float), and returns a model (Any) and intervals (list[list[float]]).
-                For any point in the intervals, the same model must be selected.
+            algorithm (Callable[[np.ndarray, np.ndarray, float], tuple[Any, list[list[float]] | RealSubset]]):
+                Callable function which takes two vectors a (np.ndarray) and b (np.ndarray),
+                and a scalar z (float), and returns a model (Any) and
+                intervals (list[list[float]] | RealSubset). For any point in the intervals,
+                the same model must be selected.
             model_selector (Callable[[Any], bool]): Callable function which takes a model (Any)
                 and returns a boolean value, indicating whether the model is the same as
                 the selected model.
@@ -259,7 +262,8 @@ class SelectiveInference:
                 raise ValueError("The n_jobs must be positive integer.")
 
             for model, intervals in results:
-                intervals = RealSubset(intervals)
+                if not isinstance(intervals, RealSubset):
+                    intervals = RealSubset(intervals)
 
                 search_count += 1
                 searched_intervals = searched_intervals | intervals
@@ -301,8 +305,8 @@ class SelectiveInference:
             inf_p,
             sup_p,
             naive_p,
-            searched_intervals.intervals.tolist(),
-            truncated_intervals.intervals.tolist(),
+            searched_intervals.tolist(),
+            truncated_intervals.tolist(),
             search_count,
             detect_count,
         )
