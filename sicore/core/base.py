@@ -440,35 +440,6 @@ class SelectiveInference:
             case "parametric", "parallel":
 
                 def search_strategy(searched_intervals: RealSubset) -> list[float]:
-                    # num_points_per_core = 2
-                    # scale = 0.5
-
-                    # num_points = self.n_jobs * num_points_per_core
-                    # num_samples = np.min([10000, num_points * 3])
-                    # rng = np.random.default_rng(0)
-
-                    # unsearched_intervals = self.support - searched_intervals
-                    # if self.stat in unsearched_intervals:
-                    #     z_list = [self.stat]
-                    #     loc = self.stat
-                    # else:
-                    #     z_list = []
-                    #     edges = searched_intervals.find_interval_containing(self.stat)
-                    #     loc = edges[np.argmin(-self.null_rv.logpdf(edges))]
-
-                    # print(loc, len(searched_intervals))
-
-                    # intervals = unsearched_intervals.intervals
-                    # while len(z_list) < num_points:
-                    #     samples = rng.normal(loc=loc, scale=scale, size=num_samples)
-                    #     mask = np.any(
-                    #         (intervals[:, 0] <= samples[:, np.newaxis])
-                    #         & (samples[:, np.newaxis] <= intervals[:, 1]),
-                    #         axis=1,
-                    #     )
-                    #     z_list += samples[mask].tolist()
-                    # return z_list[:num_points]
-
                     num_points_per_core = 4
                     num_points = self.n_jobs * num_points_per_core
                     expand_width = 0.5
