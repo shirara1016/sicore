@@ -3,7 +3,7 @@ import numpy as np
 
 
 def simplify(intervals: np.ndarray, tol: float = 1e-10) -> np.ndarray:
-    """Simplify (merge overlapping) intervals.
+    """Simplify (merge overlapping) the intervals.
 
     Args:
         intervals (np.ndarray): Intervals [[l1, u1], [l2, u2], ...].
@@ -28,7 +28,7 @@ def simplify(intervals: np.ndarray, tol: float = 1e-10) -> np.ndarray:
 
 
 def complement(intervals: np.ndarray) -> np.ndarray:
-    """Take complement of intervals.
+    """Take the complement of intervals.
 
     Args:
         intervals (np.ndarray): Intervals [[l1, u1], [l2, u2], ...].
@@ -53,7 +53,7 @@ def complement(intervals: np.ndarray) -> np.ndarray:
 
 
 def union(intervals1: np.ndarray, intervals2: np.ndarray) -> np.ndarray:
-    """Take union of two intervals.
+    """Take the union of two intervals.
 
     Args:
         intervals1 (np.ndarray): Intervals [[l1, u1], [l2, u2], ...].
@@ -67,7 +67,7 @@ def union(intervals1: np.ndarray, intervals2: np.ndarray) -> np.ndarray:
 
 
 def intersection(intervals1: np.ndarray, intervals2: np.ndarray) -> np.ndarray:
-    """Take intersection of two intervals.
+    """Take the intersection of two intervals.
 
     Args:
         intervals1 (np.ndarray): Intervals [[l1, u1], [l2, u2], ...].
@@ -430,14 +430,14 @@ class RealSubset:
             return False
         return np.any((self.intervals[:, 0] <= z) & (z <= self.intervals[:, 1]))
 
-    def find_interval_containing(self, z: float) -> tuple[float, float] | None:
+    def find_interval_containing(self, z: float) -> list[float] | None:
         """Find the interval containing a real number.
 
         Args:
             z (float): Real number to find the interval containing it.
 
         Returns:
-            tuple[float, float] | None: Interval containing z if found, None otherwise.
+            list[float] | None: Interval containing z if found, None otherwise.
         """
         if len(self.intervals) == 0:
             return None
@@ -445,7 +445,15 @@ class RealSubset:
         if np.sum(mask) == 0:
             return None
         assert np.sum(mask) == 1
-        return self.intervals[mask][0]
+        return self.intervals[mask][0].tolist()
+
+    def tolist(self) -> list[list[float]]:
+        """Return the intervals as a list of lists.
+
+        Returns:
+            list[list[float]]: Intervals as a list of lists.
+        """
+        return self.intervals.tolist()
 
     def __len__(self) -> int:
         """Return the number of intervals in the subset.
@@ -472,4 +480,4 @@ class RealSubset:
             str: String representation of the RealSubset in the format
                 "RealSubset([[a, b], [c, d], ...])".
         """
-        return f"RealSubset({self.intervals.tolist()})"
+        return f"RealSubset({self.tolist()})"
