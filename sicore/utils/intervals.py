@@ -29,11 +29,13 @@ def symmetric_difference(intervals1: np.ndarray, intervals2: np.ndarray) -> np.n
     return union(difference(intervals1, intervals2), difference(intervals2, intervals1))
 
 
-def polynomial_below_zero(poly_or_coef: np.poly1d | np.ndarray, tol: float = 1e-10):
+def polynomial_below_zero(
+    poly_or_coef: np.poly1d | np.ndarray | list[float], tol: float = 1e-10
+) -> list[list[float]]:
     """Compute intervals where a given polynomial is below zero.
 
     Args:
-        poly_or_coef (np.poly1d | np.ndarray): Polynomial or its
+        poly_or_coef (np.poly1d | np.ndarray | list[float]): Polynomial or its
             coefficients e.g. [a, b, c] for a*z^2 + b*z + c.
         tol (float, optional): Tolerance error parameter. It is recommended to set a
             large value (about 1e-5) for high order polynomial (>= 3) or a polynomial
@@ -84,7 +86,7 @@ def polynomial_below_zero(poly_or_coef: np.poly1d | np.ndarray, tol: float = 1e-
     if poly(roots[-1] + 1) <= 0:
         intervals.append([roots[-1], np.inf])
 
-    return simplify(np.array(intervals))
+    return simplify(np.array(intervals)).tolist()
 
 
 def polytope_below_zero(
@@ -132,3 +134,23 @@ def polytope_below_zero(
         gamma += c
 
     return polynomial_below_zero([alpha, beta, gamma], tol=tol)
+
+
+def degree_one_polynomials_below_zero(a: np.ndarray, b: np.ndarray) -> np.ndarray:
+    """Compute intervals where given degree one polynomials a_i + b_i * z are all below zero.
+
+    Args:
+        a (np.ndarray): Constant terms of the degree one polynomials.
+        b (np.ndarray): Coefficinets of the degree one polynomials.
+
+    Returns:
+        list[list[float]]: Intervals where the degree one polynomials are below zero.
+    """
+    l, u = -np.inf, np.inf
+    l_candidates = -a[b < 0] / b[b < 0]
+    u_candidates = -a[b > 0] / b[b > 0]
+    if len(l_candidates) > 0:
+        l = np.max(l_candidates)
+    if len(u_candidates) > 0:
+        u = np.min(u_candidates)
+    return [[l, u]]
