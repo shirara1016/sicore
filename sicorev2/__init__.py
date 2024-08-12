@@ -2,8 +2,7 @@
 Core package for selective inference.
 """
 
-from .core.norm import SelectiveInferenceNorm
-from .core.chi import SelectiveInferenceChi
+from .main.inference import SelectiveInferenceNorm, SelectiveInferenceChi
 
 
 __all__ = [
