@@ -16,7 +16,7 @@ class OneVec:
         """
         self.length = length
 
-    def get(self, i, j=None):
+    def get(self, i: int, j: int | None = None):
         """
         Get the vector.
 
@@ -38,12 +38,15 @@ class OneVec:
         return vec
 
 
-def construct_projection_matrix(basis, verify=False):
+def construct_projection_matrix(
+    basis: np.ndarray | list[list[float]], verify: bool = False
+) -> np.ndarray:
     """Construct projection matrix from basis.
 
     Args:
-        basis (np.ndarray): The basis of the k-dimensional subspace to be projected.
-            The shape of the basis should be (k, n), where n is the dimension of the data space.
+        basis (np.ndarray | list[list[float]]): The basis of the k-dimensional subspace
+            to be projected. The shape of the basis should be (k, n),
+            where n is the dimension of the data space.
         verify (bool, optional): Whether to verify the constructed projection matrix. Defaults to False.
 
     Raises:
