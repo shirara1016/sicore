@@ -215,13 +215,21 @@ class SelectiveInference:
                 Defaults to 0.001.
 
         Raises:
-            ValueError: If `n_jobs` is not a positive integer.
-            InfiniteLoopError: If the search is conducted on the same search points.
+            InfiniteLoopError: If the search was performed a specified times and may have fallen into an infinite loop.
+            InfiniteLoopError: If the search did not proceed and fell into an infinite loop.
 
         Returns:
             SelectiveInferenceResult: The result of the selective inference.
         """
-        # TODO: warning the pattern matching
+        self._check_validity_of_arguments(
+            inference_mode,
+            search_strategy,
+            termination_criterion,
+            n_jobs,
+            step,
+            significance_level,
+            precision,
+        )
 
         self.n_jobs = n_jobs
         self.step = step
@@ -251,15 +259,12 @@ class SelectiveInference:
                 results = []
                 for z in z_list:
                     model, intervals = algorithm(self.a, self.b, z)
-                    # print(z, intervals)
                     results.append((model, intervals))
-            elif n_jobs > 1:
+            else:
                 with Parallel(n_jobs=n_jobs) as parallel:
                     results = parallel(
                         delayed(algorithm)(self.a, self.b, z) for z in z_list
                     )
-            else:
-                raise ValueError("The n_jobs must be positive integer.")
 
             for model, intervals in results:
                 if not isinstance(intervals, RealSubset):
@@ -532,3 +537,80 @@ class SelectiveInference:
                     )
 
                 return termination_criterion
+
+    def _check_validity_of_arguments(
+        self,
+        inference_mode: str = "parametric",
+        search_strategy: Callable[[RealSubset], list[float]] | str = "pi3",
+        termination_criterion: (
+            Callable[[RealSubset, RealSubset], bool] | str
+        ) = "precision",
+        n_jobs: int = 1,
+        step: float = 1e-6,
+        significance_level: float = 0.05,
+        precision: float = 0.001,
+    ):
+        """Check the validity of the arguments.
+
+        Args:
+            inference_mode (str, optional): Must be one of 'parametric', 'exhaustive',
+                or 'over_conditioning'. Defaults to 'parametric'.
+            search_strategy (Callable[[RealSubset], list[float]] | str, optional): Callable
+                function which takes a searched_intervals (RealSubset) and returns next
+                search points (list[float]).
+                If str, it must be one of 'pi1', 'pi2', 'pi3', or 'parallel'.
+                If 'pi1', the search strategy focuses on the truncated intervals.
+                If 'pi2', the search strategy focuses on the searched intervals.
+                If 'pi3', the search strategy focuses on the both of the truncated and searched intervals.
+                If 'parallel', the search strategy focuses on the both of the
+                truncated and searched intervals for the parallel computing.
+                Defaults to 'pi3'.
+            termination_criterion (Callable[[RealSubset, RealSubset], bool] | str, optional):
+                Callable function which takes searched_intervals (RealSubset) and truncated_intervals (RealSubset) and returns a boolean value, indicating
+                whether the search should be terminated.
+                If str, it must be one of 'precision' or 'decision'.
+                If 'precision', the termination criterion is based on
+                the precision in the computation of the p-value.
+                If 'decision', the termination criterion is based on
+                the decision result by the p-value
+            n_jobs (int, optional): Number of jobs to run in parallel. Defaults to 1.
+            step (float, optional): Step size for the search strategy. Defaults to 1e-6.
+            significance_level (float, optional): Significance level for
+                the termination criterion. Defaults to 0.05.
+            precision (float, optional): Precision for the termination criterion.
+                Defaults to 0.001.
+        """
+        if inference_mode not in ["parametric", "exhaustive", "over_conditioning"]:
+            raise ValueError(
+                "The inference_mode must be one of 'parametric', 'exhaustive', or 'over_conditioning'."
+            )
+
+        search_strategy_names = ["pi1", "pi2", "pi3", "parallel"]
+        if (
+            isinstance(search_strategy, str)
+            and search_strategy not in search_strategy_names
+        ):
+            raise ValueError(
+                "The search_strategy must be one of 'pi1', 'pi2', 'pi3', or 'parallel' if it is str."
+            )
+
+        termination_criterion_names = ["precision", "decision"]
+        if (
+            isinstance(termination_criterion, str)
+            and termination_criterion not in termination_criterion_names
+        ):
+            raise ValueError(
+                "The termination_criterion must be one of 'precision' or 'decision' if it is str."
+            )
+
+        if n_jobs <= 0 or not isinstance(n_jobs, int):
+            raise ValueError("The n_jobs must be positive integer.")
+
+        if step <= 0:
+            raise ValueError("The step must be positive.")
+
+        if not (0.0 < significance_level < 1.0):
+            raise ValueError("The significance level must be in the range [0.0, 1.0].")
+
+        if precision <= 0:
+            raise ValueError("The precision must be positive.")
