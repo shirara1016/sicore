@@ -64,7 +64,7 @@ class InfiniteLoopError(Exception):
     pass
 
 
-def compute_pvalue(F: float, alternative: str) -> float:
+def _compute_pvalue(F: float, alternative: str) -> float:
     """Compute the p-value from the CDF value.
 
     Args:
@@ -95,7 +95,7 @@ def compute_pvalue(F: float, alternative: str) -> float:
             )
 
 
-def evaluate_pvalue_bounds(
+def _evaluate_pvalue_bounds(
     inf_F: float, sup_F: float, alternative: str
 ) -> tuple[float, float]:
     """Evaluate the lower and upper bounds of the p-value from the lower and upper bounds of the CDF values.
@@ -123,8 +123,8 @@ def evaluate_pvalue_bounds(
             "The lower bound of the CDF value must be less than the upper bound."
         )
 
-    p_value_from_inf = compute_pvalue(inf_F, alternative)
-    p_value_from_sup = compute_pvalue(sup_F, alternative)
+    p_value_from_inf = _compute_pvalue(inf_F, alternative)
+    p_value_from_sup = _compute_pvalue(sup_F, alternative)
     inf_p, sup_p = np.sort([p_value_from_inf, p_value_from_sup])
     return inf_p, sup_p
 
@@ -322,7 +322,7 @@ class SelectiveInference:
         """
         absolute = self.alternative == "abs"
         F = self.truncated_cdf(self.stat, truncated_intervals, absolute)
-        return compute_pvalue(F, self.alternative)
+        return _compute_pvalue(F, self.alternative)
 
     def _evaluate_pvalue_bounds(
         self,
@@ -367,7 +367,7 @@ class SelectiveInference:
         inf_F = self.truncated_cdf(self.stat, inf_intervals, absolute)
         sup_F = self.truncated_cdf(self.stat, sup_intervals, absolute)
 
-        inf_p, sup_p = evaluate_pvalue_bounds(inf_F, sup_F, self.alternative)
+        inf_p, sup_p = _evaluate_pvalue_bounds(inf_F, sup_F, self.alternative)
         return inf_p, sup_p
 
     def _create_search_strategy(
