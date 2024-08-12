@@ -272,13 +272,14 @@ class SelectiveInference:
                     detect_count += 1
                     truncated_intervals = truncated_intervals | intervals
 
-            if (
-                search_count > max_iter
-                or searched_intervals == before_searched_intervals
-            ):
-                # print(searched_intervals)
-                # print(before_searched_intervals)
-                raise InfiniteLoopError()
+            if search_count > max_iter:
+                raise InfiniteLoopError(
+                    "The search was performed a specified times and may have fallen into an infinite loop."
+                )
+            if searched_intervals == before_searched_intervals:
+                raise InfiniteLoopError(
+                    "The search did not proceed and fell into an infinite loop."
+                )
             before_searched_intervals = searched_intervals
 
             if termination_criterion(searched_intervals, truncated_intervals):
@@ -391,7 +392,6 @@ class SelectiveInference:
         Returns:
             Callable[[RealSubset], list[float]]: The search strategy.
         """
-        # TODO: warning the pattern matching
         match inference_mode, search_strategy_name:
             case "exhaustive", _:
                 return lambda searched_intervals: (
@@ -493,8 +493,6 @@ class SelectiveInference:
         Returns:
             Callable[[RealSubset, RealSubset], list[float]]: The termination criterion.
         """
-        # TODO: warning the pattern matching
-
         match inference_mode, termination_criterion_name:
             case "exhaustive", _:
 
