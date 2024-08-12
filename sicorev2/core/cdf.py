@@ -116,7 +116,7 @@ def _truncated_cdf_from_cdf(
         raise ZeroDivisionError("The denominator is zero. Consider increasing the dps.")
 
 
-def tn_cdf(
+def truncated_norm_cdf(
     z: float,
     intervals: np.ndarray | list[list[float]] | RealSubset,
     **kwargs,
@@ -139,7 +139,7 @@ def tn_cdf(
     return float(_truncated_cdf_from_cdf(cdf, z, intervals, **kwargs))
 
 
-def tc_cdf(
+def truncated_chi_cdf(
     z: float,
     df: int,
     intervals: np.ndarray | list[list[float]] | RealSubset,
