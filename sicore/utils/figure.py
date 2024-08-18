@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.stats import uniform, ecdf
+from scipy.stats import uniform, ecdf  # type: ignore
 import matplotlib.pyplot as plt
 
 from .evaluation import false_positive_rate, true_positive_rate
@@ -102,7 +102,7 @@ class SummaryFigure:
         self.title = title
         self.xlabel = xlabel
         self.ylabel = ylabel
-        self.data = dict()
+        self.data: dict[str, list] = dict()
         self.red_line = False
 
     def add_value(self, value: float, label: str, xloc: str | int | float):
@@ -149,8 +149,8 @@ class SummaryFigure:
             plt.ylabel(self.ylabel)
 
         for label, xloc_value_list in self.data.items():
-            xlocs, values = zip(*xloc_value_list)
-            xlocs, values = np.array(xlocs), np.array(values)
+            xlocs_, values_ = zip(*xloc_value_list)
+            xlocs, values = np.array(xlocs_), np.array(values_)
             if not all(isinstance(xloc, (str)) for xloc in xlocs):
                 values = values[np.argsort(xlocs)]
                 xlocs = np.sort(xlocs)
@@ -159,7 +159,7 @@ class SummaryFigure:
         if self.red_line:
             plt.plot(xlocs, [0.05] * len(xlocs), color="red", linestyle="--", lw=0.5)
 
-        plt.xticks(xlocs, labels=xlocs)
+        plt.xticks(xlocs)
         plt.ylim(ylim)
         if yticks is not None:
             plt.yticks(yticks)
