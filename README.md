@@ -24,7 +24,7 @@ The following modules can be imported by `from sicore import *`.
 - SelectiveInferenceResult: Data class for the result of selective inference.
 
 **Evaluation**
-- reject_rate(): Computes rejection rate from the list of SelectiveInferenceResult objects or p-values.
+- rejection_rate(): Computes rejection rate from the list of SelectiveInferenceResult objects or p-values.
 
 **Figure**
 - pvalues_hist() : Draws a histogram of p-values.
