@@ -3,7 +3,7 @@ from scipy.stats import uniform, ecdf  # type: ignore
 import matplotlib.pyplot as plt
 
 from ..core.base import SelectiveInferenceResult
-from .evaluation import reject_rate
+from .evaluation import rejection_rate
 
 plt.rcParams.update({"figure.autolayout": True})
 
@@ -139,7 +139,7 @@ class SummaryFigure:
             naive (bool, optional): Whether to use naive p-values from
                 SelectiveInferenceResult objects. Defaults to False.
         """
-        value = reject_rate(results, alpha=alpha, naive=naive)
+        value = rejection_rate(results, alpha=alpha, naive=naive)
         self._add_value(value, label, xloc)
 
     def plot(
