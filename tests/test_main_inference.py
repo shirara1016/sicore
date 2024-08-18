@@ -56,8 +56,8 @@ class MarginalScreening:
         a, b = self.X.T @ a, self.X.T @ b
 
         signs = np.sign(a + b * z)
-        intervals = degree_one_polynomials_below_zero(-signs * a, -signs * b)
-        intervals = RealSubset(intervals)
+        intervals_ = degree_one_polynomials_below_zero(-signs * a, -signs * b)
+        intervals = RealSubset(intervals_)
         a, b = signs * a, signs * b
 
         collerations = a + b * z
