@@ -164,14 +164,20 @@ def test_contains(intervals, value, expected):
 
 
 @pytest.mark.parametrize(
-    "intervals, value, expected",
+    "intervals, value, expected_result, expected_exception",
     [
-        ([[1.0, 3.0], [5.0, 7.0]], 4.0, None),
-        ([[1.0, 3.0], [5.0, 7.0]], 6.0, [5.0, 7.0]),
+        ([[1.0, 3.0], [5.0, 7.0]], 4.0, None, ValueError),
+        ([[1.0, 3.0], [5.0, 7.0]], 6.0, [5.0, 7.0], None),
     ],
 )
-def test_find_interval_containing(intervals, value, expected):
-    assert RealSubset(intervals).find_interval_containing(value) == expected
+def test_find_interval_containing(
+    intervals, value, expected_result, expected_exception
+):
+    if expected_exception is not None:
+        with pytest.raises(expected_exception):
+            RealSubset(intervals).find_interval_containing(value)
+    else:
+        assert RealSubset(intervals).find_interval_containing(value) == expected_result
 
 
 @pytest.mark.parametrize(
