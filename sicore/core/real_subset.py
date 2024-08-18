@@ -37,7 +37,7 @@ def complement(intervals: np.ndarray) -> np.ndarray:
     Returns:
         np.ndarray: Complement of the input intervals [[l1', u1'], [l2', u2'], ...].
     """
-    if len(intervals) == 0:
+    if len(intervals) == 0 or len(intervals[0]) == 0:
         return np.array([[-np.inf, np.inf]])
 
     result = []
