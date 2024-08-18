@@ -1,4 +1,7 @@
 import numpy as np
+
+from typing import cast
+
 from ..core.base import SelectiveInferenceResult
 
 
@@ -17,6 +20,7 @@ def reject_rate(
             SelectiveInferenceResult objects. Defaults to False.
     """
     if isinstance(results[0], SelectiveInferenceResult):
+        results = cast(list[SelectiveInferenceResult], results)
         if naive:
             p_values = np.array([result.naive_p for result in results])
         else:
