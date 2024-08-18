@@ -1,7 +1,7 @@
 import numpy as np
-from scipy.stats import rv_continuous, norm, t, skewnorm, gennorm, exponnorm
-from scipy.integrate import quad
-from scipy.optimize import brentq
+from scipy.stats import rv_continuous, norm, t, skewnorm, gennorm, exponnorm  # type: ignore
+from scipy.integrate import quad  # type: ignore
+from scipy.optimize import brentq  # type: ignore
 
 gennormflat = gennorm
 gennormsteep = gennorm

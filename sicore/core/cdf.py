@@ -1,5 +1,5 @@
 import numpy as np
-from mpmath import mp
+from mpmath import mp  # type: ignore
 from typing import Callable
 from .real_subset import RealSubset
 
