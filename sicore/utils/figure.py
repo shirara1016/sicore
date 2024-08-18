@@ -2,6 +2,7 @@ import numpy as np
 from scipy.stats import uniform, ecdf  # type: ignore
 import matplotlib.pyplot as plt
 
+from ..core.base import SelectiveInferenceResult
 from .evaluation import reject_rate
 
 plt.rcParams.update({"figure.autolayout": True})
@@ -105,7 +106,7 @@ class SummaryFigure:
         self.data: dict[str, list] = dict()
         self.red_line = False
 
-    def add_value(self, value: float, label: str, xloc: str | int | float):
+    def _add_value(self, value: float, label: str, xloc: str | int | float):
         """Add a value to the figure.
 
         Args:
@@ -118,6 +119,28 @@ class SummaryFigure:
         """
         self.data.setdefault(label, [])
         self.data[label].append((xloc, value))
+
+    def add_results(
+        self,
+        results: list[SelectiveInferenceResult] | list[float] | np.ndarray,
+        label: str,
+        xloc: str | int | float,
+        alpha: float = 0.05,
+        naive: bool = False,
+    ):
+        """Add reject rate computed from the given results to the figure.
+
+        Args:
+            results (list[SelectiveInferenceResult] | list[float] | np.ndarray):
+                List of SelectiveInferenceResult objects or p-values.
+            label (str): Label corresponding to the results.
+            xloc (str | int | float): Location of the results.
+            alpha (float, optional): Significance level. Defaults to 0.05.
+            naive (bool, optional): Whether to use naive p-values from
+                SelectiveInferenceResult objects. Defaults to False.
+        """
+        value = reject_rate(results, alpha=alpha, naive=naive)
+        self._add_value(value, label, xloc)
 
     def plot(
         self,
@@ -205,28 +228,10 @@ class FprFigure(SummaryFigure):
         Args:
             title (str | None, optional): Title of the figure. Defaults to None.
             xlabel (str | None, optional): Label of x-axis. Defaults to None.
-            ylabel (str | None, optional): Label of y-axis. Defaults to Type I Error Rate.
+            ylabel (str | None, optional): Label of y-axis. Defaults to 'Type I Error Rate'.
         """
         super().__init__(title=title, xlabel=xlabel, ylabel=ylabel)
         self.red_line = True
-
-    def add_pvalues(
-        self,
-        p_values: list[float] | np.ndarray,
-        label: str,
-        xloc: str | int | float,
-        alpha: float = 0.05,
-    ):
-        """Add p-values to the figure.
-
-        Args:
-            p_values (list[float] | np.ndarray): List of p-values.
-            label (str): Label corresponding to the p-values.
-            xloc (str | int | float): Location of the p-values.
-            alpha (float, optional): Significance level.
-        """
-        fpr = reject_rate(p_values, alpha=alpha)
-        self.add_fpr(fpr, label, xloc)
 
     def add_fpr(self, fpr: float, label: str, xloc: str | int | float):
         """Add a fpr value to the figure.
@@ -236,7 +241,7 @@ class FprFigure(SummaryFigure):
             label (str): Label corresponding to the FPR value.
             xloc (str | int | float): Location of the FPR value.
         """
-        self.add_value(fpr, label, xloc)
+        self._add_value(fpr, label, xloc)
 
 
 class TprFigure(SummaryFigure):
@@ -245,7 +250,7 @@ class TprFigure(SummaryFigure):
     Args:
         title (str | None, optional): Title of the figure. Defaults to None.
         xlabel (str | None, optional): Label of x-axis. Defaults to None.
-        ylabel (str | None, optional): Label of y-axis. Defaults to Power.
+        ylabel (str | None, optional): Label of y-axis. Defaults to 'Power'.
 
     Examples:
         >>> fig = TprFigure(xlabel='signal')
@@ -262,33 +267,9 @@ class TprFigure(SummaryFigure):
         xlabel: str | None = None,
         ylabel: str = "Power",
     ):
-        """Initialize a true positive rate figure.
-
-        Args:
-            title (str | None, optional): Title of the figure. Defaults to None.
-            xlabel (str | None, optional): Label of x-axis. Defaults to None.
-            ylabel (str | None, optional): Label of y-axis. Defaults to Power.
-        """
+        """Initialize a true positive rate figure."""
         super().__init__(title=title, xlabel=xlabel, ylabel=ylabel)
         self.red_line = False
-
-    def add_pvalues(
-        self,
-        p_values: list[float] | np.ndarray,
-        label: str,
-        xloc: str | int | float,
-        alpha: float = 0.05,
-    ):
-        """Add p-values to the figure.
-
-        Args:
-            p_values (list[float] | np.ndarray): List of p-values.
-            label (str): Label corresponding to the p-values.
-            xloc (str | int | float): Location of the p-values.
-            alpha (float, optional): Significance level.
-        """
-        tpr = reject_rate(p_values, alpha=alpha)
-        self.add_tpr(tpr, label, xloc)
 
     def add_tpr(self, tpr: float, label: str, xloc: str | int | float):
         """Add a tpr value to the figure.
@@ -298,4 +279,4 @@ class TprFigure(SummaryFigure):
             label (str): Label corresponding to the TPR value.
             xloc (str | int | float): Location of the TPR value.
         """
-        self.add_value(tpr, label, xloc)
+        self._add_value(tpr, label, xloc)

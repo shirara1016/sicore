@@ -17,7 +17,13 @@ from .utils.intervals import (
     polytope_below_zero,
     degree_one_polynomials_below_zero,
 )
-from .utils.figure import FprFigure, TprFigure, pvalues_hist, pvalues_qqplot
+from .utils.figure import (
+    SummaryFigure,
+    FprFigure,
+    TprFigure,
+    pvalues_hist,
+    pvalues_qqplot,
+)
 from .utils.non_gaussian import generate_non_gaussian_rv
 
 __all__ = [
@@ -28,6 +34,7 @@ __all__ = [
     "reject_rate",
     "pvalues_hist",
     "pvalues_qqplot",
+    "SummaryFigure",
     "FprFigure",
     "TprFigure",
     "RealSubset",
