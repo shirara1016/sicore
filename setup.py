@@ -8,7 +8,7 @@ with open("LICENSE", "r", encoding="utf8") as f:
 
 setup(
     name="sicore",
-    version="1.0.1",
+    version="2.0.0",
     description="Core package for Selective Inference",
     long_description=readme,
     long_description_content_type="text/markdown",
@@ -21,7 +21,6 @@ setup(
         "mpmath>=1.1.0",
         "matplotlib>=3.3.1",
         "scipy>=1.5.2",
-        "statsmodels>=0.11.1",
     ],
     python_requires=">=3.10",
     license="MIT License",
