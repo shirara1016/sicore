@@ -50,7 +50,7 @@ def construct_projection_matrix(
         verify (bool, optional): Whether to verify the constructed projection matrix. Defaults to False.
 
     Raises:
-        Exception: The constructed projection matrix is not consistent with the definition.
+        ValueError: The constructed projection matrix is not consistent with the definition.
 
     Returns:
         np.ndarray: The constructed projection matrix
@@ -60,8 +60,8 @@ def construct_projection_matrix(
     P = U @ U.T
     if verify:
         if np.sum(np.abs(P.T - P)) > 1e-5:
-            raise Exception("The projection matrix is not constructed correctly")
+            raise ValueError("The projection matrix is not constructed correctly")
         else:
             if np.sum(np.abs(P @ P - P)) > 1e-5:
-                raise Exception("The projection matrix is not constructed correctly")
+                raise ValueError("The projection matrix is not constructed correctly")
     return P
