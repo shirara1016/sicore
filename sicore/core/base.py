@@ -242,11 +242,11 @@ class SelectiveInference:
         self.significance_level = significance_level
         self.precision = precision
 
-        if isinstance(search_strategy, str):
+        if not callable(search_strategy):
             search_strategy = self._create_search_strategy(
                 inference_mode, search_strategy
             )
-        if isinstance(termination_criterion, str):
+        if not callable(termination_criterion):
             termination_criterion = self._create_termination_criterion(
                 inference_mode, termination_criterion
             )
