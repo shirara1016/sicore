@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Any
 import numpy as np
 
 
@@ -325,15 +326,18 @@ class RealSubset:
         """
         return len(self.intervals) == 0
 
-    def __eq__(self, other: RealSubset) -> bool:
-        """Check if two subsets are equal.
+    def __eq__(self, other: Any) -> bool:
+        """Check if two objects are equal.
 
         Args:
-            other (RealSubset): Another subset to compare with.
+            other (Any): Another object to compare with.
 
         Returns:
-            bool: True if the two subsets are equal, False otherwise.
+            bool: True if another object is a RealSubset and two subsets
+                are equal, False otherwise.
         """
+        if not isinstance(other, RealSubset):
+            return False
         if self.intervals.shape != other.intervals.shape:
             return False
         return np.allclose(self.intervals, other.intervals, rtol=1e-12, atol=1e-12)
@@ -426,22 +430,25 @@ class RealSubset:
         """
         if len(self.intervals) == 0:
             return False
-        return np.any((self.intervals[:, 0] <= z) & (z <= self.intervals[:, 1]))
+        return np.any((self.intervals[:, 0] <= z) & (z <= self.intervals[:, 1])).item()
 
-    def find_interval_containing(self, z: float) -> list[float] | None:
+    def find_interval_containing(self, z: float) -> list[float]:
         """Find the interval containing a real number.
 
         Args:
             z (float): Real number to find the interval containing it.
 
         Returns:
-            list[float] | None: Interval containing z if found, None otherwise.
+            list[float]: Interval containing z
+
+        Raises:
+            ValueError: If the subset is empty or no interval contains z.
         """
         if len(self.intervals) == 0:
-            return None
+            raise ValueError("The subset is empty.")
         mask = (self.intervals[:, 0] <= z) & (z <= self.intervals[:, 1])
         if np.sum(mask) == 0:
-            return None
+            raise ValueError(f"No interval containing {z:.6f}.")
         assert np.sum(mask) == 1
         return self.intervals[mask][0].tolist()
 
