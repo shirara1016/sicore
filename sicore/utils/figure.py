@@ -7,7 +7,7 @@ from .evaluation import false_positive_rate, true_positive_rate
 plt.rcParams.update({"figure.autolayout": True})
 
 
-def p_values_hist(
+def pvalues_hist(
     p_values: list[float] | np.ndarray,
     bins: int = 20,
     title: str | None = None,
@@ -39,7 +39,7 @@ def p_values_hist(
     plt.close()
 
 
-def p_values_qqplot(
+def pvalues_qqplot(
     p_values: list[float] | np.ndarray,
     plot_pos: list[float] | np.ndarray | None = None,
     title: str | None = None,
@@ -210,7 +210,7 @@ class FprFigure(SummaryFigure):
         super().__init__(title=title, xlabel=xlabel, ylabel=ylabel)
         self.red_line = True
 
-    def add_p_values(
+    def add_pvalues(
         self,
         p_values: list[float] | np.ndarray,
         label: str,
@@ -272,7 +272,7 @@ class TprFigure(SummaryFigure):
         super().__init__(title=title, xlabel=xlabel, ylabel=ylabel)
         self.red_line = False
 
-    def add_p_values(
+    def add_pvalues(
         self,
         p_values: list[float] | np.ndarray,
         label: str,
