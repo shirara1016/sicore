@@ -3,7 +3,7 @@ import numpy as np
 from joblib import Parallel, delayed  # type: ignore
 
 import warnings
-from typing import Any, Callable
+from typing import Any, Callable, Literal
 
 from .real_subset import RealSubset
 
@@ -65,13 +65,15 @@ class InfiniteLoopError(Exception):
     pass
 
 
-def _compute_pvalue(F: float, alternative: str) -> float:
+def _compute_pvalue(
+    F: float, alternative: Literal["two-sided", "less", "greater", "abs"]
+) -> float:
     """Compute the p-value from the CDF value.
 
     Args:
         F (float): The CDF value.
         alternative (str): Must be one of 'two-sided', 'less', 'greater', or 'abs'.
-            If 'two sided', the p-value is computed for the two-tailed test.
+            If 'two-sided', the p-value is computed for the two-tailed test.
             If 'less', the p-value is computed for the right-tailed test.
             If 'greater', the p-value is computed for the left-tailed test.
             If 'abs', the p-value is computed for the two-tailed test with distribution
@@ -97,7 +99,9 @@ def _compute_pvalue(F: float, alternative: str) -> float:
 
 
 def _evaluate_pvalue_bounds(
-    inf_F: float, sup_F: float, alternative: str
+    inf_F: float,
+    sup_F: float,
+    alternative: Literal["two-sided", "less", "greater", "abs"],
 ) -> tuple[float, float]:
     """Evaluate the lower and upper bounds of the p-value from the lower and upper bounds of the CDF values.
 
@@ -158,11 +162,16 @@ class SelectiveInference:
             [np.ndarray, np.ndarray, float], tuple[Any, list[list[float]] | RealSubset]
         ],
         model_selector: Callable[[Any], bool],
-        alternative: str = "abs",
-        inference_mode: str = "parametric",
-        search_strategy: Callable[[RealSubset], list[float]] | str = "pi3",
+        alternative: Literal["two-sided", "less", "greater", "abs"] = "abs",
+        inference_mode: Literal[
+            "parametric", "exhaustive", "over_conditioning"
+        ] = "parametric",
+        search_strategy: (
+            Callable[[RealSubset], list[float]]
+            | Literal["pi1", "pi2", "pi3", "parallel"]
+        ) = "pi3",
         termination_criterion: (
-            Callable[[RealSubset, RealSubset], bool] | str
+            Callable[[RealSubset, RealSubset], bool] | Literal["precision", "decision"]
         ) = "precision",
         max_iter: int = 100_000,
         n_jobs: int = 1,
