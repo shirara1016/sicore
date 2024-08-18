@@ -11,7 +11,7 @@ def difference(intervals1: np.ndarray, intervals2: np.ndarray) -> np.ndarray:
         intervals2 (np.ndarray): Intervals [[l1, u1], [l2, u2], ...].
 
     Returns:
-        np.ndarray: Difference of the firt input intervals with the second input intervals [[l1', u1'], [l2', u2'], ...].
+        np.ndarray: Difference of the first input intervals with the second input intervals [[l1', u1'], [l2', u2'], ...].
     """
     return intersection(intervals1, complement(intervals2))
 
@@ -143,7 +143,7 @@ def degree_one_polynomials_below_zero(
 
     Args:
         a (np.ndarray): Constant terms of the degree one polynomials.
-        b (np.ndarray): Coefficinets of the degree one polynomials.
+        b (np.ndarray): Coefficients of the degree one polynomials.
 
     Returns:
         list[list[float]]: Intervals where the degree one polynomials are below zero.
