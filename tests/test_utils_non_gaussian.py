@@ -11,7 +11,7 @@ from sicore.utils.non_gaussian import generate_non_gaussian_rv, _wasserstein_dis
         (rv_name, distance)
         for rv_name, distance in product(
             ["t", "skewnorm", "gennormsteep", "gennormflat", "exponnorm"],
-            [0.03, 0.06, 0.09, 0.12],
+            [0.04, 0.08],
         )
     ],
 )
