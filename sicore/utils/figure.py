@@ -2,7 +2,7 @@ import numpy as np
 from scipy.stats import uniform, ecdf  # type: ignore
 import matplotlib.pyplot as plt
 
-from .evaluation import false_positive_rate, true_positive_rate
+from .evaluation import reject_rate
 
 plt.rcParams.update({"figure.autolayout": True})
 
@@ -225,7 +225,7 @@ class FprFigure(SummaryFigure):
             xloc (str | int | float): Location of the p-values.
             alpha (float, optional): Significance level.
         """
-        fpr = false_positive_rate(p_values, alpha=alpha)
+        fpr = reject_rate(p_values, alpha=alpha)
         self.add_fpr(fpr, label, xloc)
 
     def add_fpr(self, fpr: float, label: str, xloc: str | int | float):
@@ -287,7 +287,7 @@ class TprFigure(SummaryFigure):
             xloc (str | int | float): Location of the p-values.
             alpha (float, optional): Significance level.
         """
-        tpr = true_positive_rate(p_values, alpha=alpha)
+        tpr = reject_rate(p_values, alpha=alpha)
         self.add_tpr(tpr, label, xloc)
 
     def add_tpr(self, tpr: float, label: str, xloc: str | int | float):

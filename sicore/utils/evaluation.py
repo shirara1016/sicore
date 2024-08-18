@@ -1,101 +1,26 @@
 import numpy as np
+from ..core.base import SelectiveInferenceResult
 
 
-def false_positive_rate(p_values: list[float] | np.ndarray, alpha: float = 0.05):
-    """
-    Compute false positive rate of p-values under null.
+def reject_rate(
+    results: list[SelectiveInferenceResult] | np.ndarray | list[float],
+    alpha: float = 0.05,
+    naive: bool = False,
+):
+    """Compute reject rate
 
     Args:
-        p_values (list[float] | np.ndarray): List of p-values.
-        alpha (float, optional): Significance level.
-
-    Returns:
-        float: False positive rate.
+        results (list[SelectiveInferenceResult] | np.ndarray | list[float]):
+            List of SelectiveInferenceResult objects or p-values.
+        alpha (float, optional): Significance level. Defaults to 0.05.
+        naive (bool, optional): Whether to use naive p-values from
+            SelectiveInferenceResult objects. Defaults to False.
     """
-    p_values = np.array(p_values)
+    if isinstance(results[0], SelectiveInferenceResult):
+        if naive:
+            p_values = np.array([result.naive_p for result in results])
+        else:
+            p_values = np.array([result.p_value for result in results])
+    else:
+        p_values = np.array(results)
     return np.count_nonzero(p_values <= alpha) / len(p_values)
-
-
-def false_negative_rate(p_values: list[float] | np.ndarray, alpha: float = 0.05):
-    """
-    Compute false negative rate of p-values under alternative.
-
-    Args:
-        p_values (list[float] | np.ndarray): List of p-values.
-        alpha (float, optional): Significance level.
-
-    Returns:
-        float: False negative rate.
-    """
-    p_values = np.array(p_values)
-    return np.count_nonzero(p_values > alpha) / len(p_values)
-
-
-def true_negative_rate(p_values: list[float] | np.ndarray, alpha: float = 0.05):
-    """
-    Compute true negative rate of p-values under null.
-
-    Args:
-        p_values (list[float] | np.ndarray): List of p-values.
-        alpha (float, optional): Significance level.
-
-    Returns:
-        float: True negative rate.
-    """
-    return 1 - false_positive_rate(p_values, alpha=alpha)
-
-
-def true_positive_rate(p_values: list[float] | np.ndarray, alpha: float = 0.05):
-    """
-    Compute true positive rate of p-values under alternative.
-
-    Args:
-        p_values (list[float] | np.ndarray): List of p-values.
-        alpha (float, optional): Significance level.
-
-    Returns:
-        float: True positive rate.
-    """
-    return 1 - false_negative_rate(p_values, alpha=alpha)
-
-
-def type1_error_rate(p_values: list[float] | np.ndarray, alpha: float = 0.05):
-    """
-    Compute type I error rate of p-values under null.
-
-    Args:
-        p_values (list[float] | np.ndarray): List of p-values.
-        alpha (float, optional): Significance level.
-
-    Returns:
-        float: Type I error rate.
-    """
-    return false_positive_rate(p_values, alpha=alpha)
-
-
-def type2_error_rate(p_values: list[float] | np.ndarray, alpha: float = 0.05):
-    """
-    Compute type II error rate of p-values under alternative.
-
-    Args:
-        p_values (list[float] | np.ndarray): List of p-values.
-        alpha (float, optional): Significance level.
-
-    Returns:
-        float: Type II error rate.
-    """
-    return false_negative_rate(p_values, alpha=alpha)
-
-
-def power(p_values: list[float] | np.ndarray, alpha: float = 0.05):
-    """
-    Compute power of p-values under alternative.
-
-    Args:
-        p_values (list[float] | np.ndarray): List of p-values.
-        alpha (float, optional): Significance level.
-
-    Returns:
-        float: Power.
-    """
-    return true_positive_rate(p_values, alpha=alpha)
