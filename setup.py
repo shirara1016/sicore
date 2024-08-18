@@ -17,10 +17,10 @@ setup(
     url="https://github.com/shirara1016/sicore",
     packages=find_packages(exclude=("tests", "docs")),
     install_requires=[
-        "numpy>=1.19.1",
-        "mpmath>=1.1.0",
+        "numpy>=1.23.5",
+        "mpmath>=1.2.0",
         "matplotlib>=3.3.1",
-        "scipy>=1.5.2",
+        "scipy>=1.14.0",
     ],
     python_requires=">=3.10",
     license="MIT License",
