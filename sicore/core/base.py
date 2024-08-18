@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 import numpy as np
-from joblib import Parallel, delayed
+from joblib import Parallel, delayed  # type: ignore
 
+import warnings
 from typing import Any, Callable
 
 from .real_subset import RealSubset
@@ -188,9 +189,10 @@ class SelectiveInference:
                 of absolute values.
             inference_mode (str, optional): Must be one of 'parametric', 'exhaustive',
                 or 'over_conditioning'. Defaults to 'parametric'.
-            search_strategy (Callable[[RealSubset], list[float]] | str, optional): Callable
-                function which takes a searched_intervals (RealSubset) and returns next
-                search points (list[float]).
+            search_strategy (Callable[[RealSubset], list[float]] | str, optional):
+                Callable function which takes a searched_intervals (RealSubset) and
+                returns next search points (list[float]).
+                This option is ignored when the inferece_mode is 'exhaustive' or 'over_conditioning'.
                 If str, it must be one of 'pi1', 'pi2', 'pi3', or 'parallel'.
                 If 'pi1', the search strategy focuses on the truncated intervals.
                 If 'pi2', the search strategy focuses on the searched intervals.
@@ -199,8 +201,10 @@ class SelectiveInference:
                 truncated and searched intervals for the parallel computing.
                 Defaults to 'pi3'.
             termination_criterion (Callable[[RealSubset, RealSubset], bool] | str, optional):
-                Callable function which takes searched_intervals (RealSubset) and truncated_intervals (RealSubset) and returns a boolean value, indicating
+                Callable function which takes searched_intervals (RealSubset) and
+                truncated_intervals (RealSubset) and returns a boolean value, indicating
                 whether the search should be terminated.
+                This option is ignored when the inferece_mode is 'exhaustive' or 'over_conditioning'.
                 If str, it must be one of 'precision' or 'decision'.
                 If 'precision', the termination criterion is based on
                 the precision in the computation of the p-value.
@@ -209,10 +213,10 @@ class SelectiveInference:
             max_iter (int, optional): Maximum number of iterations. Defaults to 100_000.
             n_jobs (int, optional): Number of jobs to run in parallel. Defaults to 1.
             step (float, optional): Step size for the search strategy. Defaults to 1e-6.
-            significance_level (float, optional): Significance level for
-                the termination criterion. Defaults to 0.05.
-            precision (float, optional): Precision for the termination criterion.
-                Defaults to 0.001.
+            significance_level (float, optional): Significance level only for
+                the termination criterion 'decision'. Defaults to 0.05.
+            precision (float, optional): Precision only for the termination
+                criterion 'precision'. Defaults to 0.001.
 
         Raises:
             InfiniteLoopError: If the search was performed a specified times and may have fallen into an infinite loop.
@@ -412,13 +416,13 @@ class SelectiveInference:
                 match search_strategy_name:
                     case "pi1":
                         target_value = self.stat
-                        metric = lambda z: np.abs(z - self.stat)
+                        metric = lambda z: np.abs(np.array(z) - self.stat)
                     case "pi2":
                         target_value = self.mode
-                        metric = lambda z: -self.null_rv.logpdf(z)
+                        metric = lambda z: -self.null_rv.logpdf(np.array(z))
                     case "pi3":
                         target_value = self.stat
-                        metric = lambda z: -self.null_rv.logpdf(z)
+                        metric = lambda z: -self.null_rv.logpdf(np.array(z))
 
                 def search_strategy(searched_intervals: RealSubset) -> list[float]:
                     if searched_intervals.is_empty():
@@ -437,8 +441,7 @@ class SelectiveInference:
                                     break
                                 step /= 10
 
-                    candidates = np.array(candidates)
-                    return [candidates[np.argmin(metric(candidates))]]
+                    return [np.array(candidates)[np.argmin(metric(candidates))]]
 
                 return search_strategy
 
@@ -478,6 +481,8 @@ class SelectiveInference:
 
             case _, _:
                 raise ValueError("Invalid mode or name.")
+
+        return search_strategy
 
     def _create_termination_criterion(
         self,
@@ -537,6 +542,8 @@ class SelectiveInference:
                     )
 
                 return termination_criterion
+
+        return termination_criterion
 
     def _check_validity_of_arguments(
         self,
