@@ -5,7 +5,7 @@ Core package for selective inference.
 from .core.base import SelectiveInference, SelectiveInferenceResult
 from .core.real_subset import RealSubset
 from .main.inference import SelectiveInferenceNorm, SelectiveInferenceChi
-from .utils.constructor import OneVec, construct_projection_matrix
+from .utils.constructor import OneVector, construct_projection_matrix
 from .utils.evaluation import reject_rate
 from .utils.intervals import (
     complement,
@@ -40,6 +40,6 @@ __all__ = [
     "polytope_below_zero",
     "degree_one_polynomials_below_zero",
     "generate_non_gaussian_rv",
-    "OneVec",
+    "OneVector",
     "construct_projection_matrix",
 ]

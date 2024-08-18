@@ -1,7 +1,7 @@
 import numpy as np
 
 
-class OneVec:
+class OneVector:
     """Vector whose elements from position `i` to `j` are set to 1, and 0 otherwise.
 
     Args:
@@ -28,14 +28,14 @@ class OneVec:
         Returns:
             np.ndarray: One-zero vector
         """
-        vec = np.zeros(self.length)
+        vector = np.zeros(self.length)
 
         if j is None:
-            vec[i - 1] = 1
+            vector[i - 1] = 1
         else:
-            vec[i - 1 : j] = 1
+            vector[i - 1 : j] = 1
 
-        return vec
+        return vector
 
 
 def construct_projection_matrix(

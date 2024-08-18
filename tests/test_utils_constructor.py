@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 from numpy.testing import assert_allclose
-from sicore.utils.constructor import OneVec, construct_projection_matrix
+from sicore.utils.constructor import OneVector, construct_projection_matrix
 
 
 @pytest.mark.parametrize(
@@ -14,7 +14,7 @@ from sicore.utils.constructor import OneVec, construct_projection_matrix
     ],
 )
 def test_OneVec(indexes, expected):
-    one = OneVec(5)
+    one = OneVector(5)
     assert_allclose(one.get(*indexes), expected)
 
 
