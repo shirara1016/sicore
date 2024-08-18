@@ -1,6 +1,6 @@
 import numpy as np
-from scipy import sparse
-from scipy.stats import norm, chi
+from scipy import sparse  # type: ignore
+from scipy.stats import norm, chi  # type: ignore
 
 from ..core.real_subset import RealSubset
 from ..core.base import SelectiveInference
@@ -44,7 +44,7 @@ class SelectiveInferenceNorm(SelectiveInference):
 
         if use_tf:
             try:
-                import tensorflow as tf
+                import tensorflow as tf  # type: ignore
             except ModuleNotFoundError:
                 raise ModuleNotFoundError("TensorFlow is not installed.")
 
@@ -150,7 +150,7 @@ class SelectiveInferenceChi(SelectiveInference):
 
         if use_tf:
             try:
-                import tensorflow as tf
+                import tensorflow as tf  # type: ignore
             except ModuleNotFoundError:
                 raise ModuleNotFoundError("TensorFlow is not installed.")
 
