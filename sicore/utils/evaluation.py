@@ -5,12 +5,12 @@ from typing import cast
 from ..core.base import SelectiveInferenceResult
 
 
-def reject_rate(
+def rejection_rate(
     results: list[SelectiveInferenceResult] | np.ndarray | list[float],
     alpha: float = 0.05,
     naive: bool = False,
 ):
-    """Compute reject rate
+    """Compute rejection rate from the list of SelectiveInferenceResult objects or p-values.
 
     Args:
         results (list[SelectiveInferenceResult] | np.ndarray | list[float]):

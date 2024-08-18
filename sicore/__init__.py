@@ -6,7 +6,7 @@ from .core.base import SelectiveInference, SelectiveInferenceResult
 from .core.real_subset import RealSubset
 from .main.inference import SelectiveInferenceNorm, SelectiveInferenceChi
 from .utils.constructor import OneVector, construct_projection_matrix
-from .utils.evaluation import reject_rate
+from .utils.evaluation import rejection_rate
 from .utils.intervals import (
     complement,
     union,
@@ -31,7 +31,7 @@ __all__ = [
     "SelectiveInferenceNorm",
     "SelectiveInferenceChi",
     "SelectiveInferenceResult",
-    "reject_rate",
+    "rejection_rate",
     "pvalues_hist",
     "pvalues_qqplot",
     "SummaryFigure",
