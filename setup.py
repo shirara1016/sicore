@@ -9,7 +9,7 @@ with open("LICENSE", "r", encoding="utf8") as f:
 setup(
     name="sicore",
     version="2.0.0",
-    description="Core package for Selective Inference",
+    description="Core Package for Selective Inference",
     long_description=readme,
     long_description_content_type="text/markdown",
     author="Takeuchi Lab",
