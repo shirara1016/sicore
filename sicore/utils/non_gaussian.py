@@ -102,8 +102,7 @@ def _binary_search(
         distance (float): Wasserstein distance from the standard gaussian distribution.
 
     Returns:
-        float: Parameter of the random variable where the given random variable has the given
-            Wasserstein distance from the standard gaussian distribution.
+        float: Parameter of the random variable where the given random variable has the given Wasserstein distance from the standard gaussian distribution.
     """
 
     f = lambda param: _wasserstein_distance(_standardize(rv_name, param)) - distance
@@ -123,8 +122,7 @@ def generate_non_gaussian_rv(
             and the standard gaussian distribution.
 
     Returns:
-        rv_continuous: Generated standardized random variable object in the given rv_name family
-            with the given Wasserstein distance from the standard gaussian distribution.
+        rv_continuous: Generated standardized random variable object in the given rv_name family with the given Wasserstein distance from the standard gaussian distribution.
     """
     try:
         param = params_dict[rv_name][str(distance)]
