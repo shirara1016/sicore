@@ -33,7 +33,7 @@ The following modules can be imported by `from sicore import *`.
 - TprFigure: Draws a figure of the true positive rate.
 
 **Interval Operations**
-- RealSubset : Class for representing a subset of real numbers, which provides many operations with intuitive synta.
+- RealSubset : Class for representing a subset of real numbers, which provides many operations with intuitive syntax.
 - complement() : Take the complement of intervals.
 - union() : Take the union of two intervals.
 - intersection() : Take the intersection of two intervals.
