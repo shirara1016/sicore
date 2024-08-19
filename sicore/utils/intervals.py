@@ -59,7 +59,7 @@ def polynomial_below_zero(
             return []
 
     roots = []
-    if np.issubdtype(poly.coef.dtype, complex):
+    if np.issubdtype(poly.roots.dtype, complex):
         for root in poly.roots:
             if -tol < root.imag < tol:
                 roots.append(root.real)
@@ -149,6 +149,8 @@ def degree_one_polynomials_below_zero(
         list[list[float]]: Intervals where the degree one polynomials are below zero.
     """
     l, u = -np.inf, np.inf
+    if np.any(a[b == 0.0] > 0.0):
+        return []
     l_candidates = -a[b < 0] / b[b < 0]
     u_candidates = -a[b > 0] / b[b > 0]
     if len(l_candidates) > 0:
