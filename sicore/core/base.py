@@ -65,56 +65,50 @@ class InfiniteLoopError(Exception):
 
 
 def _compute_pvalue(
-    F: float, alternative: Literal["two-sided", "less", "greater", "abs"]
+    F: float, alternative: Literal["two-sided", "less", "greater"]
 ) -> float:
     """Compute the p-value from the CDF value.
 
     Args:
         F (float): The CDF value.
-        alternative (Literal["two-sided", "less", "greater", "abs"]):
-            Must be one of 'two-sided', 'less', 'greater', or 'abs'.
+        alternative (Literal["two-sided", "less", "greater"]):
+            Must be one of 'two-sided', 'less', or 'greater'.
             If 'two-sided', the p-value is computed for the two-tailed test.
             If 'less', the p-value is computed for the right-tailed test.
             If 'greater', the p-value is computed for the left-tailed test.
-            If 'abs', the p-value is computed for the two-tailed test with distribution
-            of absolute values.
 
     Returns:
         float: The p-value.
 
     Raises:
-        ValueError: If `alternative` is not one of 'two-sided', 'less', 'greater', or 'abs'.
+        ValueError: If `alternative` is not one of 'two-sided', 'less', or 'greater'.
     """
     match alternative:
-        case "two-sided":
-            return float(2 * np.min([F, 1.0 - F]))
-        case "less" | "abs":
+        case "two-sided" | "less":
             return float(1.0 - F)
         case "greater":
             return float(F)
         case _:
             raise ValueError(
-                "The alternative must be one of 'two-sided', 'less', 'greater', or 'abs'."
+                "The alternative must be one of 'two-sided', 'less', or 'greater'."
             )
 
 
 def _evaluate_pvalue_bounds(
     inf_F: float,
     sup_F: float,
-    alternative: Literal["two-sided", "less", "greater", "abs"],
+    alternative: Literal["two-sided", "less", "greater"],
 ) -> tuple[float, float]:
     """Evaluate the lower and upper bounds of the p-value from the lower and upper bounds of the CDF values.
 
     Args:
         inf_F (float): The lower bound of the CDF value.
         sup_F (float): The upper bound of the CDF value.
-        alternative (Literal["two-sided", "less", "greater", "abs"]):
-            Must be one of 'two-sided', 'less', 'greater', or 'abs'.
+        alternative (Literal["two-sided", "less", "greater"]):
+            Must be one of 'two-sided', 'less', or 'greater'.
             If 'two sided', the p-value is computed for the two-tailed test.
             If 'less', the p-value is computed for the right-tailed test.
             If 'greater', the p-value is computed for the left-tailed test.
-            If 'abs', the p-value is computed for the two-tailed test with distribution
-            of absolute values.
 
     Returns:
         tuple[float, float]: The lower and upper bounds of the p-value.
@@ -122,7 +116,7 @@ def _evaluate_pvalue_bounds(
     Raises:
         ValueError: If the lower bound of the CDF value is greater than the upper bound.
         ValueError: If `n_jobs` is not a positive integer.
-        ValueError: If `alternative` is not one of 'two-sided', 'less', 'greater', or 'abs'.
+        ValueError: If `alternative` is not one of 'two-sided', 'less', or 'greater'.
     """
     if inf_F > sup_F:
         raise ValueError(
@@ -163,7 +157,7 @@ class SelectiveInference:
             [np.ndarray, np.ndarray, float], tuple[Any, list[list[float]] | RealSubset]
         ],
         model_selector: Callable[[Any], bool],
-        alternative: Literal["two-sided", "less", "greater", "abs"] = "abs",
+        alternative: Literal["two-sided", "less", "greater"] = "two-sided",
         inference_mode: Literal[
             "parametric", "exhaustive", "over_conditioning"
         ] = "parametric",
@@ -196,8 +190,6 @@ class SelectiveInference:
                 If 'two sided', the p-value is computed for the two-tailed test.
                 If 'less', the p-value is computed for the right-tailed test.
                 If 'greater', the p-value is computed for the left-tailed test.
-                If 'abs', the p-value is computed for the two-tailed test with distribution
-                of absolute values.
             inference_mode (Literal["parametric", "exhaustive", "over_conditioning"], optional):
                 Must be one of 'parametric', 'exhaustive',or 'over_conditioning'. Defaults to 'parametric'.
             search_strategy (Callable[[RealSubset], list[float]] | Literal["pi1", "pi2", "pi3", "parallel"], optional):
@@ -331,7 +323,7 @@ class SelectiveInference:
         Returns:
             float: The p-value from the truncated intervals.
         """
-        absolute = self.alternative == "abs"
+        absolute = self.alternative == "two-sided"
         F = self.truncated_cdf(self.stat, truncated_intervals, absolute)
         return _compute_pvalue(F, self.alternative)
 
@@ -349,7 +341,7 @@ class SelectiveInference:
         Returns:
             tuple[float, float]: The lower and upper bounds of the p-value.
         """
-        absolute = self.alternative == "abs"
+        absolute = self.alternative == "two-sided"
         if absolute:
             mask_intervals = RealSubset([[-np.abs(self.stat), np.abs(self.stat)]])
         else:
