@@ -127,6 +127,7 @@ class SelectiveInferenceNorm(SelectiveInference):
             & self.support
         )
         self.null_rv = norm()
+        self.alternative = "two-sided"
 
         self.truncated_cdf = lambda z, intervals, absolute: truncated_norm_cdf(
             z, intervals, absolute=absolute
@@ -225,6 +226,7 @@ class SelectiveInferenceChi(SelectiveInference):
             & self.support
         )
         self.null_rv = chi(df=degree)
+        self.alternative = "less"
 
         self.truncated_cdf = lambda z, intervals, absolute: truncated_chi_cdf(
             z, degree, intervals, absolute=absolute
