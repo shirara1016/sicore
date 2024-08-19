@@ -39,10 +39,7 @@ def _wasserstein_distance(rv: rv_continuous) -> float:
         float: Wasserstein distance between the given random variable and the standard gaussian distribution.
     """
 
-    def func(x):
-        return np.abs(rv.cdf(x) - norm.cdf(x))
-
-    return quad(func, -np.inf, np.inf)[0]
+    return quad(lambda x: np.abs(rv.cdf(x) - norm.cdf(x)), -np.inf, np.inf)[0]
 
 
 def _binary_search(
