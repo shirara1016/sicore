@@ -92,27 +92,41 @@ def test_symmetric_difference(intervals1, intervals2, expected):
     )
 
 
-# def test_poly_lt_zero():
-#     testcase = [
-#         ([1], []),
-#         ([0], [[NINF, INF]]),
-#         ([-1], [[NINF, INF]]),
-#         ([1, 1], [[NINF, -1]]),
-#         ([-1, 1], [[1, INF]]),
-#         ([1, -2, 2], []),
-#         ([1, -2, 1], []),
-#         ([1, 0, -1], [[-1, 1]]),
-#         ([-1, 0, 1], [[NINF, -1], [1, INF]]),
-#         ([-1, 2, -1], [[NINF, INF]]),
-#         ([-1, 2, -2], [[NINF, INF]]),
-#         ([1, -6, 11, -6], [[NINF, 1], [2, 3]]),
-#         ([1, -3, 4, -2], [[NINF, 1]]),
-#         ([1, 0, 0, 0], [[NINF, 0]]),
-#     ]
+@pytest.mark.parametrize(
+    "coef, expected",
+    [
+        ([1.0], []),
+        ([0.0], [[-np.inf, np.inf]]),
+        ([-1.0], [[-np.inf, np.inf]]),
+        ([1.0, 1.0], [[-np.inf, -1.0]]),
+        ([-1.0, 1.0], [[1.0, np.inf]]),
+        ([1.0, -2.0, 2.0], []),
+        ([1.0, -2.0, 1.0], []),
+        ([1.0, 0.0, -1.0], [[-1.0, 1.0]]),
+        ([-1.0, 0.0, 1.0], [[-np.inf, -1.0], [1.0, np.inf]]),
+        ([-1.0, 2.0, -1.0], [[-np.inf, np.inf]]),
+        ([-1.0, 2.0, -2.0], [[-np.inf, np.inf]]),
+        ([1.0, -6.0, 11.0, -6.0], [[-np.inf, 1.0], [2.0, 3.0]]),
+        ([1.0, -3.0, 4.0, -2.0], [[-np.inf, 1.0]]),
+        ([1.0, 0.0, 0.0, 0.0], [[-np.inf, 0.0]]),
+    ],
+)
+def test_polynomial_below_zero(coef, expected):
+    assert_allclose(polynomial_below_zero(coef), expected)
 
-#     for coef, expected in testcase:
-#         assert_allclose(poly_lt_zero(coef), expected)
+    poly = np.poly1d(coef)
+    assert_allclose(polynomial_below_zero(poly), expected)
 
-#     for coef, expected in testcase:
-#         poly = np.poly1d(coef)
-#         assert_allclose(poly_lt_zero(poly), expected)
+
+@pytest.mark.parametrize(
+    "a, b, expected",
+    [
+        ([2.0, -3.0], [-2.0, 1.0], [[1.0, 3.0]]),
+        ([-3.0, -2.0], [-3.0, -1.0], [[-1.0, np.inf]]),
+        ([-6.0, -6.0], [1.0, 2.0], [[-np.inf, 3.0]]),
+        ([5.0, 2.0], [-1.0, 0.0], []),
+    ],
+)
+def test_degree_one_polynomials_below_zero(a, b, expected):
+    a, b = np.array(a), np.array(b)
+    assert_allclose(degree_one_polynomials_below_zero(a, b), expected)
