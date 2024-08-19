@@ -73,11 +73,29 @@ def rejection_rate(
 
     Returns:
         float: Rejection rate.
+
+    Raises:
+        ValueError: naive and bonferroni cannot be True at the same time.
     """
+    if naive and bonferroni:
+        raise ValueError("naive and bonferroni cannot be True at the same time.")
+    if naive:
+        log_num_tests = 0.0
+
     if isinstance(results[0], SelectiveInferenceResult):
         results = cast(list[SelectiveInferenceResult], results)
-        if naive:
-            p_values = np.array([result.naive_p for result in results])
+        if naive or bonferroni:
+            null_rv, alternative = results[0]._null_rv, results[0]._alternative
+            intervals = _find_rejection_area(
+                null_rv, alternative, alpha, log_num_tests
+            ).intervals
+            stats = np.array([result.stat for result in results])
+            rejects = np.any(
+                (intervals[:, 0] <= stats[:, np.newaxis])
+                & (stats[:, np.newaxis] <= intervals[:, 1]),
+                axis=1,
+            )
+            return np.count_nonzero(rejects) / len(rejects)
         else:
             p_values = np.array([result.p_value for result in results])
     else:
