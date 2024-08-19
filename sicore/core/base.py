@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import numpy as np
+from scipy.stats import rv_continuous  # type: ignore
 from joblib import Parallel, delayed  # type: ignore
 
 from typing import Any, Callable, Literal
@@ -23,6 +24,8 @@ class SelectiveInferenceResult:
             Intervals where the selected model is obtained.
         search_count (int): Number of times the search was performed.
         detect_count (int): Number of times the selected model was obtained.
+        _null_rv (rv_continuous): Null distribution of the unconditional test statistic.
+        _alternative (Literal["two-sided", "less", "greater"]): Type of the alternative hypothesis.
     """
 
     stat: float
@@ -34,6 +37,8 @@ class SelectiveInferenceResult:
     truncated_intervals: list[list[float]]
     search_count: int
     detect_count: int
+    _null_rv: rv_continuous
+    _alternative: Literal["two-sided", "less", "greater"]
 
     def __str__(self):
         precision = 6
@@ -316,6 +321,8 @@ class SelectiveInference:
             truncated_intervals.tolist(),
             search_count,
             detect_count,
+            self.null_rv,
+            self.alternative,
         )
 
     def _compute_pvalue(self, truncated_intervals: RealSubset) -> float:
