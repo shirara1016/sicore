@@ -185,8 +185,26 @@ class SelectiveInference:
             model_selector (Callable[[Any], bool]): Callable function which takes a model (Any)
                 and returns a boolean value, indicating whether the model is the same as
                 the selected model.
-            alternative (Literal["two-sided", "less", "greater", "abs"], optional):
-                Must be one of 'two-sided', 'less', 'greater', or 'abs'.
+            alternative (Literal["two-sided", "less", "greater"] | None, optional):
+                The type of alternative hypothesis used in the statistical test.
+
+                **Default:**
+                    * 'two-sided' for normal distribution tests.
+                    * 'less' for chi-square distribution tests.
+
+                **Accepted Values:**
+                    * 'two-sided': Performs a two-tailed test. The p-value considers both tails of the distribution.
+                    * 'less': Performs a right-tailed test. The p-value considers the right tail of the distribution.
+                    * 'greater': Performs a left-tailed test. The p-value considers the left tail of the distribution.
+
+                **Note:** This parameter must be one of the specified values or None.
+
+                Type of alternative hypothesis in the inference.
+                If 'two-sided', we consider the two-tailed test.
+                If 'less', we consider the right-tailed test.
+                If 'greater', we consider the left-tailed test.
+                If set to None, defaults to 'two-sided' for the normal distribution
+                and 'less' for the chi distribution.
                 If 'two sided', the p-value is computed for the two-tailed test.
                 If 'less', the p-value is computed for the right-tailed test.
                 If 'greater', the p-value is computed for the left-tailed test.
