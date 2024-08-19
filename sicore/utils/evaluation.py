@@ -1,15 +1,18 @@
 import numpy as np
+from scipy.stats import rv_continuous  # type: ignore
+from scipy.optimize import brentq  # type: ignore
 
-from typing import cast
+from typing import Literal, cast
 
 from ..core.base import SelectiveInferenceResult
+from ..core.real_subset import RealSubset
 
 
 def rejection_rate(
     results: list[SelectiveInferenceResult] | np.ndarray | list[float],
     alpha: float = 0.05,
     naive: bool = False,
-):
+) -> float:
     """Compute rejection rate from the list of SelectiveInferenceResult objects or p-values.
 
     Args:
@@ -18,6 +21,9 @@ def rejection_rate(
         alpha (float, optional): Significance level. Defaults to 0.05.
         naive (bool, optional): Whether to use naive p-values from
             SelectiveInferenceResult objects. Defaults to False.
+
+    Returns:
+        float: Rejection rate.
     """
     if isinstance(results[0], SelectiveInferenceResult):
         results = cast(list[SelectiveInferenceResult], results)
