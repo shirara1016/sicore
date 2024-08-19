@@ -119,6 +119,27 @@ def test_polynomial_below_zero(coef, expected):
 
 
 @pytest.mark.parametrize(
+    "a_vector, b_vector, A, b, c, expected",
+    [
+        ([0.0, -2.0], [1.0, 1.0], None, [1.0, 1.0], 4.0, [[-np.inf, -1.0]]),
+        ([0.0, -2.0], [-1.0, -1.0], None, [1.0, 1.0], 4.0, [[1.0, np.inf]]),
+        ([-1.0, -1.0], [1.0, 1.0], np.eye(2), None, -2.0, [[0.0, 2.0]]),
+        (
+            [-1.0, -1.0],
+            [1.0, 1.0],
+            -np.eye(2),
+            None,
+            2.0,
+            [[-np.inf, 0.0], [2.0, np.inf]],
+        ),
+    ],
+)
+def test_polytope_below_zero(a_vector, b_vector, A, b, c, expected):
+    a_vector, b_vector = np.array(a_vector), np.array(b_vector)
+    assert_allclose(polytope_below_zero(a_vector, b_vector, A, b, c), expected)
+
+
+@pytest.mark.parametrize(
     "a, b, expected",
     [
         ([2.0, -3.0], [-2.0, 1.0], [[1.0, 3.0]]),
