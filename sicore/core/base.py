@@ -38,6 +38,40 @@ class SelectiveInferenceResult:
     _null_rv: rv_continuous
     _alternative: Literal["two-sided", "less", "greater"]
 
+    def __post_init__(self):
+        """Compute the logarithm of the naive p-value and store it in the cache."""
+        match self._alternative:
+            case "two-sided":
+                self._log_naive_p_value = np.log(2.0) + self._null_rv.logcdf(
+                    -np.abs(self.stat)
+                )
+            case "less":
+                self._log_naive_p_value = self._null_rv.logsf(self.stat)
+            case "greater":
+                self._log_naive_p_value = self._null_rv.logcdf(self.stat)
+
+    def naive_p_value(self) -> float:
+        """Compute the naive p-value.
+
+        Returns:
+            float: The naive p-value.
+        """
+        return np.exp(self._log_naive_p_value)
+
+    def bonferroni_p_value(self, log_num_comparisons: float) -> float:
+        """Compute the Bonferroni-corrected p-value.
+
+        Args:
+            log_num_comparisons (float): Logarithm of the number of comparisons.
+
+        Returns:
+            float: The Bonferroni-corrected p-value.
+        """
+        log_bonferroni_p_value = np.clip(
+            self._log_naive_p_value + log_num_comparisons, -np.inf, 0.0
+        )
+        return np.exp(log_bonferroni_p_value)
+
     def __str__(self):
         precision = 6
         converter_ = lambda intervals: (
