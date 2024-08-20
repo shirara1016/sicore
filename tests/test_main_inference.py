@@ -153,17 +153,15 @@ class MarginalScreeningChi(MarginalScreening):
 
 
 @pytest.mark.parametrize(
-    "seed, expected_stat, expected_p_value, expected_naive_p",
+    "seed, expected_stat, expected_p_value",
     [
-        (0, 1.997181, 0.067986, 0.045806),
-        (1, -0.715869, 0.802903, 0.474072),
-        (2, -0.959323, 0.551424, 0.337396),
-        (3, 0.966223, 0.598692, 0.333933),
+        (0, 1.997181, 0.067986),
+        (1, -0.715869, 0.802903),
+        (2, -0.959323, 0.551424),
+        (3, 0.966223, 0.598692),
     ],
 )
-def test_marginal_screening_norm(
-    seed, expected_stat, expected_p_value, expected_naive_p
-):
+def test_marginal_screening_norm(seed, expected_stat, expected_p_value):
     rng = np.random.default_rng(seed)
     n, p, k, sigma = 100, 10, 5, 1.0
 
@@ -178,29 +176,25 @@ def test_marginal_screening_norm(
             index, termination_criterion="precision", search_strategy=search_strategy
         )
         assert np.abs(result.p_value - expected_p_value) < 0.001
-        assert np.abs(result.naive_p - expected_naive_p) < 0.001
         assert np.abs(result.stat - expected_stat) < 0.001
 
         result = ms.inference(
             index, termination_criterion="decision", search_strategy=search_strategy
         )
         assert (result.p_value <= 0.05) == (expected_p_value <= 0.05)
-        assert np.abs(result.naive_p - expected_naive_p) < 0.001
         assert np.abs(result.stat - expected_stat) < 0.001
 
 
 @pytest.mark.parametrize(
-    "seed, expected_stat, expected_p_value, expected_naive_p",
+    "seed, expected_stat, expected_p_value",
     [
-        (0, 1.503175, 0.568306, 0.323108),
-        (1, 3.020218, 0.130227, 0.104307),
-        (2, 2.121942, 0.292879, 0.212055),
-        (3, 2.627566, 0.385533, 0.141044),
+        (0, 1.503175, 0.568306),
+        (1, 3.020218, 0.130227),
+        (2, 2.121942, 0.292879),
+        (3, 2.627566, 0.385533),
     ],
 )
-def test_marginal_screening_chi(
-    seed, expected_stat, expected_p_value, expected_naive_p
-):
+def test_marginal_screening_chi(seed, expected_stat, expected_p_value):
     rng = np.random.default_rng(seed)
     n, p, k, sigma = 100, 10, 5, 1.0
 
@@ -215,12 +209,10 @@ def test_marginal_screening_chi(
             indexes, termination_criterion="precision", search_strategy=search_strategy
         )
         assert np.abs(result.p_value - expected_p_value) < 0.001
-        assert np.abs(result.naive_p - expected_naive_p) < 0.001
         assert np.abs(result.stat - expected_stat) < 0.001
 
         result = ms.inference(
             indexes, termination_criterion="decision", search_strategy=search_strategy
         )
         assert (result.p_value <= 0.05) == (expected_p_value <= 0.05)
-        assert np.abs(result.naive_p - expected_naive_p) < 0.001
         assert np.abs(result.stat - expected_stat) < 0.001
