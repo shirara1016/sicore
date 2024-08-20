@@ -8,46 +8,6 @@ from ..core.base import SelectiveInferenceResult
 from ..core.real_subset import RealSubset
 
 
-def _find_rejection_area(
-    null_rv: rv_continuous,
-    alternative: Literal["two-sided", "less", "greater"],
-    alpha: float = 0.05,
-    log_num_comparisons: float = 0.0,
-) -> RealSubset:
-    """Find the rejection area of the unconditional test statistic.
-
-    Args:
-        null_rv (rv_continuous): Null distribution of the unconditional test statistic.
-        alternative (Literal["two-sided", "less", "greater"]): Type of the alternative hypothesis.
-        alpha (float, optional): Significance level. Defaults to 0.05.
-        log_num_comparisons (float, optional): Logarithm of the number of comparisons
-            for the Bonferroni correction. Defaults to 0.0, which means no correction.
-
-    Returns:
-        RealSubset: Rejection area of the unconditional test statistic.
-    """
-    support = RealSubset(np.array(null_rv.support()).reshape(-1, 2))
-    match alternative:
-        case "two-sided":
-            f = (
-                lambda z: null_rv.logcdf(-np.abs(z))
-                - np.log(0.5 * alpha)
-                + log_num_comparisons
-            )
-            edge = brentq(f, 0.0001, 1000.0)
-            return RealSubset([[-np.inf, -edge], [edge, np.inf]]) & support
-        case "less":
-            f = lambda z: null_rv.logsf(z) - np.log(alpha) + log_num_comparisons
-            edge = brentq(f, 0.0001, 1000.0)
-            return RealSubset([[edge, np.inf]]) & support
-        case "greater":
-            f = lambda z: null_rv.logcdf(z) - np.log(alpha) + log_num_comparisons
-            edge = brentq(f, -1000.0, -0.0001)
-            return RealSubset([[-np.inf, edge]]) & support
-        case _:
-            raise ValueError("alternative must be 'two-sided', 'less', or 'greater'.")
-
-
 def rejection_rate(
     results: list[SelectiveInferenceResult] | np.ndarray | list[float],
     alpha: float = 0.05,
