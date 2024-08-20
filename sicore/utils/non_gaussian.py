@@ -70,7 +70,8 @@ def generate_non_gaussian_rv(
         rv_name (Literal["t", "skewnorm", "gennormsteep", "gennormflat", "exponnorm"]):
             Random variable name to be generated.
         distance (float): Wasserstein distance between the random variable
-            and the standard gaussian distribution.
+            and the standard gaussian distribution. It is strongly
+            recommended to set a value between 0.01 and 0.15.
 
     Returns:
         rv_continuous: Generated standardized random variable object in the given rv_name family with the given Wasserstein distance from the standard gaussian distribution.
