@@ -23,8 +23,8 @@ class SelectiveInferenceResult:
             Intervals where the selected model is obtained.
         search_count (int): Number of times the search was performed.
         detect_count (int): Number of times the selected model was obtained.
-        _null_rv (rv_continuous): Null distribution of the unconditional test statistic.
-        _alternative (Literal["two-sided", "less", "greater"]): Type of the alternative hypothesis.
+        null_rv (rv_continuous): Null distribution of the unconditional test statistic.
+        alternative (Literal["two-sided", "less", "greater"]): Type of the alternative hypothesis.
     """
 
     stat: float
@@ -35,20 +35,20 @@ class SelectiveInferenceResult:
     truncated_intervals: list[list[float]]
     search_count: int
     detect_count: int
-    _null_rv: rv_continuous
-    _alternative: Literal["two-sided", "less", "greater"]
+    null_rv: rv_continuous
+    alternative: Literal["two-sided", "less", "greater"]
 
     def __post_init__(self):
         """Compute the logarithm of the naive p-value and store it in the cache."""
-        match self._alternative:
+        match self.alternative:
             case "two-sided":
-                self._log_naive_p_value = np.log(2.0) + self._null_rv.logcdf(
+                self._log_naive_p_value = np.log(2.0) + self.null_rv.logcdf(
                     -np.abs(self.stat)
                 )
             case "less":
-                self._log_naive_p_value = self._null_rv.logsf(self.stat)
+                self._log_naive_p_value = self.null_rv.logsf(self.stat)
             case "greater":
-                self._log_naive_p_value = self._null_rv.logcdf(self.stat)
+                self._log_naive_p_value = self.null_rv.logcdf(self.stat)
 
     def naive_p_value(self) -> float:
         """Compute the naive p-value.
@@ -92,6 +92,8 @@ class SelectiveInferenceResult:
                 f"truncated_intervals: {converter_(self.truncated_intervals)}",
                 f"search_count: {self.search_count}",
                 f"detect_count: {self.detect_count}",
+                f"null_rv: {self.null_rv.dist.name}",
+                f"alternative: {self.alternative}",
             ]
         )
 

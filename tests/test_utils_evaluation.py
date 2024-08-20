@@ -25,8 +25,8 @@ def test_rejection_rate_naive(null_rv, alternative, expected):
         "truncated_intervals": None,
         "search_count": None,
         "detect_count": None,
-        "_null_rv": null_rv,
-        "_alternative": alternative,
+        "null_rv": null_rv,
+        "alternative": alternative,
     }
     stats = null_rv.rvs(random_state=0, size=1000)
     stats += np.sign(stats) * 1.1
@@ -55,8 +55,8 @@ def test_rejection_rate_bonferroni(null_rv, alternative, expected):
         "truncated_intervals": None,
         "search_count": None,
         "detect_count": None,
-        "_null_rv": null_rv,
-        "_alternative": alternative,
+        "null_rv": null_rv,
+        "alternative": alternative,
     }
     stats = null_rv.rvs(random_state=0, size=1000)
     stats += np.sign(stats) * 1.1
@@ -82,8 +82,8 @@ def test_rejection_rate_p_values(seed, has_bias, expected):
         "truncated_intervals": None,
         "search_count": None,
         "detect_count": None,
-        "_null_rv": None,
-        "_alternative": None,
+        "null_rv": None,
+        "alternative": None,
     }
     rng = np.random.default_rng(seed)
     p_values = rng.uniform(size=1000)
