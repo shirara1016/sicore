@@ -79,37 +79,18 @@ def rejection_rate(
     """
     if naive and bonferroni:
         raise ValueError("naive and bonferroni cannot be True at the same time.")
-    if naive:
-        log_num_comparisons = 0.0
 
-    match isinstance(results[0], SelectiveInferenceResult), naive or bonferroni:
-        case True, True:
-            results = cast(list[SelectiveInferenceResult], results)
-            info_list = [
-                result._null_rv.args + (result._alternative,) for result in results
-            ]
-            if len(set(info_list)) == 1:
-                null_rv, alternative = results[0]._null_rv, results[0]._alternative
-                intervals = _find_rejection_area(
-                    null_rv, alternative, alpha, log_num_comparisons
-                ).intervals
-                stats = np.array([result.stat for result in results])
-                rejects = np.any(
-                    (intervals[:, 0] <= stats[:, np.newaxis])
-                    & (stats[:, np.newaxis] <= intervals[:, 1]),
-                    axis=1,
-                )
-            else:
-                rejects = []
-                for result in results:
-                    rejection_area = _find_rejection_area(
-                        result._null_rv, result._alternative, alpha, log_num_comparisons
-                    )
-                    rejects.append(result.stat in rejection_area)
-        case True, False:
-            results = cast(list[SelectiveInferenceResult], results)
-            rejects = np.array([result.p_value for result in results]) <= alpha
-        case False, _:
-            results = cast(np.ndarray | list[float], results)
-            rejects = np.array(results) <= alpha
-    return np.count_nonzero(rejects) / len(rejects)
+    if isinstance(results[0], SelectiveInferenceResult):
+        results = cast(list[SelectiveInferenceResult], results)
+        if naive:
+            p_values = np.array([result.naive_p_value() for result in results])
+        elif bonferroni:
+            p_values = np.array(
+                [result.bonferroni_p_value(log_num_comparisons) for result in results]
+            )
+        else:
+            p_values = np.array([result.p_value for result in results])
+    else:
+        p_values = np.array(results)
+
+    return np.count_nonzero(p_values <= alpha) / len(p_values)
