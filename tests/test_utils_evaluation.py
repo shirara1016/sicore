@@ -20,6 +20,22 @@ from sicore.core.real_subset import RealSubset
         (norm(), "less", 0.05, 0.0, RealSubset([1.64485363, np.inf])),
         (norm(), "greater", 0.05, 0.0, RealSubset([-np.inf, -1.64485363])),
         (chi(12), "less", 0.05, 0.0, RealSubset([4.58541926, np.inf])),
+        (
+            norm(),
+            "two-sided",
+            0.05,
+            256.0 * np.log(2.0),
+            RealSubset([[-np.inf, -18.829625], [18.829625, np.inf]]),
+        ),
+        (norm(), "less", 0.05, 256.0 * np.log(2.0), RealSubset([18.792881, np.inf])),
+        (
+            norm(),
+            "greater",
+            0.05,
+            256.0 * np.log(2.0),
+            RealSubset([-np.inf, -18.792881]),
+        ),
+        (chi(12), "less", 0.05, 256.0 * np.log(2.0), RealSubset([20.110980, np.inf])),
     ],
 )
 def test_find_rejection_area(
