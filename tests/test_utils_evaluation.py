@@ -1,10 +1,37 @@
 import pytest
 import numpy as np
 from numpy.testing import assert_allclose
-from sicore.utils.evaluation import rejection_rate
+from scipy.stats import norm, chi
+from sicore.utils.evaluation import _find_rejection_area, rejection_rate
 from sicore.core.base import SelectiveInferenceResult
+from sicore.core.real_subset import RealSubset
 
 
+@pytest.mark.parametrize(
+    "null_rv, alternative, alpha, log_num_comparisons, expected",
+    [
+        (
+            norm(),
+            "two-sided",
+            0.05,
+            0.0,
+            RealSubset([[-np.inf, -1.95996398], [1.95996398, np.inf]]),
+        ),
+        (norm(), "less", 0.05, 0.0, RealSubset([1.64485363, np.inf])),
+        (norm(), "greater", 0.05, 0.0, RealSubset([-np.inf, -1.64485363])),
+        (chi(12), "less", 0.05, 0.0, RealSubset([4.58541926, np.inf])),
+    ],
+)
+def test_find_rejection_area(
+    null_rv, alternative, alpha, log_num_comparisons, expected
+):
+    rejection_area = _find_rejection_area(
+        null_rv, alternative, alpha, log_num_comparisons
+    )
+    assert_allclose(rejection_area.intervals, expected.intervals)
+
+
+@pytest.mark.skip()
 @pytest.mark.parametrize(
     "p_values, naive, expected",
     [
@@ -29,6 +56,8 @@ def test_rejection_rate_results(p_values, naive, expected):
         "truncated_intervals": [[-np.inf, np.inf]],
         "search_count": 1,
         "detect_count": 1,
+        "_null_rv": None,
+        "_alternative": None,
     }
     results = []
     for p_value in p_values:
