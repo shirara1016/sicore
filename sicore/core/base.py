@@ -17,7 +17,6 @@ class SelectiveInferenceResult:
         p_value (float): Selective p-value.
         inf_p (float): Lower bound of selective p-value.
         sup_p (float): Upper bound of selective p-value.
-        naive_p (float): Naive p-value.
         searched_intervals (list[list[float]]):
             Intervals where the search was performed.
         truncated_intervals (list[list[float]]):
@@ -32,7 +31,6 @@ class SelectiveInferenceResult:
     p_value: float
     inf_p: float
     sup_p: float
-    naive_p: float
     searched_intervals: list[list[float]]
     truncated_intervals: list[list[float]]
     search_count: int
@@ -56,7 +54,6 @@ class SelectiveInferenceResult:
                 f"p_value: {self.p_value:.{precision}f}",
                 f"inf_p: {self.inf_p:.{precision}f}",
                 f"sup_p: {self.sup_p:.{precision}f}",
-                f"naive_p: {self.naive_p:.{precision}f}",
                 f"searched_intervals: {converter_(self.searched_intervals)}",
                 f"truncated_intervals: {converter_(self.truncated_intervals)}",
                 f"search_count: {self.search_count}",
@@ -309,14 +306,12 @@ class SelectiveInference:
         inf_p, sup_p = self._evaluate_pvalue_bounds(
             searched_intervals, truncated_intervals
         )
-        naive_p = self._compute_pvalue(self.support)
 
         return SelectiveInferenceResult(
             self.stat,
             p_value,
             inf_p,
             sup_p,
-            naive_p,
             searched_intervals.tolist(),
             truncated_intervals.tolist(),
             search_count,
