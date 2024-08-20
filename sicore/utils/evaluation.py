@@ -12,7 +12,7 @@ def _find_rejection_area(
     null_rv: rv_continuous,
     alternative: Literal["two-sided", "less", "greater"],
     alpha: float = 0.05,
-    log_num_tests: float = 0.0,
+    log_num_comparisons: float = 0.0,
 ) -> RealSubset:
     """Find the rejection area of the unconditional test statistic.
 
@@ -20,7 +20,7 @@ def _find_rejection_area(
         null_rv (rv_continuous): Null distribution of the unconditional test statistic.
         alternative (Literal["two-sided", "less", "greater"]): Type of the alternative hypothesis.
         alpha (float, optional): Significance level. Defaults to 0.05.
-        log_num_tests (float, optional): Logarithm of the number of tests
+        log_num_comparisons (float, optional): Logarithm of the number of comparisons
             for the Bonferroni correction. Defaults to 0.0, which means no correction.
 
     Returns:
@@ -32,16 +32,16 @@ def _find_rejection_area(
             f = (
                 lambda z: null_rv.logcdf(-np.abs(z))
                 - np.log(0.5 * alpha)
-                + log_num_tests
+                + log_num_comparisons
             )
             edge = brentq(f, 0.0001, 1000.0)
             return RealSubset([[-np.inf, -edge], [edge, np.inf]]) & support
         case "less":
-            f = lambda z: null_rv.logsf(z) - np.log(alpha) + log_num_tests
+            f = lambda z: null_rv.logsf(z) - np.log(alpha) + log_num_comparisons
             edge = brentq(f, 0.0001, 1000.0)
             return RealSubset([[edge, np.inf]]) & support
         case "greater":
-            f = lambda z: null_rv.logcdf(z) - np.log(alpha) + log_num_tests
+            f = lambda z: null_rv.logcdf(z) - np.log(alpha) + log_num_comparisons
             edge = brentq(f, -1000.0, -0.0001)
             return RealSubset([[-np.inf, edge]]) & support
         case _:
@@ -53,7 +53,7 @@ def rejection_rate(
     alpha: float = 0.05,
     naive: bool = False,
     bonferroni: bool = False,
-    log_num_tests: float = 0.0,
+    log_num_comparisons: float = 0.0,
 ) -> float:
     """Compute rejection rate from the list of SelectiveInferenceResult objects or p-values.
 
@@ -67,7 +67,7 @@ def rejection_rate(
         bonferroni (bool, optional): Whether to compute rejection rate with Bonferroni correction.
             This option is available only when results are SelectiveInferenceResult objects.
             Defaults to False.
-        log_num_tests (float, optional): Logarithm of the number of tests
+        log_num_comparisons (float, optional): Logarithm of the number of comparisons
             for the Bonferroni correction. This option is ignored when bonferroni is False.
             Defaults to 0.0, which means no correction.
 
@@ -80,14 +80,14 @@ def rejection_rate(
     if naive and bonferroni:
         raise ValueError("naive and bonferroni cannot be True at the same time.")
     if naive:
-        log_num_tests = 0.0
+        log_num_comparisons = 0.0
 
     if isinstance(results[0], SelectiveInferenceResult):
         results = cast(list[SelectiveInferenceResult], results)
         if naive or bonferroni:
             null_rv, alternative = results[0]._null_rv, results[0]._alternative
             intervals = _find_rejection_area(
-                null_rv, alternative, alpha, log_num_tests
+                null_rv, alternative, alpha, log_num_comparisons
             ).intervals
             stats = np.array([result.stat for result in results])
             rejects = np.any(
