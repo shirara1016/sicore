@@ -1,17 +1,17 @@
-# Configuration file for the Sphinx documentation builder.
+"""Configuration file for the Sphinx documentation builder."""  # noqa: INP001
 #
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
-import os
 import sys
+from pathlib import Path
 
-sys.path.insert(0, os.path.abspath("../"))
+sys.path.insert(0, Path("../").resolve())
 
 project = "sicore"
-copyright = "2024, Takeuchi-Lab"
+project_copyright = "2024, Takeuchi-Lab"
 author = "Takeuchi-Lab"
 release = "2.0.0"
 
@@ -30,4 +30,3 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 autodoc_member_order = "bysource"
 
 html_theme = "furo"
-html_static_path = ["_static"]
