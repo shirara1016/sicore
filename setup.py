@@ -8,8 +8,8 @@ with open("LICENSE", "r", encoding="utf8") as f:
 
 setup(
     name="sicore",
-    version="1.0.1",
-    description="Core package for Selective Inference",
+    version="2.0.0",
+    description="Core Package for Selective Inference",
     long_description=readme,
     long_description_content_type="text/markdown",
     author="Takeuchi Lab",
@@ -17,11 +17,10 @@ setup(
     url="https://github.com/shirara1016/sicore",
     packages=find_packages(exclude=("tests", "docs")),
     install_requires=[
-        "numpy>=1.19.1",
-        "mpmath>=1.1.0",
-        "matplotlib>=3.3.1",
-        "scipy>=1.5.2",
-        "statsmodels>=0.11.1",
+        "numpy>=1.26.4,<2.0.0",
+        "mpmath>=1.3.0",
+        "matplotlib>=3.9.1",
+        "scipy>=1.14.0",
     ],
     python_requires=">=3.10",
     license="MIT License",

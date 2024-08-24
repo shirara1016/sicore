@@ -1,12 +1,12 @@
 # sicore package
 
-This package consists of core functions commonly used in selective inference.
+This package provides core functions for selective inference.
 
-The Japanese version README is [here](/README_ja.md).
+Detailed API reference is [here](https://shirara1016.github.io/sicore/).
 
 ## Installation
 
-This package requires python 3.10 or higher and automatically installs any dependent packages. If you want to use tensorflow and pytorch's tensor, please install the framework manually.
+This package requires python 3.10 or higher and automatically installs any dependent packages. If you want to use tensorflow and pytorch's tensors, please install them manually.
 ```
 $ pip install sicore
 ```
@@ -15,54 +15,42 @@ Uninstall :
 $ pip uninstall sicore
 ```
 
-## API Reference
-Deteiled API reference is [here](https://shirara1016.github.io/sicore/).
+## Module Contents
+The following modules can be imported by `from sicore import *`.
 
-## List of functions
-The following fuctions are imported by `from sicore import *`
+**Selective Inference**
+- SelectiveInferenceNorm : Selective inference for the normal distribution.
+- SelectiveInferenceChi : Selective inference for the chi distribution.
+- SelectiveInferenceResult: Data class for the result of selective inference.
 
-**Statistical Inference**
-- NaiveInferenceNorm : Naive statistical inference for the test statistic following a normal distribution.
-- SelectiveInferenceNorm : Selective statistical inference for the test statistic following a normal distribution.
-    - Parametric SI and Over-Conditioning provided.
-    - Parametric SI offers the following three types of methods.
-        - Calculation of p-value with specified guaranteed accuracy.
-        - Determining if the null hypothesis is rejected or not.
-        - Performing a parametric search of the entire specified range.
-    - Inference results are returned as a data class.
-- NaiveInferenceChi : Naive statistical inference for the test statistic following a chi distribution.
-- SelectiveInferenceChi : Selective statistical inference for the test statistic following a chi distribution.
-    - Parametric SI and Over-Conditioning provided.
-    - Parametric SI offers the following three types of methods.
-        - Calculation of p-value with specified guaranteed accuracy.
-        - Determining if the null hypothesis is rejected or not.
-        - Performing a parametric search of the entire specified range.
-    - Inference results are returned as a data class.
+**Evaluation**
+- rejection_rate(): Computes rejection rate from the list of SelectiveInferenceResult objects or p-values.
 
-**Truncated Distribution**
-Provides computation with arbitrary precision using mpmath for multiple truncated intervals.
-- tn_cdf() : truncated standard normal distribution
-- tc_cdf() : truncated chi distribution
-
-**Evaluation Function**
-- type1_error_rate()
-- power()
-
-**Figure Drawing**
+**Figure**
 - pvalues_hist() : Draws a histogram of p-values.
 - pvalues_qqplot() : Draws a uniform Q-Q plot of p-values.
+- FprFigure: Draws a figure of the false positive rate.
+- TprFigure: Draws a figure of the true positive rate.
 
 **Interval Operations**
-- intervals.intersection() : Computes the intersection of two sets of intervals.
-- intervals.intersection_all() : Computes the intersection of set of intervals.
-- intervals.union_all() : Computes the union of set of intervals.
-- intervals.not_() : Computes the complement of set of intervals with real numbers as the whole set.
+- RealSubset : Class for representing a subset of real numbers, which provides many operations with intuitive syntax.
+- complement() : Take the complement of intervals.
+- union() : Take the union of two intervals.
+- intersection() : Take the intersection of two intervals.
+- difference() : Take the difference of first intervals with second intervals.
+- symmetric_difference() : Take the symmetric difference of two intervals.
 
-**Utility**
-- OneVec : Generates a vector that is 1 at the specified index and 0 otherwise.
-- poly_lt_zero() : Calculation of the intervals for which the polynomial is less than or equal to 0.
-- polytope_to_interval() : Converts a selection event given in quadratic form into truncated intervals.
-- construct_projection_matrix() : Constructs a projection matrix from a basis given as a list of vectors to the subspace it spans.
+**Inequalities Solver**
+- polynomial_below_zero() : Compute intervals where a given polynomial is below zero.
+- polytope_below_zero() : Compute intervals where a given polytope is below zero.
+- degree_one_polynomials_below_zero: Compute intervals where given degree-one polynomials are all below zero.
+
+**Non-Gaussian Random Variables**
+- generate_non_gaussian_rv(): Generate a standardized random variable in a given rv_name family with a given Wasserstein distance from the standard gaussian distribution.
+
+**Constructor**
+- OneVector : Vector whose elements at specified positions are set to 1, and 0 otherwise.
+- construct_projection_matrix() : Construct projection matrix from basis.
 
 ## Others
 Execute code test :
