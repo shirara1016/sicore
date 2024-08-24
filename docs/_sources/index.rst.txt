@@ -7,9 +7,7 @@ sicore package
 ==============
 
 .. toctree::
-   :maxdepth: 3
-
-   index
+   :maxdepth: 0
 
 Module contents
 ---------------

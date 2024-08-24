@@ -1,16 +1,22 @@
-import pytest
+"""Module with tests for the main inference module."""
+
+from typing import Literal
+
 import numpy as np
-from sicore.core.real_subset import RealSubset
+import pytest
+from numpy.testing import assert_allclose
+
 from sicore.core.base import SelectiveInferenceResult
-from sicore.utils.intervals import degree_one_polynomials_below_zero
+from sicore.core.real_subset import NotBelongToSubsetError, RealSubset
+from sicore.main.inference import SelectiveInferenceChi, SelectiveInferenceNorm
 from sicore.utils.constructor import construct_projection_matrix
-from sicore.main.inference import SelectiveInferenceNorm, SelectiveInferenceChi
+from sicore.utils.intervals import degree_one_polynomials_below_zero
 
 
 class MarginalScreening:
     """A class for marginal screening."""
 
-    def __init__(self, X: np.ndarray, y: np.ndarray, sigma: float, k: int):
+    def __init__(self, X: np.ndarray, y: np.ndarray, sigma: float, k: int) -> None:
         """Initialize a MarginalScreening object.
 
         Args:
@@ -36,9 +42,12 @@ class MarginalScreening:
         return np.argsort(np.abs(X.T @ y))[::-1][:k].tolist()
 
     def algorithm(
-        self, a: np.ndarray, b: np.ndarray, z: float
+        self,
+        a: np.ndarray,
+        b: np.ndarray,
+        z: float,
     ) -> tuple[list[int], RealSubset]:
-        """A function to conduct selective inference
+        """A function to conduct selective inference.
 
         It takes a, b, and z as input and apply marginal screening to the dataset
         (self.X, a + b * z) to select the top self.k features M. It returns
@@ -68,11 +77,13 @@ class MarginalScreening:
 
         for active in active_set:
             temp_intervals = degree_one_polynomials_below_zero(
-                a[inactive_set] - a[active], b[inactive_set] - b[active]
+                a[inactive_set] - a[active],
+                b[inactive_set] - b[active],
             )
             intervals = intervals & RealSubset(temp_intervals)
 
-        assert z in intervals
+        if z not in intervals:
+            raise NotBelongToSubsetError(z, intervals)
         return indexes[: self.k].tolist(), intervals
 
     def model_selector(self, M: list[int]) -> bool:
@@ -108,25 +119,38 @@ class MarginalScreeningNorm(MarginalScreening):
             @ np.linalg.inv(self.X[:, self.M].T @ self.X[:, self.M])[:, index]
         )
 
-    def inference(self, index: int, **kwargs) -> SelectiveInferenceResult:
+    def inference(
+        self,
+        index: int,
+        search_strategy: Literal["pi1", "pi2", "pi3"],
+        termination_criterion: Literal["precision", "decision"],
+    ) -> SelectiveInferenceResult:
         """Conduct selective inference for the normal distribution.
 
         Args:
             index (int): Target index for the selective inference.
+            search_strategy (Literal["pi1", "pi2", "pi3"]):
+                Search strategy for the test.
+            termination_criterion (Literal["precision", "decision"]):
+                Termination criterion for the test.
 
         Returns:
             SelectiveInferenceResult: The result of the selective inference.
         """
         eta = self.construct_eta(index)
         si = SelectiveInferenceNorm(self.y, self.sigma, eta)
-        result = si.inference(self.algorithm, self.model_selector, **kwargs)
-        return result
+        return si.inference(
+            self.algorithm,
+            self.model_selector,
+            search_strategy=search_strategy,
+            termination_criterion=termination_criterion,
+        )
 
 
 class MarginalScreeningChi(MarginalScreening):
     """A class for marginal screening for the chi distribution."""
 
-    def construct_P(self, indexes: list[int]) -> np.ndarray:
+    def construct_projection(self, indexes: list[int]) -> np.ndarray:
         """Construct the P matrix for the selective inference.
 
         Args:
@@ -137,23 +161,36 @@ class MarginalScreeningChi(MarginalScreening):
         """
         return construct_projection_matrix(self.X[:, np.array(self.M)[indexes]].T)
 
-    def inference(self, indexes: list[int], **kwargs) -> SelectiveInferenceResult:
+    def inference(
+        self,
+        indexes: list[int],
+        search_strategy: Literal["pi1", "pi2", "pi3"],
+        termination_criterion: Literal["precision", "decision"],
+    ) -> SelectiveInferenceResult:
         """Conduct selective inference for the chi distribution.
 
         Args:
             indexes (list[int]): Target indexes for the selective inference.
+            search_strategy (Literal["pi1", "pi2", "pi3"]):
+                Search strategy for the test.
+            termination_criterion (Literal["precision", "decision"]):
+                Termination criterion for the test.
 
         Returns:
             SelectiveInferenceResult: The result of the selective inference.
         """
-        P = self.construct_P(indexes)
-        si = SelectiveInferenceChi(self.y, self.sigma, P)
-        result = si.inference(self.algorithm, self.model_selector, **kwargs)
-        return result
+        projection = self.construct_projection(indexes)
+        si = SelectiveInferenceChi(self.y, self.sigma, projection)
+        return si.inference(
+            self.algorithm,
+            self.model_selector,
+            search_strategy=search_strategy,
+            termination_criterion=termination_criterion,
+        )
 
 
 @pytest.mark.parametrize(
-    "seed, expected_stat, expected_p_value",
+    ("seed", "expected_stat", "expected_p_value"),
     [
         (0, 1.997181, 0.067986),
         (1, -0.715869, 0.802903),
@@ -161,7 +198,13 @@ class MarginalScreeningChi(MarginalScreening):
         (3, 0.966223, 0.598692),
     ],
 )
-def test_marginal_screening_norm(seed, expected_stat, expected_p_value):
+def test_marginal_screening_norm(
+    seed: int,
+    expected_stat: float,
+    expected_p_value: float,
+) -> None:
+    """Test the SelectiveInferenceNorm class."""
+    precision, significance_level = 0.001, 0.05
     rng = np.random.default_rng(seed)
     n, p, k, sigma = 100, 10, 5, 1.0
 
@@ -171,22 +214,29 @@ def test_marginal_screening_norm(seed, expected_stat, expected_p_value):
 
     ms = MarginalScreeningNorm(X, y, sigma, k)
 
-    for search_strategy in ["pi1", "pi2", "pi3"]:
+    strategies: list[Literal["pi1", "pi2", "pi3"]] = ["pi1", "pi2", "pi3"]
+    for search_strategy in strategies:
         result = ms.inference(
-            index, termination_criterion="precision", search_strategy=search_strategy
+            index,
+            termination_criterion="precision",
+            search_strategy=search_strategy,
         )
-        assert np.abs(result.p_value - expected_p_value) < 0.001
-        assert np.abs(result.stat - expected_stat) < 0.001
+        assert np.abs(result.p_value - expected_p_value) < precision
+        assert_allclose(result.stat, expected_stat, rtol=1e-4, atol=1e-4)
 
         result = ms.inference(
-            index, termination_criterion="decision", search_strategy=search_strategy
+            index,
+            termination_criterion="decision",
+            search_strategy=search_strategy,
         )
-        assert (result.p_value <= 0.05) == (expected_p_value <= 0.05)
-        assert np.abs(result.stat - expected_stat) < 0.001
+        assert (result.p_value <= significance_level) == (
+            expected_p_value <= significance_level
+        )
+        assert_allclose(result.stat, expected_stat, rtol=1e-4, atol=1e-4)
 
 
 @pytest.mark.parametrize(
-    "seed, expected_stat, expected_p_value",
+    ("seed", "expected_stat", "expected_p_value"),
     [
         (0, 1.503175, 0.568306),
         (1, 3.020218, 0.130227),
@@ -194,25 +244,38 @@ def test_marginal_screening_norm(seed, expected_stat, expected_p_value):
         (3, 2.627566, 0.385533),
     ],
 )
-def test_marginal_screening_chi(seed, expected_stat, expected_p_value):
+def test_marginal_screening_chi(
+    seed: int,
+    expected_stat: float,
+    expected_p_value: float,
+) -> None:
+    """Test the SelectiveInferenceChi class."""
+    precision, significance_level = 0.001, 0.05
     rng = np.random.default_rng(seed)
     n, p, k, sigma = 100, 10, 5, 1.0
 
     X = rng.normal(size=(n, p))
     y = rng.normal(size=n)
-    indexes = rng.choice(k, rng.choice(k - 1) + 2, replace=False)
+    indexes = rng.choice(k, rng.choice(k - 1) + 2, replace=False).tolist()
 
     ms = MarginalScreeningChi(X, y, sigma, k)
 
-    for search_strategy in ["pi1", "pi2", "pi3"]:
+    strategies: list[Literal["pi1", "pi2", "pi3"]] = ["pi1", "pi2", "pi3"]
+    for search_strategy in strategies:
         result = ms.inference(
-            indexes, termination_criterion="precision", search_strategy=search_strategy
+            indexes,
+            termination_criterion="precision",
+            search_strategy=search_strategy,
         )
-        assert np.abs(result.p_value - expected_p_value) < 0.001
-        assert np.abs(result.stat - expected_stat) < 0.001
+        assert np.abs(result.p_value - expected_p_value) < precision
+        assert_allclose(result.stat, expected_stat, rtol=1e-4, atol=1e-4)
 
         result = ms.inference(
-            indexes, termination_criterion="decision", search_strategy=search_strategy
+            indexes,
+            termination_criterion="decision",
+            search_strategy=search_strategy,
         )
-        assert (result.p_value <= 0.05) == (expected_p_value <= 0.05)
-        assert np.abs(result.stat - expected_stat) < 0.001
+        assert (result.p_value <= significance_level) == (
+            expected_p_value <= significance_level
+        )
+        assert_allclose(result.stat, expected_stat, rtol=1e-4, atol=1e-4)

@@ -1,9 +1,11 @@
-import numpy as np
-from scipy.stats import uniform, ecdf  # type: ignore
-import matplotlib.pyplot as plt
+"""Module containing the classes for plotting figures."""
 
-from ..core.base import SelectiveInferenceResult
-from .evaluation import rejection_rate
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.stats import ecdf, uniform  # type: ignore[import]
+
+from sicore.core.base import SelectiveInferenceResult
+from sicore.utils.evaluation import rejection_rate
 
 plt.rcParams.update({"figure.autolayout": True})
 
@@ -14,15 +16,15 @@ def pvalues_hist(
     title: str | None = None,
     fname: str | None = None,
     figsize: tuple[float, float] = (6, 4),
-):
-    """
-    Plot histogram of p-values.
+) -> None:
+    """Plot histogram of p-values.
 
     Args:
         p_values (list[float] | np.ndarray): List of p-values.
         bins (int, optional): The number of bins. Defaults to 20.
         title (str | None, optional): Title of the figure. Defaults to None.
-        fname (str | None, optional): File name. If `fname` is given, the plotted figure will
+        fname (str | None, optional):
+            File name. If `fname` is given, the plotted figure will
             be saved as a file. Defaults to None.
         figsize (tuple[float, float], optional): Size of the figure. Defaults to (6, 4).
     """
@@ -46,16 +48,17 @@ def pvalues_qqplot(
     title: str | None = None,
     fname: str | None = None,
     figsize: tuple[float, float] = (4, 4),
-):
-    """
-    Plot uniform Q-Q plot of p-values.
+) -> None:
+    """Plot uniform Q-Q plot of p-values.
 
     Args:
         p_values (list[float] | np.ndarray): List of p-values.
-        plot_pos (list[float] | np.ndarray | None, optional): Plotting positions.
-            If None, default plotting positions will be used. Defaults to None.
+        plot_pos (list[float] | np.ndarray | None, optional):
+            Plotting positions. If None, default plotting positions will be used.
+            Defaults to None.
         title (str | None, optional): Title of the figure. Defaults to None.
-        fname (str | None, optional): File name. If `fname` is given, the plotted figure will
+        fname (str | None, optional):
+            File name. If `fname` is given, the plotted figure will
             be saved as a file. Defaults to None.
         figsize (tuple[float, float], optional): Size of the figure. Defaults to (4, 4).
     """
@@ -92,7 +95,7 @@ class SummaryFigure:
         title: str | None = None,
         xlabel: str | None = None,
         ylabel: str | None = None,
-    ):
+    ) -> None:
         """Initialize a summary figure.
 
         Args:
@@ -103,19 +106,19 @@ class SummaryFigure:
         self.title = title
         self.xlabel = xlabel
         self.ylabel = ylabel
-        self.data: dict[str, list] = dict()
+        self.data: dict[str, list] = {}
         self.red_line = False
 
-    def _add_value(self, value: float, label: str, xloc: str | int | float):
+    def _add_value(self, value: float, label: str, xloc: str | float) -> None:
         """Add a value to the figure.
 
         Args:
             value (float): Value to be plotted.
             label (str): Label corresponding to the value.
                 To note that the label well be shown in the given order.
-            xloc (str | int | float): Location of the value.
+            xloc (str | float): Location of the value.
                 If str, it will be equally spaced in the given order.
-                If int or float, it will be the exact location.
+                If float, it will be the exact location.
         """
         self.data.setdefault(label, [])
         self.data[label].append((xloc, value))
@@ -124,22 +127,43 @@ class SummaryFigure:
         self,
         results: list[SelectiveInferenceResult] | list[float] | np.ndarray,
         label: str,
-        xloc: str | int | float,
+        xloc: str | float,
         alpha: float = 0.05,
+        *,
         naive: bool = False,
-    ):
-        """Add reject rate computed from the given results to the figure.
+        bonferroni: bool = False,
+        log_num_comparisons: float = 0.0,
+    ) -> None:
+        """Add rejection rate computed from the given results to the figure.
 
         Args:
             results (list[SelectiveInferenceResult] | list[float] | np.ndarray):
                 List of SelectiveInferenceResult objects or p-values.
-            label (str): Label corresponding to the results.
-            xloc (str | int | float): Location of the results.
+            label (str):
+                Label corresponding to the results.
+            xloc (str | float):
+                Location of the results.
             alpha (float, optional): Significance level. Defaults to 0.05.
-            naive (bool, optional): Whether to use naive p-values from
+            naive (bool, optional):
+                Whether to compute rejection rate of naive inference.
+                This option is available only when results are
                 SelectiveInferenceResult objects. Defaults to False.
+            bonferroni (bool, optional):
+                Whether to compute rejection rate with Bonferroni correction.
+                This option is available only when results are
+                SelectiveInferenceResult objects. Defaults to False.
+            log_num_comparisons (float, optional):
+                Logarithm of the number of comparisons for the Bonferroni correction.
+                This option is ignored when bonferroni is False.
+                Defaults to 0.0, which means no correction.
         """
-        value = rejection_rate(results, alpha=alpha, naive=naive)
+        value = rejection_rate(
+            results,
+            alpha=alpha,
+            naive=naive,
+            bonferroni=bonferroni,
+            log_num_comparisons=log_num_comparisons,
+        )
         self._add_value(value, label, xloc)
 
     def plot(
@@ -147,21 +171,25 @@ class SummaryFigure:
         fname: str | None = None,
         ylim: tuple[float, float] = (0.0, 1.0),
         yticks: list[float] | None = None,
-        loc: str | None = None,
+        legend_loc: str | None = None,
         fontsize: int = 10,
-    ):
-        """
-        Plot the figure.
+    ) -> None:
+        """Plot the figure.
 
         Args:
-            fname (str | None, optional): File name. If `fname` is given, the plotted figure
+            fname (str | None, optional):
+                File name. If `fname` is given, the plotted figure
                 will be saved as a file. Defaults to None.
-            ylim (tuple[float, float], optional): Range of y-axis. Defaults to (0.0, 1.0).
-            yticks (list[float] | None, optional): List of y-ticks. Defaults to None.
+            ylim (tuple[float, float], optional):
+                Range of y-axis. Defaults to (0.0, 1.0).
+            yticks (list[float] | None, optional):
+                List of y-ticks. Defaults to None.
                 If None, y-ticks will be automatically determined.
-            loc (str | None, optional): Location of the legend. Defaults to None.
+            legend_loc (str | None, optional):
+                Location of the legend. Defaults to None.
                 If None, the legend will be placed at the best location.
-            fontsize (int, optional): Font size of the legend. Defaults to 10.
+            fontsize (int, optional):
+                Font size of the legend. Defaults to 10.
         """
         plt.rcParams.update({"font.size": fontsize})
         if self.title is not None:
@@ -172,7 +200,7 @@ class SummaryFigure:
             plt.ylabel(self.ylabel)
 
         for label, xloc_value_list in self.data.items():
-            xlocs_, values_ = zip(*xloc_value_list)
+            xlocs_, values_ = zip(*xloc_value_list, strict=False)
             xlocs, values = np.array(xlocs_), np.array(values_)
             if not all(isinstance(xloc, (str)) for xloc in xlocs):
                 values = values[np.argsort(xlocs)]
@@ -187,7 +215,7 @@ class SummaryFigure:
         if yticks is not None:
             plt.yticks(yticks)
 
-        plt.legend(frameon=False, loc=loc)
+        plt.legend(frameon=False, loc=legend_loc)
         if fname is None:
             plt.show()
         else:
@@ -222,24 +250,25 @@ class FprFigure(SummaryFigure):
         title: str | None = None,
         xlabel: str | None = None,
         ylabel: str = "Type I Error Rate",
-    ):
+    ) -> None:
         """Initialize a false positive rate figure.
 
         Args:
             title (str | None, optional): Title of the figure. Defaults to None.
             xlabel (str | None, optional): Label of x-axis. Defaults to None.
-            ylabel (str | None, optional): Label of y-axis. Defaults to 'Type I Error Rate'.
+            ylabel (str | None, optional):
+                Label of y-axis. Defaults to 'Type I Error Rate'.
         """
         super().__init__(title=title, xlabel=xlabel, ylabel=ylabel)
         self.red_line = True
 
-    def add_fpr(self, fpr: float, label: str, xloc: str | int | float):
+    def add_fpr(self, fpr: float, label: str, xloc: str | float) -> None:
         """Add a fpr value to the figure.
 
         Args:
             fpr (float): FPR value.
             label (str): Label corresponding to the FPR value.
-            xloc (str | int | float): Location of the FPR value.
+            xloc (str | float): Location of the FPR value.
         """
         self._add_value(fpr, label, xloc)
 
@@ -266,17 +295,17 @@ class TprFigure(SummaryFigure):
         title: str | None = None,
         xlabel: str | None = None,
         ylabel: str = "Power",
-    ):
+    ) -> None:
         """Initialize a true positive rate figure."""
         super().__init__(title=title, xlabel=xlabel, ylabel=ylabel)
         self.red_line = False
 
-    def add_tpr(self, tpr: float, label: str, xloc: str | int | float):
+    def add_tpr(self, tpr: float, label: str, xloc: str | float) -> None:
         """Add a tpr value to the figure.
 
         Args:
             tpr (float): TPR value.
             label (str): Label corresponding to the TPR value.
-            xloc (str | int | float): Location of the TPR value.
+            xloc (str | float): Location of the TPR value.
         """
         self._add_value(tpr, label, xloc)

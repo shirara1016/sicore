@@ -1,6 +1,11 @@
+"""Module providing functions for computing intervals and solving inequalities."""
+
+from itertools import pairwise
+
 import numpy as np
-from scipy import sparse  # type: ignore
-from ..core.real_subset import simplify, complement, union, intersection
+from scipy import sparse  # type: ignore[import]
+
+from sicore.core.real_subset import complement, intersection, simplify, union
 
 
 def difference(intervals1: np.ndarray, intervals2: np.ndarray) -> np.ndarray:
@@ -11,7 +16,9 @@ def difference(intervals1: np.ndarray, intervals2: np.ndarray) -> np.ndarray:
         intervals2 (np.ndarray): Intervals [[l1, u1], [l2, u2], ...].
 
     Returns:
-        np.ndarray: Difference of the first input intervals with the second input intervals [[l1', u1'], [l2', u2'], ...].
+        np.ndarray:
+            Difference of the first input intervals with the second input intervals
+            [[l1', u1'], [l2', u2'], ...].
     """
     return intersection(intervals1, complement(intervals2))
 
@@ -24,19 +31,22 @@ def symmetric_difference(intervals1: np.ndarray, intervals2: np.ndarray) -> np.n
         intervals2 (np.ndarray): Intervals [[l1, u1], [l2, u2], ...].
 
     Returns:
-        np.ndarray: Symmetric difference of the two input intervals [[l1', u1'], [l2', u2'], ...].
+        np.ndarray:
+            Symmetric difference of the two input intervals
+            [[l1', u1'], [l2', u2'], ...].
     """
     return union(difference(intervals1, intervals2), difference(intervals2, intervals1))
 
 
 def polynomial_below_zero(
-    poly_or_coef: np.poly1d | np.ndarray | list[float], tol: float = 1e-10
+    poly_or_coef: np.poly1d | np.ndarray | list[float],
+    tol: float = 1e-10,
 ) -> list[list[float]]:
     """Compute intervals where a given polynomial is below zero.
 
     Args:
         poly_or_coef (np.poly1d | np.ndarray | list[float]): Polynomial or its
-            coefficients e.g. [a, b, c] for a*z^2 + b*z + c.
+            coefficients e.g. [a, b, c] for a * z**2 + b * z + c.
         tol (float, optional): Tolerance error parameter. It is recommended to set a
             large value (about 1e-5) for high order polynomial (>= 3) or a polynomial
             with multiple root. Defaults to 1e-10.
@@ -55,20 +65,15 @@ def polynomial_below_zero(
     if poly.order == 0:
         if poly.coef[0] <= 0:
             return [[-np.inf, np.inf]]
-        else:
-            return []
+        return []
 
-    roots = []
     if np.issubdtype(poly.roots.dtype, complex):
-        for root in poly.roots:
-            if -tol < root.imag < tol:
-                roots.append(root.real)
+        roots = [root.real for root in poly.roots if -tol < root.imag < tol]
 
         if len(roots) == 0:
-            if poly(0) <= 0:
+            if poly(0.0) <= 0:
                 return [[-np.inf, np.inf]]
-            else:
-                return []
+            return []
     else:
         roots = poly.roots.tolist()
 
@@ -77,7 +82,8 @@ def polynomial_below_zero(
 
     if poly(roots[0] - 1) <= 0:
         intervals.append([-np.inf, roots[0]])
-    for start, end in zip(roots[:-1], roots[1:]):
+
+    for start, end in pairwise(roots):
         if end - start < tol:
             continue
         mid = (start + end) / 2
@@ -92,39 +98,43 @@ def polynomial_below_zero(
 def polytope_below_zero(
     a_vector: np.ndarray,
     b_vector: np.ndarray,
-    A: np.ndarray | sparse.csr_matrix | None = None,
+    a: np.ndarray | sparse.csr_matrix | None = None,
     b: np.ndarray | None = None,
     c: float | None = None,
+    *,
     tol: float = 1e-10,
     use_sparse: bool = False,
 ) -> list[list[float]]:
-    """Compute intervals where a given polytope (a_vec+b_vec*z)^T A (a_vec+b_vec*z) + b^T (a_vec+b_vec*z) + c is below zero.
+    """Compute intervals where a given polytope is below zero.
+
+    The polytope is defined as the set of z such that
+    (a_vec+b_vec*z)^T A (a_vec+b_vec*z) + b^T (a_vec+b_vec*z) + c < 0.0.
 
     Args:
         a_vector (np.ndarray): Vector a_vec in the polytope.
         b_vector (np.ndarray): Vector b_vec in the polytope.
-        A (np.ndarray | sparse.csr_matrix, optional): Matrix A in the polytope. Defaults to None.
-        b (np.ndarray, optional): Vector b in the polytope. Defaults to None.
-        c (float, optional): Scalar c in the polytope. Defaults to None.
+        a (np.ndarray | sparse.csr_matrix, optional):
+            Matrix A in the polytope. Defaults to None.
+        b (np.ndarray, optional):
+            Vector b in the polytope. Defaults to None.
+        c (float, optional):
+            Scalar c in the polytope. Defaults to None.
         tol (float, optional): Tolerance error parameter. Defaults to 1e-10.
-        use_sparse (bool, optional): Whether to use sparse matrix for computation of A matrix.
-            Defaults to False.
+        use_sparse (bool, optional):
+            Whether to use sparse matrix for computation of A matrix. Defaults to False.
 
     Returns:
         list[list[float]]: Intervals where the polytope is below zero.
     """
     alpha, beta, gamma = 0.0, 0.0, 0.0
 
-    if A is not None:
-        if use_sparse:
-            A = sparse.csr_matrix(A)
-        else:
-            A = np.array(A)
-        aA = a_vector @ A
-        bA = b_vector @ A
-        alpha += bA @ b_vector
-        beta += aA @ b_vector + bA @ a_vector
-        gamma += aA @ a_vector
+    if a is not None:
+        a_mat = np.array(a) if not use_sparse else sparse.csr_matrix(a)
+        a_a_mat = a_vector @ a_mat
+        b_a_mat = b_vector @ a_mat
+        alpha += b_a_mat @ b_vector
+        beta += a_a_mat @ b_vector + b_a_mat @ a_vector
+        gamma += a_a_mat @ a_vector
 
     if b is not None:
         beta += b @ b_vector
@@ -137,9 +147,13 @@ def polytope_below_zero(
 
 
 def degree_one_polynomials_below_zero(
-    a: np.ndarray, b: np.ndarray
+    a: np.ndarray,
+    b: np.ndarray,
 ) -> list[list[float]]:
-    """Compute intervals where given degree one polynomials a_i + b_i * z are all below zero.
+    """Compute intervals where given degree one polynomials are all below zero.
+
+    The degree one polynomials are defined as the set of z such that
+    a_i + b_i * z < 0.0 for all i in [len(a)].
 
     Args:
         a (np.ndarray): Constant terms of the degree one polynomials.

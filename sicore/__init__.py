@@ -1,28 +1,26 @@
-"""
-Core package for selective inference.
-"""
+"""Core package for selective inference."""
 
 from .core.base import SelectiveInference, SelectiveInferenceResult
 from .core.real_subset import RealSubset
-from .main.inference import SelectiveInferenceNorm, SelectiveInferenceChi
+from .main.inference import SelectiveInferenceChi, SelectiveInferenceNorm
 from .utils.constructor import OneVector, construct_projection_matrix
 from .utils.evaluation import rejection_rate
-from .utils.intervals import (
-    complement,
-    union,
-    intersection,
-    difference,
-    symmetric_difference,
-    polynomial_below_zero,
-    polytope_below_zero,
-    degree_one_polynomials_below_zero,
-)
 from .utils.figure import (
-    SummaryFigure,
     FprFigure,
+    SummaryFigure,
     TprFigure,
     pvalues_hist,
     pvalues_qqplot,
+)
+from .utils.intervals import (
+    complement,
+    degree_one_polynomials_below_zero,
+    difference,
+    intersection,
+    polynomial_below_zero,
+    polytope_below_zero,
+    symmetric_difference,
+    union,
 )
 from .utils.non_gaussian import generate_non_gaussian_rv
 

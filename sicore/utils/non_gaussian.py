@@ -1,9 +1,18 @@
-import numpy as np
-from scipy.stats import rv_continuous, norm, t, skewnorm, gennorm, exponnorm  # type: ignore
-from scipy.integrate import quad  # type: ignore
-from scipy.optimize import brentq  # type: ignore
+"""Module providing function for generating non-gaussian random variables."""
 
 from typing import Literal
+
+import numpy as np
+from scipy.integrate import quad  # type: ignore[import]
+from scipy.optimize import brentq  # type: ignore[import]
+from scipy.stats import (  # type: ignore[import]
+    exponnorm,
+    gennorm,
+    norm,
+    rv_continuous,
+    skewnorm,
+    t,
+)
 
 gennormflat = gennorm
 gennormsteep = gennorm
@@ -23,22 +32,26 @@ def _standardize(
     Returns:
         rv_continuous: Standardized random variable object with the given parameter.
     """
-    rv = eval(rv_name)
+    rv = rv_dict[rv_name]
     mean = rv.mean(param)
     std = rv.std(param)
     return rv(param, loc=-mean / std, scale=1 / std)
 
 
 def _wasserstein_distance(rv: rv_continuous) -> float:
-    """Compute the Wasserstein distance between a given random variable and the standard gaussian distribution.
+    """Compute the Wasserstein distance.
+
+    Compute the Wasserstein distance between a given random variable
+    and the standard gaussian distribution.
 
     Args:
         rv (rv_continuous): Random variable object.
 
     Returns:
-        float: Wasserstein distance between the given random variable and the standard gaussian distribution.
+        float:
+            Wasserstein distance between the given random variable and
+            the standard gaussian distribution.
     """
-
     return quad(lambda x: np.abs(rv.cdf(x) - norm.cdf(x)), -np.inf, np.inf)[0]
 
 
@@ -46,41 +59,64 @@ def _binary_search(
     rv_name: Literal["t", "skewnorm", "gennormsteep", "gennormflat", "exponnorm"],
     distance: float,
 ) -> float:
-    """Binary search for the parameter where a given random variable has a given Wasserstein distance from the standard gaussian distribution.
+    """Binary search the parameter for the specified random variable family.
+
+    Search the parameter of the random variabl where the specified random variable
+    has the specified Wasserstein distance from the standard gaussian distribution.
 
     Args:
-        rv_name (Literal["t", "skewnorm", "gennormsteep", "gennormflat", "exponnorm"]): Random variable name.
+        rv_name (Literal["t", "skewnorm", "gennormsteep", "gennormflat", "exponnorm"]):
+            Random variable name.
         distance (float): Wasserstein distance from the standard gaussian distribution.
 
     Returns:
-        float: Parameter of the random variable where the given random variable has the given Wasserstein distance from the standard gaussian distribution.
+        float:
+            Parameter of the random variable where the specified random variable has
+            the specified Wasserstein distance from the standard gaussian distribution.
     """
-
-    f = lambda param: _wasserstein_distance(_standardize(rv_name, param)) - distance
-    return brentq(f, *range_dict[rv_name])
+    return brentq(
+        lambda param: _wasserstein_distance(_standardize(rv_name, param)) - distance,
+        *range_dict[rv_name],
+    )
 
 
 def generate_non_gaussian_rv(
     rv_name: Literal["t", "skewnorm", "gennormsteep", "gennormflat", "exponnorm"],
     distance: float,
-):
-    """Generate a standardized random variable in a given rv_name family with a given Wasserstein distance from the standard gaussian distribution.
+) -> rv_continuous:
+    """Generate a random variable from the specified random variable family.
+
+    Generate a standardized random variable from
+    the specified random variable family which has the specified
+    Wasserstein distance from the standard gaussian distribution.
 
     Args:
         rv_name (Literal["t", "skewnorm", "gennormsteep", "gennormflat", "exponnorm"]):
             Random variable name to be generated.
-        distance (float): Wasserstein distance between the random variable
+        distance (float): Wasserstein distance between the generated random variable
             and the standard gaussian distribution. It is strongly
             recommended to set a value between 0.01 and 0.15.
 
     Returns:
-        rv_continuous: Generated standardized random variable object in the given rv_name family with the given Wasserstein distance from the standard gaussian distribution.
+        rv_continuous:
+            Generated standardized random variable from the
+            specified random variable family which has the specified
+            Wasserstein distance from the standard gaussian distribution.
     """
     try:
         param = params_dict[rv_name][str(distance)]
     except KeyError:
         param = _binary_search(rv_name, distance)
     return _standardize(rv_name, param)
+
+
+rv_dict = {
+    "skewnorm": skewnorm,
+    "exponnorm": exponnorm,
+    "gennormsteep": gennorm,
+    "gennormflat": gennorm,
+    "t": t,
+}
 
 
 range_dict = {
