@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from sicore.core.real_subset import RealSubset
+from sicore.core.real_subset import RealSubset, NotBelongToSubsetError
 
 
 @pytest.mark.parametrize(
@@ -166,7 +166,7 @@ def test_contains(intervals, value, expected):
 @pytest.mark.parametrize(
     "intervals, value, expected_result, expected_exception",
     [
-        ([[1.0, 3.0], [5.0, 7.0]], 4.0, None, ValueError),
+        ([[1.0, 3.0], [5.0, 7.0]], 4.0, None, NotBelongToSubsetError),
         ([[1.0, 3.0], [5.0, 7.0]], 6.0, [5.0, 7.0], None),
     ],
 )

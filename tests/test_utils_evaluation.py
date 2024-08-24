@@ -4,7 +4,6 @@ from numpy.testing import assert_allclose
 from scipy.stats import norm, chi
 from sicore.utils.evaluation import rejection_rate
 from sicore.core.base import SelectiveInferenceResult
-from sicore.core.real_subset import RealSubset
 
 
 @pytest.mark.parametrize(
