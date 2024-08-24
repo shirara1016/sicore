@@ -1,11 +1,14 @@
-import pytest
+"""Module with tests for the core cdf functions."""
+
 import numpy as np
+import pytest
 from numpy.testing import assert_allclose
-from sicore.core.cdf import truncated_norm_cdf, truncated_chi_cdf
+
+from sicore.core.cdf import truncated_chi_cdf, truncated_norm_cdf
 
 
 @pytest.mark.parametrize(
-    "z, intervals, absolute, expected",
+    ("z", "intervals", "absolute", "expected"),
     [
         (-np.inf, [[-np.inf, -2.0], [2.0, 7.0]], False, 0.0),
         (-1.7, [[-np.inf, -1.5], [-0.3, 0.5], [1.0, 12.0]], False, 0.08332542),
@@ -21,13 +24,20 @@ from sicore.core.cdf import truncated_norm_cdf, truncated_chi_cdf
         (3.5, [[3.4, 3.7], [5.0, 5.6]], True, 0.45465432),
     ],
 )
-def test_truncated_norm_cdf(z, intervals, absolute, expected):
+def test_truncated_norm_cdf(
+    z: float,
+    intervals: list[list[float]],
+    *,
+    absolute: bool,
+    expected: float,
+) -> None:
+    """Test the truncated norm cdf function."""
     value = truncated_norm_cdf(z, intervals, absolute=absolute)
     assert_allclose(value, expected, rtol=1e-6, atol=1e-6)
 
 
 @pytest.mark.parametrize(
-    "z, df, intervals, expected",
+    ("z", "df", "intervals", "expected"),
     [
         (2.5, 14, [[1.6, 6.6]], 0.03985783),
         (6.7, 5, [[6.4, 7.3], [18.9, 22.2], [24.7, 27.9]], 0.84278428),
@@ -39,6 +49,12 @@ def test_truncated_norm_cdf(z, intervals, absolute, expected):
         (np.inf, 2, [[0.0, 0.5], [1.0, 1.5], [2.0, np.inf]], 1.0),
     ],
 )
-def test_truncated_chi_cdf(z, intervals, df, expected):
+def test_truncated_chi_cdf(
+    z: float,
+    df: int,
+    intervals: list[list[float]],
+    expected: float,
+) -> None:
+    """Test the truncated chi cdf function."""
     value = truncated_chi_cdf(z, df, intervals)
     assert_allclose(value, expected, rtol=1e-6, atol=1e-6)

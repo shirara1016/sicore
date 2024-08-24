@@ -1,13 +1,16 @@
-import pytest
+"""Module with tests for the evaluation utilities."""
+
 import numpy as np
+import pytest
 from numpy.testing import assert_allclose
-from scipy.stats import norm, chi
-from sicore.utils.evaluation import rejection_rate
+from scipy.stats import chi, norm, rv_continuous  # type: ignore[import]
+
 from sicore.core.base import SelectiveInferenceResult
+from sicore.utils.evaluation import rejection_rate
 
 
 @pytest.mark.parametrize(
-    "null_rv, alternative, expected",
+    ("null_rv", "alternative", "expected"),
     [
         (norm(), "two-sided", 0.384),
         (norm(), "less", 0.262),
@@ -15,15 +18,20 @@ from sicore.core.base import SelectiveInferenceResult
         (chi(12), "less", 0.438),
     ],
 )
-def test_rejection_rate_naive(null_rv, alternative, expected):
+def test_rejection_rate_naive(
+    null_rv: rv_continuous,
+    alternative: str,
+    expected: float,
+) -> None:
+    """Test the rejection rate function with naive option."""
     args = {
-        "p_value": None,
-        "inf_p": None,
-        "sup_p": None,
-        "searched_intervals": None,
-        "truncated_intervals": None,
-        "search_count": None,
-        "detect_count": None,
+        "p_value": 0.5,
+        "inf_p": 0.0,
+        "sup_p": 1.0,
+        "searched_intervals": [[-np.inf, np.inf]],
+        "truncated_intervals": [[-np.inf, np.inf]],
+        "search_count": 1,
+        "detect_count": 1,
         "null_rv": null_rv,
         "alternative": alternative,
     }
@@ -32,12 +40,11 @@ def test_rejection_rate_naive(null_rv, alternative, expected):
     results = [SelectiveInferenceResult(**args, stat=stat) for stat in stats]
 
     value = rejection_rate(results, naive=True)
-    assert value > 0.05 + 0.10
     assert_allclose(value, expected)
 
 
 @pytest.mark.parametrize(
-    "null_rv, alternative, expected",
+    ("null_rv", "alternative", "expected"),
     [
         (norm(), "two-sided", 0.0),
         (norm(), "less", 0.0),
@@ -45,15 +52,20 @@ def test_rejection_rate_naive(null_rv, alternative, expected):
         (chi(12), "less", 0.0),
     ],
 )
-def test_rejection_rate_bonferroni(null_rv, alternative, expected):
+def test_rejection_rate_bonferroni(
+    null_rv: rv_continuous,
+    alternative: str,
+    expected: float,
+) -> None:
+    """Test the rejection rate function with bonferroni option."""
     args = {
-        "p_value": None,
-        "inf_p": None,
-        "sup_p": None,
-        "searched_intervals": None,
-        "truncated_intervals": None,
-        "search_count": None,
-        "detect_count": None,
+        "p_value": 0.5,
+        "inf_p": 0.0,
+        "sup_p": 1.0,
+        "searched_intervals": [[-np.inf, np.inf]],
+        "truncated_intervals": [[-np.inf, np.inf]],
+        "search_count": 1,
+        "detect_count": 1,
         "null_rv": null_rv,
         "alternative": alternative,
     }
@@ -62,27 +74,29 @@ def test_rejection_rate_bonferroni(null_rv, alternative, expected):
     results = [SelectiveInferenceResult(**args, stat=stat) for stat in stats]
 
     value = rejection_rate(
-        results, bonferroni=True, log_num_comparisons=256.0 * np.log(2.0)
+        results,
+        bonferroni=True,
+        log_num_comparisons=256.0 * np.log(2.0),
     )
-    assert value < 0.02
     assert_allclose(value, expected)
 
 
 @pytest.mark.parametrize(
-    "seed, has_bias, expected",
+    ("seed", "has_bias", "expected"),
     [(0, False, 0.045), (1, False, 0.047), (2, True, 0.220), (3, True, 0.226)],
 )
-def test_rejection_rate_p_values(seed, has_bias, expected):
+def test_rejection_rate_p_values(seed: int, *, has_bias: bool, expected: float) -> None:
+    """Test the rejection rate function for p-values."""
     args = {
-        "stat": None,
-        "inf_p": None,
-        "sup_p": None,
-        "searched_intervals": None,
-        "truncated_intervals": None,
-        "search_count": None,
-        "detect_count": None,
-        "null_rv": None,
-        "alternative": None,
+        "stat": 0.0,
+        "inf_p": 0.0,
+        "sup_p": 1.0,
+        "searched_intervals": [[-np.inf, np.inf]],
+        "truncated_intervals": [[-np.inf, np.inf]],
+        "search_count": 1,
+        "detect_count": 1,
+        "null_rv": norm(),
+        "alternative": "two-sided",
     }
     rng = np.random.default_rng(seed)
     p_values = rng.uniform(size=1000)
@@ -93,15 +107,7 @@ def test_rejection_rate_p_values(seed, has_bias, expected):
     ]
 
     value = rejection_rate(p_values)
-    if has_bias:
-        assert value > 0.05 + 0.10
-    else:
-        assert 0.05 - 0.01 < value < 0.05 + 0.01
     assert_allclose(value, expected)
 
     value = rejection_rate(results)
-    if has_bias:
-        assert value > 0.05 + 0.10
-    else:
-        assert 0.05 - 0.01 < value < 0.05 + 0.01
     assert_allclose(value, expected)
