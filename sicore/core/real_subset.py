@@ -1,5 +1,9 @@
+"""Module defining the RealSubset class for representing subsets of real numbers."""
+
 from __future__ import annotations
-from typing import Any
+
+from typing import Self
+
 import numpy as np
 
 
@@ -44,8 +48,9 @@ def complement(intervals: np.ndarray) -> np.ndarray:
     if intervals[0][0] > -np.inf:
         result.append([-np.inf, intervals[0][0]])
 
-    for i in range(len(intervals) - 1):
-        result.append([intervals[i][1], intervals[i + 1][0]])
+    result += [
+        [intervals[i][1], intervals[i + 1][0]] for i in range(len(intervals) - 1)
+    ]
 
     if intervals[-1][1] < np.inf:
         result.append([intervals[-1][1], np.inf])
@@ -75,7 +80,8 @@ def intersection(intervals1: np.ndarray, intervals2: np.ndarray) -> np.ndarray:
         intervals2 (np.ndarray): Intervals [[l1, u1], [l2, u2], ...].
 
     Returns:
-        np.ndarray: Intersection of the two input intervals [[l1', u1'], [l2', u2'], ...].
+        np.ndarray: Intersection of the two input intervals
+            [[l1', u1'], [l2', u2'], ...].
     """
     return complement(union(complement(intervals1), complement(intervals2)))
 
@@ -88,14 +94,17 @@ class RealSubset:
     and computation.
 
     Attributes:
-        intervals (np.ndarray): An array of shape (n, 2) representing n intervals.
-                                    Each row [a, b] represents the interval [a, b].
+        intervals (np.ndarray):
+            An array of shape (n, 2) representing n intervals.
+            Each row [a, b] represents the interval [a, b].
 
     Args:
-        intervals (np.array, list[list[int]], optional): Initial intervals to
-            create the subset. Defaults to [], which creates an empty set.
-        simplify (bool, optional): Whether to simplify (merge overlapping) intervals
-            upon creation. Defaults to True.
+        intervals (np.array, list[list[int]], None, optional):
+            Initial intervals to create the subset. Defaults to None,
+            which creates an empty set.
+        is_simplify (bool, optional):
+            Whether to simplify (merge overlapping) intervals upon creation.
+            Defaults to True.
 
     Note:
         - Infinite intervals can be represented using np.inf.
@@ -113,37 +122,42 @@ class RealSubset:
     """
 
     def __init__(
-        self, intervals: np.ndarray | list[list[float]] = [], simplify: bool = True
+        self,
+        intervals: np.ndarray | list[list[float]] | None = None,
+        *,
+        is_simplify: bool = True,
     ) -> None:
         """Initialize a RealSubset object.
 
         Args:
-            intervals (np.array, list[list[int]], optional): Initial intervals to
-                create the subset. Defaults to [], which creates an empty set.
-            simplify (bool, optional): Whether to simplify (merge overlapping) intervals
-                upon creation. Defaults to True.
+            intervals (np.array, list[list[int]], None, optional):
+                Initial intervals to create the subset. Defaults to None,
+                which creates an empty set.
+            is_simplify (bool, optional):
+                Whether to simplify (merge overlapping) intervals upon creation.
+                Defaults to True.
         """
-        if len(intervals) == 0:
+        if intervals is None:
             self.intervals = np.array([]).reshape(0, 2)
         else:
             self.intervals = np.array(intervals).reshape(-1, 2)
-            if simplify:
+            if is_simplify:
                 self.simplify()
 
     def simplify(self) -> None:
-        """Simplify the intervals of the subset"""
+        """Simplify the intervals of the subset."""
         self.intervals = simplify(self.intervals)
 
     def complement(self) -> RealSubset:
-        """Take the complement of the subset.
+        """Take the complement.
 
         Returns:
             RealSubset: Complement of the subset.
         """
-        return RealSubset(complement(self.intervals), simplify=False)
+        return RealSubset(complement(self.intervals), is_simplify=False)
 
     def __invert__(self) -> RealSubset:
-        """Take the complement of the subset
+        """Take the complement.
 
         Returns:
             RealSubset: Complement of the subset.
@@ -151,7 +165,7 @@ class RealSubset:
         return self.complement()
 
     def union(self, other: RealSubset) -> RealSubset:
-        """Take the union of the subset with another subset.
+        """Take the union and can be used by the | operator.
 
         Args:
             other (RealSubset): Another subset to take union with.
@@ -159,10 +173,10 @@ class RealSubset:
         Returns:
             RealSubset: Union of the two subsets.
         """
-        return RealSubset(union(self.intervals, other.intervals), simplify=False)
+        return RealSubset(union(self.intervals, other.intervals), is_simplify=False)
 
     def __or__(self, other: RealSubset) -> RealSubset:
-        """Take the union of the subset with another subset.
+        """Take the union.
 
         Args:
             other (RealSubset): Another subset to take union with.
@@ -173,27 +187,27 @@ class RealSubset:
         return self.union(other)
 
     def union_update(self, other: RealSubset) -> None:
-        """Update the subset with the union of itself and another subset.
+        """Update the subset by taking the union.
 
         Args:
             other (RealSubset): Another subset to take union with.
         """
         self.intervals = (self | other).intervals
 
-    def __ior__(self, other: RealSubset) -> RealSubset:
-        """Update the subset with the union of itself and another subset.
+    def __ior__(self, other: Self) -> Self:
+        """Update the subset by taking the union.
 
         Args:
-            other (RealSubset): Another subset to take union with.
+            other (Self): Another subset to take union with.
 
         Returns:
-            RealSubset: Updated subset with the union of itself and another subset.
+            Self: Updated subset with the union of itself and another subset.
         """
         self.union_update(other)
         return self
 
     def intersection(self, other: RealSubset) -> RealSubset:
-        """Take the intersection of the subset with another subset.
+        """Take the intersection and can be used by the & operator.
 
         Args:
             other (RealSubset): Another subset to take intersection with.
@@ -204,7 +218,7 @@ class RealSubset:
         return ~((~self) | (~other))
 
     def __and__(self, other: RealSubset) -> RealSubset:
-        """Take the intersection of the subset with another subset.
+        """Take the intersection.
 
         Args:
             other (RealSubset): Another subset to take intersection with.
@@ -215,27 +229,27 @@ class RealSubset:
         return self.intersection(other)
 
     def intersection_update(self, other: RealSubset) -> None:
-        """Update the subset with the intersection of itself and another subset.
+        """Update the subset by taking the intersection.
 
         Args:
             other (RealSubset): Another subset to take intersection with.
         """
         self.intervals = (self & other).intervals
 
-    def __iand__(self, other: RealSubset) -> RealSubset:
-        """Update the subset with the intersection of itself and another subset.
+    def __iand__(self, other: Self) -> Self:
+        """Update the subset by taking the intersection.
 
         Args:
             other (RealSubset): Another subset to take intersection with.
 
         Returns:
-            RealSubset: Updated subset with the intersection of itself and another subset.
+            Self: Updated subset with the intersection of itself and another subset.
         """
         self.intersection_update(other)
         return self
 
     def difference(self, other: RealSubset) -> RealSubset:
-        """Take the difference of the subset with another subset.
+        """Take the difference and can be used by the - operator.
 
         Args:
             other (RealSubset): Another subset to take difference with.
@@ -246,7 +260,7 @@ class RealSubset:
         return self & ~other
 
     def __sub__(self, other: RealSubset) -> RealSubset:
-        """Take the difference of the subset with another subset.
+        """Take the difference.
 
         Args:
             other (RealSubset): Another subset to take difference with.
@@ -257,27 +271,27 @@ class RealSubset:
         return self.difference(other)
 
     def difference_update(self, other: RealSubset) -> None:
-        """Update the subset with the difference of itself with another subset.
+        """Update the subset by taking the difference.
 
         Args:
             other (RealSubset): Another subset to take difference with.
         """
         self.intervals = (self - other).intervals
 
-    def __isub__(self, other: RealSubset) -> RealSubset:
-        """Update the subset with the difference of itself with another subset.
+    def __isub__(self, other: Self) -> Self:
+        """Update the subset by taking the difference.
 
         Args:
             other (RealSubset): Another subset to take difference with.
 
         Returns:
-            RealSubset: Updated subset with the difference of itself with another subset.
+            Self: Updated subset with the difference of itself with another subset.
         """
         self.difference_update(other)
         return self
 
     def symmetric_difference(self, other: RealSubset) -> RealSubset:
-        """Take the symmetric difference of the subset with another subset.
+        """Take the symmetric difference and can be used by the ^ operator.
 
         Args:
             other (RealSubset): Another subset to take symmetric difference with.
@@ -288,7 +302,7 @@ class RealSubset:
         return (self - other) | (other - self)
 
     def __xor__(self, other: RealSubset) -> RealSubset:
-        """Take the symmetric difference of the subset with another subset.
+        """Take the symmetric difference.
 
         Args:
             other (RealSubset): Another subset to take symmetric difference with.
@@ -299,21 +313,22 @@ class RealSubset:
         return self.symmetric_difference(other)
 
     def symmetric_difference_update(self, other: RealSubset) -> None:
-        """Update the subset with the symmetric difference of itself with another subset.
+        """Update the subset by taking the symmetric difference.
 
         Args:
             other (RealSubset): Another subset to take symmetric difference with.
         """
         self.intervals = (self ^ other).intervals
 
-    def __ixor__(self, other: RealSubset) -> RealSubset:
-        """Update the subset with the symmetric difference of itself with another subset.
+    def __ixor__(self, other: Self) -> Self:
+        """Update the subset by taking the symmetric difference.
 
         Args:
             other (RealSubset): Another subset to take symmetric difference with.
 
         Returns:
-            RealSubset: Updated subset with the symmetric difference of itself with another subset.
+            Self: Updated subset with the symmetric difference of itself
+                with another subset.
         """
         self.symmetric_difference_update(other)
         return self
@@ -326,7 +341,7 @@ class RealSubset:
         """
         return len(self.intervals) == 0
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         """Check if two objects are equal.
 
         Args:
@@ -371,7 +386,8 @@ class RealSubset:
             other (RealSubset): Another subset to check for proper subset.
 
         Returns:
-            bool: True if the subset is a proper subset of another subset, False otherwise.
+            bool: True if the subset is a proper subset of another subset,
+                False otherwise.
         """
         return self.issubset(other) and self != other
 
@@ -404,7 +420,8 @@ class RealSubset:
             other (RealSubset): Another subset to check for proper superset.
 
         Returns:
-            bool: True if the subset is a proper superset of another subset, False otherwise.
+            bool: True if the subset is a proper superset of another subset,
+                False otherwise.
         """
         return self.issuperset(other) and self != other
 
@@ -445,11 +462,10 @@ class RealSubset:
             ValueError: If the subset is empty or no interval contains z.
         """
         if len(self.intervals) == 0:
-            raise ValueError("The subset is empty.")
+            raise NotBelongToSubsetError(z, self)
         mask = (self.intervals[:, 0] <= z) & (z <= self.intervals[:, 1])
         if np.sum(mask) == 0:
-            raise ValueError(f"No interval containing {z:.6f}.")
-        assert np.sum(mask) == 1
+            raise NotBelongToSubsetError(z, self)
         return self.intervals[mask][0].tolist()
 
     def tolist(self) -> list[list[float]]:
@@ -479,10 +495,26 @@ class RealSubset:
         return "[" + ", ".join([f"[{l:.6f}, {u:.6f}]" for l, u in self.intervals]) + "]"
 
     def __repr__(self) -> str:
-        """Return a string representation of the RealSubset that can be used to recreate the object.
+        """Return a string representation that can be used to recreate the object.
 
         Returns:
             str: String representation of the RealSubset in the format
                 "RealSubset([[a, b], [c, d], ...])".
         """
         return f"RealSubset({self.tolist()})"
+
+
+class NotBelongToSubsetError(Exception):
+    """Error raised when a value does not belong to a subset."""
+
+    def __init__(self, value: float, subset: list[list[float]] | RealSubset) -> None:
+        """Initialize a NotBelongToSubsetError.
+
+        Args:
+            value (float): Value that does not belong to the subset.
+            subset (list[list[float]] | RealSubset): Subset that the value does not belong to.
+        """
+        subset = subset if isinstance(subset, RealSubset) else RealSubset(subset)
+        super().__init__(
+            f"The value {value:.6f} does not belong to the subset {subset}.",
+        )

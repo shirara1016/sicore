@@ -1,9 +1,13 @@
-from dataclasses import dataclass
-import numpy as np
-from scipy.stats import rv_continuous  # type: ignore
-from joblib import Parallel, delayed  # type: ignore
+"""Module containing the base classes for selective inference."""
 
-from typing import Any, Callable, Literal
+from collections.abc import Callable
+from dataclasses import dataclass
+from enum import Enum, auto
+from typing import Any, Literal
+
+import numpy as np
+from joblib import Parallel, delayed  # type: ignore[import]
+from scipy.stats import rv_continuous  # type: ignore[import]
 
 from .real_subset import RealSubset
 
@@ -24,7 +28,8 @@ class SelectiveInferenceResult:
         search_count (int): Number of times the search was performed.
         detect_count (int): Number of times the selected model was obtained.
         null_rv (rv_continuous): Null distribution of the unconditional test statistic.
-        alternative (Literal["two-sided", "less", "greater"]): Type of the alternative hypothesis.
+        alternative (Literal["two-sided", "less", "greater"]): Type of the
+            alternative hypothesis.
     """
 
     stat: float
@@ -38,12 +43,12 @@ class SelectiveInferenceResult:
     null_rv: rv_continuous
     alternative: Literal["two-sided", "less", "greater"]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Compute the logarithm of the naive p-value and store it in the cache."""
         match self.alternative:
             case "two-sided":
                 self._log_naive_p_value = np.log(2.0) + self.null_rv.logcdf(
-                    -np.abs(self.stat)
+                    -np.abs(self.stat),
                 )
             case "less":
                 self._log_naive_p_value = self.null_rv.logsf(self.stat)
@@ -68,19 +73,28 @@ class SelectiveInferenceResult:
             float: The Bonferroni-corrected p-value.
         """
         log_bonferroni_p_value = np.clip(
-            self._log_naive_p_value + log_num_comparisons, -np.inf, 0.0
+            self._log_naive_p_value + log_num_comparisons,
+            -np.inf,
+            0.0,
         )
         return np.exp(log_bonferroni_p_value)
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Return a string representation of the SelectiveInferenceResult object.
+
+        Returns:
+            str: A string representation of the SelectiveInferenceResult object.
+        """
         precision = 6
-        converter_ = lambda intervals: (
-            "["
-            + ", ".join(
-                [f"[{l:.{precision}f}, {u:.{precision}f}]" for l, u in intervals]
+
+        def _convert(intervals: list[list[float]], precision: float) -> str:
+            return (
+                "["
+                + ", ".join(
+                    [f"[{l:.{precision}f}, {u:.{precision}f}]" for l, u in intervals],
+                )
+                + "]"
             )
-            + "]"
-        )
 
         return "\n".join(
             [
@@ -88,27 +102,56 @@ class SelectiveInferenceResult:
                 f"p_value: {self.p_value:.{precision}f}",
                 f"inf_p: {self.inf_p:.{precision}f}",
                 f"sup_p: {self.sup_p:.{precision}f}",
-                f"searched_intervals: {converter_(self.searched_intervals)}",
-                f"truncated_intervals: {converter_(self.truncated_intervals)}",
+                f"searched_intervals: {_convert(self.searched_intervals, precision)}",
+                f"truncated_intervals: {_convert(self.truncated_intervals, precision)}",
                 f"search_count: {self.search_count}",
                 f"detect_count: {self.detect_count}",
                 f"null_rv: {self.null_rv.dist.name}",
                 f"alternative: {self.alternative}",
-            ]
+            ],
         )
 
 
+class LoopType(Enum):
+    """An enumeration class for loop types."""
+
+    ITER = auto()
+    SAME = auto()
+
+
 class InfiniteLoopError(Exception):
-    pass
+    """Exception raised when infinite loop errors occur."""
+
+    def __init__(self, loop_type: LoopType) -> None:
+        """Initialize an InfiniteLoopError object."""
+        if loop_type == LoopType.ITER:
+            message = (
+                "The search was performed a specified times and may have fallen"
+                "into an infinite loop."
+            )
+        elif loop_type == LoopType.SAME:
+            message = "The search did not proceed and fell into an infinite loop."
+        super().__init__(message)
+
+
+class InvalidAlternativeError(Exception):
+    """Exception when raised invalid alternative is given."""
+
+    def __init__(self, alternative: str) -> None:
+        """Initialize an InvalidAlternativeError object."""
+        super().__init__(
+            f"'{alternative}' is not valid, must be 'two-sided', 'less', or 'greater'.",
+        )
 
 
 def _compute_pvalue(
-    F: float, alternative: Literal["two-sided", "less", "greater"]
+    cdf_value: float,
+    alternative: Literal["two-sided", "less", "greater"],
 ) -> float:
     """Compute the p-value from the CDF value.
 
     Args:
-        F (float): The CDF value.
+        cdf_value (float): The CDF value.
         alternative (Literal["two-sided", "less", "greater"]):
             Must be one of 'two-sided', 'less', or 'greater'.
             If 'two-sided', the p-value is computed for the two-tailed test.
@@ -123,25 +166,23 @@ def _compute_pvalue(
     """
     match alternative:
         case "two-sided" | "less":
-            return float(1.0 - F)
+            return float(1.0 - cdf_value)
         case "greater":
-            return float(F)
+            return float(cdf_value)
         case _:
-            raise ValueError(
-                "The alternative must be one of 'two-sided', 'less', or 'greater'."
-            )
+            raise InvalidAlternativeError(alternative)
 
 
 def _evaluate_pvalue_bounds(
-    inf_F: float,
-    sup_F: float,
+    inf_cdf: float,
+    sup_cdf: float,
     alternative: Literal["two-sided", "less", "greater"],
 ) -> tuple[float, float]:
-    """Evaluate the lower and upper bounds of the p-value from the lower and upper bounds of the CDF values.
+    """Evaluate the bounds of the p-value from the bounds of the CDF values.
 
     Args:
-        inf_F (float): The lower bound of the CDF value.
-        sup_F (float): The upper bound of the CDF value.
+        inf_cdf (float): The lower bound of the CDF value.
+        sup_cdf (float): The upper bound of the CDF value.
         alternative (Literal["two-sided", "less", "greater"]):
             Must be one of 'two-sided', 'less', or 'greater'.
             If 'two sided', the p-value is computed for the two-tailed test.
@@ -150,55 +191,48 @@ def _evaluate_pvalue_bounds(
 
     Returns:
         tuple[float, float]: The lower and upper bounds of the p-value.
-
-    Raises:
-        ValueError: If the lower bound of the CDF value is greater than the upper bound.
-        ValueError: If `n_jobs` is not a positive integer.
-        ValueError: If `alternative` is not one of 'two-sided', 'less', or 'greater'.
     """
-    if inf_F > sup_F:
-        raise ValueError(
-            "The lower bound of the CDF value must be less than the upper bound."
-        )
-
-    p_value_from_inf = _compute_pvalue(inf_F, alternative)
-    p_value_from_sup = _compute_pvalue(sup_F, alternative)
+    p_value_from_inf = _compute_pvalue(inf_cdf, alternative)
+    p_value_from_sup = _compute_pvalue(sup_cdf, alternative)
     inf_p, sup_p = np.sort([p_value_from_inf, p_value_from_sup])
     return inf_p, sup_p
 
 
 class SelectiveInference:
-    """An abstract class conducting selective inference
+    """An abstract class conducting selective inference.
 
     This class provides the basic structure for conducting selective inference.
     The user can inherit this class and implement the `__init__` method.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize a SelectiveInference object."""
-        self.stat = None
+        self.stat: float
 
-        self.a = None
-        self.b = None
+        self.a: np.ndarray
+        self.b: np.ndarray
 
-        self.support = None
-        self.limits = None
+        self.support: RealSubset
+        self.limits: RealSubset
 
-        self.null_rv = None
-        self.mode = None
-        self.alternative = None
+        self.null_rv: rv_continuous
+        self.mode: float
+        self.alternative: Literal["two-sided", "less", "greater"]
 
-        self.truncated_cdf = None
+        self.truncated_cdf: Callable[[float, RealSubset, bool], float]
 
     def inference(
         self,
         algorithm: Callable[
-            [np.ndarray, np.ndarray, float], tuple[Any, list[list[float]] | RealSubset]
+            [np.ndarray, np.ndarray, float],
+            tuple[Any, list[list[float]] | RealSubset],
         ],
         model_selector: Callable[[Any], bool],
         alternative: Literal["two-sided", "less", "greater"] | None = None,
         inference_mode: Literal[
-            "parametric", "exhaustive", "over_conditioning"
+            "parametric",
+            "exhaustive",
+            "over_conditioning",
         ] = "parametric",
         search_strategy: (
             Callable[[RealSubset], list[float]]
@@ -217,13 +251,13 @@ class SelectiveInference:
 
         Args:
             algorithm (Callable[[np.ndarray, np.ndarray, float], tuple[Any, list[list[float]] | RealSubset]]):
-                Callable function which takes two vectors a (np.ndarray) and b (np.ndarray),
-                and a scalar z (float), and returns a model (Any) and
-                intervals (list[list[float]] | RealSubset). For any point in the intervals,
-                the same model must be selected.
-            model_selector (Callable[[Any], bool]): Callable function which takes a model (Any)
-                and returns a boolean value, indicating whether the model is the same as
-                the selected model.
+                Callable function which takes two vectors a (np.ndarray) and
+                b (np.ndarray), and a scalar z (float), and returns a model (Any) and
+                intervals (list[list[float]] | RealSubset). For any point in
+                the intervals, the same model must be selected.
+            model_selector (Callable[[Any], bool]):
+                Callable function which takes a model (Any) and returns a boolean value,
+                indicating whether the model is the same as the selected model.
             alternative (Literal["two-sided", "less", "greater"] | None, optional):
                 Must be one of 'two-sided', 'less', or 'greater' or None.
                 If 'two-sided', we consider the two-tailed test.
@@ -232,18 +266,20 @@ class SelectiveInference:
                 If set to None, defaults to 'two-sided' for the normal distribution
                 and 'less' for the chi distribution. Defaults to None.
             inference_mode (Literal["parametric", "exhaustive", "over_conditioning"], optional):
-                Must be one of 'parametric', 'exhaustive',or 'over_conditioning'. Defaults to 'parametric'.
+                Must be one of 'parametric', 'exhaustive',or 'over_conditioning'.
+                Defaults to 'parametric'.
             search_strategy (Callable[[RealSubset], list[float]] | Literal["pi1", "pi2", "pi3", "parallel"], optional):
                 Callable function which takes a searched_intervals (RealSubset) and
                 returns next search points (list[float]).
                 If not callable, it must be one of 'pi1', 'pi2', 'pi3', or 'parallel'.
                 If 'pi1', the search strategy focuses on the truncated intervals.
                 If 'pi2', the search strategy focuses on the searched intervals.
-                If 'pi3', the search strategy focuses on the both of the truncated and searched intervals.
+                If 'pi3', the search strategy focuses on the both of the truncated
+                and searched intervals.
                 If 'parallel', the search strategy focuses on the both of the
                 truncated and searched intervals for the parallel computing.
-                This option is ignored when the inference_mode is 'exhaustive' or 'over_conditioning'.
-                Defaults to 'pi3'.
+                This option is ignored when the inference_mode is
+                'exhaustive' or 'over_conditioning'. Defaults to 'pi3'.
             termination_criterion (Callable[[RealSubset, RealSubset], bool] | Literal["precision", "decision"], optional):
                 Callable function which takes searched_intervals (RealSubset) and
                 truncated_intervals (RealSubset) and returns a boolean value, indicating
@@ -253,19 +289,23 @@ class SelectiveInference:
                 the precision in the computation of the p-value.
                 If 'decision', the termination criterion is based on
                 the decision result by the p-value.
-                This option is ignored when the inference_mode is 'exhaustive' or 'over_conditioning'.
-                Defaults to 'precision'.
-            max_iter (int, optional): Maximum number of iterations. Defaults to 100_000.
-            n_jobs (int, optional): Number of jobs to run in parallel. Defaults to 1.
-            step (float, optional): Step size for the search strategy. Defaults to 1e-6.
-            significance_level (float, optional): Significance level only for
-                the termination criterion 'decision'. Defaults to 0.05.
-            precision (float, optional): Precision only for the termination
-                criterion 'precision'. Defaults to 0.001.
+                This option is ignored when the inference_mode is 'exhaustive' or
+                'over_conditioning'. Defaults to 'precision'.
+            max_iter (int, optional):
+                Maximum number of iterations. Defaults to 100_000.
+            n_jobs (int, optional):
+                Number of jobs to run in parallel. Defaults to 1.
+            step (float, optional):
+                Step size for the search strategy. Defaults to 1e-6.
+            significance_level (float, optional):
+                Significance level only for the termination criterion 'decision'.
+                Defaults to 0.05.
+            precision (float, optional):
+                Precision only for the termination criterion 'precision'.
+                Defaults to 0.001.
 
         Raises:
-            InfiniteLoopError: If the search was performed a specified times and may have fallen into an infinite loop.
-            InfiniteLoopError: If the search did not proceed and fell into an infinite loop.
+            InfiniteLoopError: If the search falls into an infinite loop.
 
         Returns:
             SelectiveInferenceResult: The result of the selective inference.
@@ -277,11 +317,13 @@ class SelectiveInference:
 
         if not callable(search_strategy):
             search_strategy = self._create_search_strategy(
-                inference_mode, search_strategy
+                inference_mode,
+                search_strategy,
             )
         if not callable(termination_criterion):
             termination_criterion = self._create_termination_criterion(
-                inference_mode, termination_criterion
+                inference_mode,
+                termination_criterion,
             )
 
         if alternative is not None:
@@ -306,9 +348,12 @@ class SelectiveInference:
                         delayed(algorithm)(self.a, self.b, z) for z in z_list
                     )
 
-            for model, intervals in results:
-                if not isinstance(intervals, RealSubset):
-                    intervals = RealSubset(intervals)
+            for model, intervals_ in results:
+                intervals = (
+                    intervals_
+                    if isinstance(intervals_, RealSubset)
+                    else RealSubset(intervals_)
+                )
 
                 search_count += 1
                 searched_intervals = searched_intervals | intervals
@@ -318,13 +363,9 @@ class SelectiveInference:
                     truncated_intervals = truncated_intervals | intervals
 
             if search_count > max_iter:
-                raise InfiniteLoopError(
-                    "The search was performed a specified times and may have fallen into an infinite loop."
-                )
+                raise InfiniteLoopError(LoopType.ITER)
             if searched_intervals == before_searched_intervals:
-                raise InfiniteLoopError(
-                    "The search did not proceed and fell into an infinite loop."
-                )
+                raise InfiniteLoopError(LoopType.SAME)
             before_searched_intervals = searched_intervals
 
             if termination_criterion(searched_intervals, truncated_intervals):
@@ -340,7 +381,8 @@ class SelectiveInference:
             p_value = self._compute_pvalue(truncated_intervals)
 
         inf_p, sup_p = self._evaluate_pvalue_bounds(
-            searched_intervals, truncated_intervals
+            searched_intervals,
+            truncated_intervals,
         )
 
         return SelectiveInferenceResult(
@@ -366,15 +408,15 @@ class SelectiveInference:
             float: The p-value from the truncated intervals.
         """
         absolute = self.alternative == "two-sided"
-        F = self.truncated_cdf(self.stat, truncated_intervals, absolute)
-        return _compute_pvalue(F, self.alternative)
+        cdf_value = self.truncated_cdf(self.stat, truncated_intervals, absolute)
+        return _compute_pvalue(cdf_value, self.alternative)
 
     def _evaluate_pvalue_bounds(
         self,
         searched_intervals: RealSubset,
         truncated_intervals: RealSubset,
     ) -> tuple[float, float]:
-        """Evaluate the lower and upper bounds of the p-value from the given truncated and searched intervals.
+        """Evaluate the bounds of the p-value from the truncated and searched intervals.
 
         Args:
             searched_intervals (RealSubset): The searched intervals.
@@ -409,10 +451,10 @@ class SelectiveInference:
             if sup_min_finite not in self.limits and sup_max_finite not in self.limits:
                 sup_intervals = sup_intervals & self.limits
 
-        inf_F = self.truncated_cdf(self.stat, inf_intervals, absolute)
-        sup_F = self.truncated_cdf(self.stat, sup_intervals, absolute)
+        inf_f = self.truncated_cdf(self.stat, inf_intervals, absolute)
+        sup_f = self.truncated_cdf(self.stat, sup_intervals, absolute)
 
-        inf_p, sup_p = _evaluate_pvalue_bounds(inf_F, sup_F, self.alternative)
+        inf_p, sup_p = _evaluate_pvalue_bounds(inf_f, sup_f, self.alternative)
         return inf_p, sup_p
 
     def _create_search_strategy(
@@ -420,7 +462,7 @@ class SelectiveInference:
         inference_mode: Literal["parametric", "exhaustive", "over_conditioning"],
         search_strategy_name: Literal["pi1", "pi2", "pi3", "parallel"],
     ) -> Callable[[RealSubset], list[float]]:
-        """Create a search strategy
+        """Create a search strategy.
 
         Args:
             inference_mode (Literal["parametric", "exhaustive", "over_conditioning"]):
@@ -429,7 +471,8 @@ class SelectiveInference:
                 Must be one of 'pi1', 'pi2', 'pi3', or 'parallel'.
                 If 'pi1', the search strategy focuses on the truncated intervals.
                 If 'pi2', the search strategy focuses on the searched intervals.
-                If 'pi3', the search strategy focuses on the both of the truncated and searched intervals.
+                If 'pi3', the search strategy focuses on the both of
+                the truncated and searched intervals.
                 If 'parallel', the search strategy focuses on the both of the
                 truncated and searched intervals for the parallel computing.
 
@@ -445,21 +488,28 @@ class SelectiveInference:
                 )
 
             case "over_conditioning", _:
-                return lambda searched_intervals: [self.stat]
+                return lambda _: [self.stat]
 
             case "parametric", "pi1" | "pi2" | "pi3":
                 match search_strategy_name:
                     case "pi1":
                         target_value = self.stat
-                        metric = lambda z: np.abs(np.array(z) - self.stat)
+
+                        def metric(z: list[float]) -> list[float]:
+                            return np.abs(np.array(z) - self.stat)
                     case "pi2":
                         target_value = self.mode
-                        metric = lambda z: -self.null_rv.logpdf(np.array(z))
+
+                        def metric(z: list[float]) -> list[float]:
+                            return -self.null_rv.logpdf(np.array(z))
                     case "pi3":
                         target_value = self.stat
-                        metric = lambda z: -self.null_rv.logpdf(np.array(z))
+
+                        def metric(z: list[float]) -> list[float]:
+                            return -self.null_rv.logpdf(np.array(z))
 
                 def search_strategy(searched_intervals: RealSubset) -> list[float]:
+                    min_step = 1e-11
                     if searched_intervals.is_empty():
                         return [self.stat]
                     unsearched_intervals = self.support - searched_intervals
@@ -468,9 +518,10 @@ class SelectiveInference:
 
                     candidates = []
                     l, u = searched_intervals.find_interval_containing(target_value)
-                    for candidate, step in [(l, -self.step), (u, self.step)]:
+                    for candidate, step_ in [(l, -self.step), (u, self.step)]:
+                        step = step_
                         if candidate in unsearched_intervals and np.isfinite(candidate):
-                            while np.abs(step) > 1e-11:
+                            while np.abs(step) > min_step:
                                 if candidate + step in unsearched_intervals:
                                     candidates.append(candidate + step)
                                     break
@@ -500,12 +551,14 @@ class SelectiveInference:
                     while len(z_list) < num_points:
                         inner, outer = tail, tail + expand_width
                         intervals = unsearched_intervals & RealSubset(
-                            [[loc - outer, loc - inner], [loc + inner, loc + outer]]
+                            [[loc - outer, loc - inner], [loc + inner, loc + outer]],
                         )
                         for l, u in intervals.intervals:
                             if l + self.step < u:
                                 z_list += np.arange(
-                                    l + self.step, u, self.step
+                                    l + self.step,
+                                    u,
+                                    self.step,
                                 ).tolist()
                             else:
                                 z_list.append((l + u) / 2)
@@ -514,9 +567,6 @@ class SelectiveInference:
 
                 return search_strategy
 
-            case _, _:
-                raise ValueError("Invalid mode or name.")
-
         return search_strategy
 
     def _create_termination_criterion(
@@ -524,7 +574,7 @@ class SelectiveInference:
         inference_mode: Literal["parametric", "exhaustive", "over_conditioning"],
         termination_criterion_name: Literal["precision", "decision"],
     ) -> Callable[[RealSubset, RealSubset], bool]:
-        """Create a termination criterion
+        """Create a termination criterion.
 
         Args:
             inference_mode (Literal["parametric", "exhaustive", "over_conditioning"]):
@@ -543,22 +593,32 @@ class SelectiveInference:
             case "exhaustive", _:
 
                 def termination_criterion(
-                    searched_intervals: RealSubset, truncated_intervals: RealSubset
+                    searched_intervals: RealSubset,
+                    truncated_intervals: RealSubset,
                 ) -> bool:
+                    _ = truncated_intervals
                     return self.limits <= searched_intervals
 
                 return termination_criterion
 
             case "over_conditioning", _:
-                return lambda searched_intervals, truncated_intervals: True
+
+                def termination_criterion(
+                    searched_intervals: RealSubset,
+                    truncated_intervals: RealSubset,
+                ) -> bool:
+                    _ = searched_intervals, truncated_intervals
+                    return True
 
             case "parametric", "precision":
 
                 def termination_criterion(
-                    searched_intervals: RealSubset, truncated_intervals: RealSubset
+                    searched_intervals: RealSubset,
+                    truncated_intervals: RealSubset,
                 ) -> bool:
                     inf_p, sup_p = self._evaluate_pvalue_bounds(
-                        searched_intervals, truncated_intervals
+                        searched_intervals,
+                        truncated_intervals,
                     )
                     return np.abs(sup_p - inf_p) < self.precision
 
@@ -567,10 +627,12 @@ class SelectiveInference:
             case "parametric", "decision":
 
                 def termination_criterion(
-                    searched_intervals: RealSubset, truncated_intervals: RealSubset
+                    searched_intervals: RealSubset,
+                    truncated_intervals: RealSubset,
                 ) -> bool:
                     inf_p, sup_p = self._evaluate_pvalue_bounds(
-                        searched_intervals, truncated_intervals
+                        searched_intervals,
+                        truncated_intervals,
                     )
                     return (
                         inf_p > self.significance_level
