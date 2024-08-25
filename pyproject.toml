@@ -2,7 +2,7 @@
 name = "sicore"
 version = "2.0.0"
 description = "Core Package for Selective Inference"
-readme = "README.md"
+readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.12"
 dependencies = [
     "numpy>=1.26.4,<2.0.0",
@@ -11,10 +11,20 @@ dependencies = [
     "scipy>=1.14.0",
     "joblib>=1.4.2",
 ]
+authors = [{ name = "Takeuchi Lab" }]
+maintainers = [{ name = "Tomohiro Shiraishi", email = "shirara1016@gmail.com" }]
+license = "MIT"
+
+[project.urls]
+documentation = "https://shirara1016.github.io/sicore/"
+repository = "https://github.com/shirara1016/sicore"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.sdist]
+exclude = ["tests/", "docs/", "docs_make/", ".vscode"]
 
 [tool.uv]
 dev-dependencies = [
@@ -27,16 +37,19 @@ dev-dependencies = [
     "torch>=2.4.0",
 ]
 
+[tool.ruff]
+extend-include = ["*.ipynb"]
+
 [tool.ruff.lint]
 exclude = [".git", ".mypy_cache", ".ruff_cache", ".venv"]
 select = ["ALL"]
 ignore = [
-    "E741", # ambiguous variable name
+    "E741",    # ambiguous variable name
     "PLR0912", # too many branches
     "PLR0913", # too many arguments in function definition
     "PLR0915", # too many statements
-    "C901", # function too complex
-    "E501", # line too long
+    "C901",    # function too complex
+    "E501",    # line too long
 ]
 
 [tool.ruff.lint.pydocstyle]
@@ -44,10 +57,18 @@ convention = "google"
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*.py" = [
-    "S101", # use of assert
-    "FBT001" # boolean argument
-    ]
+    "S101",   # use of assert
+    "FBT001", # boolean argument
+]
 "tests/test_main_inference.py" = [
     "N803", # argument name should be lowercase
     "N806", # variable in function should be lowercase
 ]
+"*.ipynb" = [
+    "N803",   # argument name should be lowercase
+    "N806",   # variable in function should be lowercase
+    "T201",   # remove print statements
+    "ERA001", # remove commented out code
+]
+
+# [tool.mypy]

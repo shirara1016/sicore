@@ -1,12 +1,7 @@
-sicore.egg-info
-build
-*__pycache__*
 .mypy_cache
 .pytest_cache
 .ruff_cache
 .venv
+*__pycache__*
 
 *.ipynb
-
-source/
-si4onnx/
