@@ -7,6 +7,3 @@ build
 .venv
 
 *.ipynb
-
-source/
-si4onnx/
