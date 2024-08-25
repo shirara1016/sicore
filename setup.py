@@ -1,10 +1,12 @@
-from setuptools import find_packages, setup
+"""Setup script for the sicore package."""
 
-with open("README.md", "r", encoding="utf8") as f:
+from pathlib import Path
+
+from setuptools import find_packages, setup  # type: ignore[import]
+
+with Path("README.md").open(encoding="utf8") as f:
     readme = f.read()
 
-with open("LICENSE", "r", encoding="utf8") as f:
-    license = f.read()
 
 setup(
     name="sicore",
@@ -21,7 +23,8 @@ setup(
         "mpmath>=1.3.0",
         "matplotlib>=3.9.1",
         "scipy>=1.14.0",
+        "joblib>=1.4.2",
     ],
-    python_requires=">=3.10",
+    python_requires=">=3.12",
     license="MIT License",
 )
