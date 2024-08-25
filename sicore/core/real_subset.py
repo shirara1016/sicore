@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Self
-
 import numpy as np
+from typing_extensions import Self
 
 
 def simplify(intervals: np.ndarray, tol: float = 1e-10) -> np.ndarray:
@@ -240,7 +239,7 @@ class RealSubset:
         """Update the subset by taking the intersection.
 
         Args:
-            other (RealSubset): Another subset to take intersection with.
+            other (Self): Another subset to take intersection with.
 
         Returns:
             Self: Updated subset with the intersection of itself and another subset.
@@ -282,7 +281,7 @@ class RealSubset:
         """Update the subset by taking the difference.
 
         Args:
-            other (RealSubset): Another subset to take difference with.
+            other (Self): Another subset to take difference with.
 
         Returns:
             Self: Updated subset with the difference of itself with another subset.
@@ -324,7 +323,7 @@ class RealSubset:
         """Update the subset by taking the symmetric difference.
 
         Args:
-            other (RealSubset): Another subset to take symmetric difference with.
+            other (Self): Another subset to take symmetric difference with.
 
         Returns:
             Self: Updated subset with the symmetric difference of itself
