@@ -14,9 +14,9 @@ from .utils.figure import (
 )
 from .utils.intervals import (
     complement,
-    degree_one_polynomials_below_zero,
     difference,
     intersection,
+    linear_polynomials_below_zero,
     polynomial_below_zero,
     polytope_below_zero,
     symmetric_difference,
@@ -43,7 +43,7 @@ __all__ = [
     "symmetric_difference",
     "polynomial_below_zero",
     "polytope_below_zero",
-    "degree_one_polynomials_below_zero",
+    "linear_polynomials_below_zero",
     "generate_non_gaussian_rv",
     "OneVector",
     "construct_projection_matrix",
