@@ -61,7 +61,7 @@ def polynomial_below_zero(
         coef = np.array(poly_or_coef).tolist()
 
     coef = [0 if -tol < c_ < tol else c_ for c_ in coef]
-    poly = Polynomial(coef)
+    poly = Polynomial(coef).trim()
 
     if poly.degree() == 0:
         if poly.coef[0] <= 0:

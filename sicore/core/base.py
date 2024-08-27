@@ -375,7 +375,7 @@ class SelectiveInference:
             np.isfinite(truncated_intervals.intervals)
         ]
         min_finite, max_finite = np.min(finites), np.max(finites)
-        if min_finite not in self.limits and max_finite not in self.limits:
+        if min_finite not in self.limits or max_finite not in self.limits:
             p_value = self._compute_pvalue(truncated_intervals & self.limits)
         else:
             p_value = self._compute_pvalue(truncated_intervals)
@@ -442,13 +442,13 @@ class SelectiveInference:
         inf_finites = inf_intervals.intervals[np.isfinite(inf_intervals.intervals)]
         if len(inf_finites) != 0:
             inf_min_finite, inf_max_finite = np.min(inf_finites), np.max(inf_finites)
-            if inf_min_finite not in self.limits and inf_max_finite not in self.limits:
+            if inf_min_finite not in self.limits or inf_max_finite not in self.limits:
                 inf_intervals = inf_intervals & self.limits
 
         sup_finites = sup_intervals.intervals[np.isfinite(sup_intervals.intervals)]
         if len(sup_finites) != 0:
             sup_min_finite, sup_max_finite = np.min(sup_finites), np.max(sup_finites)
-            if sup_min_finite not in self.limits and sup_max_finite not in self.limits:
+            if sup_min_finite not in self.limits or sup_max_finite not in self.limits:
                 sup_intervals = sup_intervals & self.limits
 
         inf_f = self.truncated_cdf(self.stat, inf_intervals, absolute)
