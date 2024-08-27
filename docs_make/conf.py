@@ -8,7 +8,7 @@
 import sys
 from pathlib import Path
 
-sys.path.insert(0, Path("../").resolve())
+sys.path.insert(0, str(Path("../").resolve()))
 
 project = "sicore"
 project_copyright = "2024, Takeuchi-Lab"
