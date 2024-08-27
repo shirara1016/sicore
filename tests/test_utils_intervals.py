@@ -2,13 +2,14 @@
 
 import numpy as np
 import pytest
+from numpy.polynomial import Polynomial
 from numpy.testing import assert_allclose
 
 from sicore.utils.intervals import (
     complement,
-    degree_one_polynomials_below_zero,
     difference,
     intersection,
+    linear_polynomials_below_zero,
     polynomial_below_zero,
     polytope_below_zero,
     symmetric_difference,
@@ -132,23 +133,23 @@ def test_symmetric_difference(
         ([0.0], [[-np.inf, np.inf]]),
         ([-1.0], [[-np.inf, np.inf]]),
         ([1.0, 1.0], [[-np.inf, -1.0]]),
-        ([-1.0, 1.0], [[1.0, np.inf]]),
-        ([1.0, -2.0, 2.0], []),
+        ([1.0, -1.0], [[1.0, np.inf]]),
+        ([2.0, -2.0, 1.0], []),
         ([1.0, -2.0, 1.0], []),
-        ([1.0, 0.0, -1.0], [[-1.0, 1.0]]),
-        ([-1.0, 0.0, 1.0], [[-np.inf, -1.0], [1.0, np.inf]]),
+        ([-1.0, 0.0, 1.0], [[-1.0, 1.0]]),
+        ([1.0, 0.0, -1.0], [[-np.inf, -1.0], [1.0, np.inf]]),
         ([-1.0, 2.0, -1.0], [[-np.inf, np.inf]]),
-        ([-1.0, 2.0, -2.0], [[-np.inf, np.inf]]),
-        ([1.0, -6.0, 11.0, -6.0], [[-np.inf, 1.0], [2.0, 3.0]]),
-        ([1.0, -3.0, 4.0, -2.0], [[-np.inf, 1.0]]),
-        ([1.0, 0.0, 0.0, 0.0], [[-np.inf, 0.0]]),
+        ([-2.0, 2.0, -1.0], [[-np.inf, np.inf]]),
+        ([-6.0, 11.0, -6.0, 1.0], [[-np.inf, 1.0], [2.0, 3.0]]),
+        ([-2.0, 4.0, -3.0, 1.0], [[-np.inf, 1.0]]),
+        ([0.0, 0.0, 0.0, 1.0], [[-np.inf, 0.0]]),
     ],
 )
 def test_polynomial_below_zero(coef: list[float], expected: list[list[float]]) -> None:
     """Test the polynomial below zero function."""
     assert_allclose(polynomial_below_zero(coef), expected)
 
-    poly = np.poly1d(coef)
+    poly = Polynomial(coef)
     assert_allclose(polynomial_below_zero(poly), expected)
 
 
@@ -190,11 +191,11 @@ def test_polytope_below_zero(
         ([5.0, 2.0], [-1.0, 0.0], []),
     ],
 )
-def test_degree_one_polynomials_below_zero(
+def test_linear_polynomials_below_zero(
     a: list[float],
     b: list[float],
     expected: list[list[float]],
 ) -> None:
     """Test the degree one polynomials below zero function."""
     a_, b_ = np.array(a), np.array(b)
-    assert_allclose(degree_one_polynomials_below_zero(a_, b_), expected)
+    assert_allclose(linear_polynomials_below_zero(a_, b_), expected)

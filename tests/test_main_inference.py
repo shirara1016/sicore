@@ -10,7 +10,7 @@ from sicore.core.base import SelectiveInferenceResult
 from sicore.core.real_subset import NotBelongToSubsetError, RealSubset
 from sicore.main.inference import SelectiveInferenceChi, SelectiveInferenceNorm
 from sicore.utils.constructor import construct_projection_matrix
-from sicore.utils.intervals import degree_one_polynomials_below_zero
+from sicore.utils.intervals import linear_polynomials_below_zero
 
 
 class MarginalScreening:
@@ -65,7 +65,7 @@ class MarginalScreening:
         a, b = self.X.T @ a, self.X.T @ b
 
         signs = np.sign(a + b * z)
-        intervals_ = degree_one_polynomials_below_zero(-signs * a, -signs * b)
+        intervals_ = linear_polynomials_below_zero(-signs * a, -signs * b)
         intervals = RealSubset(intervals_)
         a, b = signs * a, signs * b
 
@@ -76,7 +76,7 @@ class MarginalScreening:
         inactive_set = indexes[self.k :]
 
         for active in active_set:
-            temp_intervals = degree_one_polynomials_below_zero(
+            temp_intervals = linear_polynomials_below_zero(
                 a[inactive_set] - a[active],
                 b[inactive_set] - b[active],
             )
