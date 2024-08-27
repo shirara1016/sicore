@@ -1118,13 +1118,12 @@ Defaults to True.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sicore.polynomial_below_zero">
-<span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">polynomial_below_zero</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">poly_or_coef</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">poly1d</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-10</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#sicore.polynomial_below_zero" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">polynomial_below_zero</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">poly_or_coef</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Polynomial</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-10</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#sicore.polynomial_below_zero" title="Link to this definition">¶</a></dt>
 <dd><p>Compute intervals where a given polynomial is below zero.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>poly_or_coef</strong> (<em>np.poly1d</em><em> | </em><em>np.ndarray</em><em> | </em><em>list</em><em>[</em><em>float</em><em>]</em>) – Polynomial or its
-coefficients e.g. [a, b, c] for a * z**2 + b * z + c.</p></li>
+<li><p><strong>poly_or_coef</strong> (<em>Polynomial</em><em> | </em><em>np.ndarray</em><em> | </em><em>list</em><em>[</em><em>float</em><em>]</em>) – Polynomial or its coefficients e.g. [a, b, c] for a + b * z + c * z ** 2.</p></li>
 <li><p><strong>tol</strong> (<em>float</em><em>, </em><em>optional</em>) – Tolerance error parameter. It is recommended to set a
 large value (about 1e-5) for high order polynomial (&gt;= 3) or a polynomial
 with multiple root. Defaults to 1e-10.</p></li>
@@ -1167,20 +1166,20 @@ with multiple root. Defaults to 1e-10.</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="sicore.degree_one_polynomials_below_zero">
-<span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">degree_one_polynomials_below_zero</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#sicore.degree_one_polynomials_below_zero" title="Link to this definition">¶</a></dt>
-<dd><p>Compute intervals where given degree one polynomials are all below zero.</p>
-<p>The degree one polynomials are defined as the set of z such that
+<dt class="sig sig-object py" id="sicore.linear_polynomials_below_zero">
+<span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">linear_polynomials_below_zero</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#sicore.linear_polynomials_below_zero" title="Link to this definition">¶</a></dt>
+<dd><p>Compute intervals where given linear polynomials are all below zero.</p>
+<p>The linear polynomials are defined as the set of z such that
 a_i + b_i * z &lt; 0.0 for all i in [len(a)].</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>a</strong> (<em>np.ndarray</em>) – Constant terms of the degree one polynomials.</p></li>
-<li><p><strong>b</strong> (<em>np.ndarray</em>) – Coefficients of the degree one polynomials.</p></li>
+<li><p><strong>a</strong> (<em>np.ndarray</em>) – Constant terms of the linear polynomials.</p></li>
+<li><p><strong>b</strong> (<em>np.ndarray</em>) – Coefficients of the linear polynomials.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Intervals where the degree one polynomials are below zero.</p>
+<dd class="field-even"><p>Intervals where the linear polynomials are all below zero.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list[list[float]]</p>
@@ -1381,7 +1380,7 @@ Defaults to False.</p></li>
 <li><a class="reference internal" href="#sicore.symmetric_difference"><code class="docutils literal notranslate"><span class="pre">symmetric_difference()</span></code></a></li>
 <li><a class="reference internal" href="#sicore.polynomial_below_zero"><code class="docutils literal notranslate"><span class="pre">polynomial_below_zero()</span></code></a></li>
 <li><a class="reference internal" href="#sicore.polytope_below_zero"><code class="docutils literal notranslate"><span class="pre">polytope_below_zero()</span></code></a></li>
-<li><a class="reference internal" href="#sicore.degree_one_polynomials_below_zero"><code class="docutils literal notranslate"><span class="pre">degree_one_polynomials_below_zero()</span></code></a></li>
+<li><a class="reference internal" href="#sicore.linear_polynomials_below_zero"><code class="docutils literal notranslate"><span class="pre">linear_polynomials_below_zero()</span></code></a></li>
 <li><a class="reference internal" href="#sicore.generate_non_gaussian_rv"><code class="docutils literal notranslate"><span class="pre">generate_non_gaussian_rv()</span></code></a></li>
 <li><a class="reference internal" href="#sicore.OneVector"><code class="docutils literal notranslate"><span class="pre">OneVector</span></code></a><ul>
 <li><a class="reference internal" href="#sicore.OneVector.get"><code class="docutils literal notranslate"><span class="pre">OneVector.get()</span></code></a></li>
