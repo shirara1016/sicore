@@ -1,5 +1,7 @@
 """Module containing the classes for plotting figures."""
 
+from pathlib import Path
+
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import ecdf, uniform  # type: ignore[import]
@@ -88,6 +90,19 @@ class SummaryFigure:
         title (str | None, optional): Title of the figure. Defaults to None.
         xlabel (str | None, optional): Label of x-axis. Defaults to None.
         ylabel (str | None, optional): Label of y-axis. Defaults to None.
+
+    Examples:
+        >>> fig = SummaryFigure(xlabel='Image Size', ylabel="Type I Error Rate")
+        >>> fig.add_fpr(0.053, "proposed", "64")
+        >>> fig.add_fpr(0.048, "proposed", "256")
+        >>> fig.add_fpr(0.046, "proposed", "1024")
+        >>> fig.add_fpr(0.052, "proposed", "4096")
+        >>> fig.add_fpr(0.413, "naive", "64")
+        >>> fig.add_fpr(0.821, "naive", "256")
+        >>> fig.add_fpr(0.483, "naive", "1024")
+        >>> fig.add_fpr(0.418, "naive", "4096")
+        >>> fig.add_red_line(0.05, "significance level")
+        >>> fig.plot(filepath="fpr.pdf", fontsize=16)
     """
 
     def __init__(
@@ -107,9 +122,8 @@ class SummaryFigure:
         self.xlabel = xlabel
         self.ylabel = ylabel
         self.data: dict[str, list] = {}
-        self.red_line = False
 
-    def _add_value(self, value: float, label: str, xloc: str | float) -> None:
+    def add_value(self, value: float, label: str, xloc: str | float) -> None:
         """Add a value to the figure.
 
         Args:
@@ -122,6 +136,7 @@ class SummaryFigure:
         """
         self.data.setdefault(label, [])
         self.data[label].append((xloc, value))
+        self.red_lines: list[tuple[float, str | None]] = []
 
     def add_results(
         self,
@@ -164,12 +179,21 @@ class SummaryFigure:
             bonferroni=bonferroni,
             log_num_comparisons=log_num_comparisons,
         )
-        self._add_value(value, label, xloc)
+        self.add_value(value, label, xloc)
+
+    def add_red_line(self, value: float = 0.05, label: str | None = None) -> None:
+        """Add a red line at the specified value.
+
+        Args:
+            value (float): Value to be plotted as a red line. Defaults to 0.05.
+            label (str | None): Label of the red line. Defaults to None.
+        """
+        self.red_lines.append((value, label))
 
     def plot(
         self,
-        fname: str | None = None,
-        ylim: tuple[float, float] = (0.0, 1.0),
+        filepath: Path | str | None = None,
+        ylim: tuple[float, float] | None = (0.0, 1.0),
         yticks: list[float] | None = None,
         legend_loc: str | None = None,
         fontsize: int = 10,
@@ -177,11 +201,12 @@ class SummaryFigure:
         """Plot the figure.
 
         Args:
-            fname (str | None, optional):
-                File name. If `fname` is given, the plotted figure
+            filepath (Path | str | None, optional):
+                File path. If `filepath` is given, the plotted figure
                 will be saved as a file. Defaults to None.
-            ylim (tuple[float, float], optional):
-                Range of y-axis. Defaults to (0.0, 1.0).
+            ylim (tuple[float, float] | None, optional):
+                Range of y-axis. Defaults to None.
+                If None, range of y-axis will be automatically determined.
             yticks (list[float] | None, optional):
                 List of y-ticks. Defaults to None.
                 If None, y-ticks will be automatically determined.
@@ -200,26 +225,35 @@ class SummaryFigure:
             plt.ylabel(self.ylabel)
 
         for label, xloc_value_list in self.data.items():
-            xlocs_, values_ = zip(*xloc_value_list, strict=False)
+            xlocs_, values_ = zip(*xloc_value_list, strict=True)
             xlocs, values = np.array(xlocs_), np.array(values_)
             if not all(isinstance(xloc, (str)) for xloc in xlocs):
                 values = values[np.argsort(xlocs)]
                 xlocs = np.sort(xlocs)
             plt.plot(xlocs, values, label=label, marker="x")
 
-        if self.red_line:
-            plt.plot(xlocs, [0.05] * len(xlocs), color="red", linestyle="--", lw=0.5)
-
+        for value, label_ in self.red_lines:
+            plt.plot(
+                xlocs,
+                [value] * len(xlocs),
+                color="red",
+                linestyle="--",
+                lw=0.5,
+                label=label_,
+            )
         plt.xticks(xlocs)
-        plt.ylim(ylim)
+
+        if ylim is not None:
+            plt.ylim(ylim)
         if yticks is not None:
             plt.yticks(yticks)
 
         plt.legend(frameon=False, loc=legend_loc)
-        if fname is None:
+        if filepath is None:
             plt.show()
         else:
-            plt.savefig(fname, transparent=True, bbox_inches="tight", pad_inches=0)
+            filename = str(filepath) if isinstance(filepath, Path) else filepath
+            plt.savefig(filename, transparent=True, bbox_inches="tight", pad_inches=0)
         plt.clf()
         plt.close()
 
@@ -270,7 +304,7 @@ class FprFigure(SummaryFigure):
             label (str): Label corresponding to the FPR value.
             xloc (str | float): Location of the FPR value.
         """
-        self._add_value(fpr, label, xloc)
+        self.add_value(fpr, label, xloc)
 
 
 class TprFigure(SummaryFigure):
@@ -308,4 +342,4 @@ class TprFigure(SummaryFigure):
             label (str): Label corresponding to the TPR value.
             xloc (str | float): Location of the TPR value.
         """
-        self._add_value(tpr, label, xloc)
+        self.add_value(tpr, label, xloc)
