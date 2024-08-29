@@ -19,13 +19,13 @@ gennormsteep = gennorm
 
 
 def _standardize(
-    rv_name: Literal["t", "skewnorm", "gennormsteep", "gennormflat", "exponnorm"],
+    rv_name: Literal["skewnorm", "exponnorm", "gennormsteep", "gennormflat", "t"],
     param: float,
 ) -> rv_continuous:
     """Standardize a random variable.
 
     Args:
-        rv_name (Literal["t", "skewnorm", "gennormsteep", "gennormflat", "exponnorm"]):
+        rv_name (Literal["skewnorm","exponnorm", "gennormsteep", "gennormflat", "t"]):
             Random variable name to be standardized.
         param (float): Parameter of a given random variable to be standardized.
 
@@ -56,7 +56,7 @@ def _wasserstein_distance(rv: rv_continuous) -> float:
 
 
 def _binary_search(
-    rv_name: Literal["t", "skewnorm", "gennormsteep", "gennormflat", "exponnorm"],
+    rv_name: Literal["skewnorm", "exponnorm", "gennormsteep", "gennormflat", "t"],
     distance: float,
 ) -> float:
     """Binary search the parameter for the specified random variable family.
@@ -65,7 +65,7 @@ def _binary_search(
     has the specified Wasserstein distance from the standard gaussian distribution.
 
     Args:
-        rv_name (Literal["t", "skewnorm", "gennormsteep", "gennormflat", "exponnorm"]):
+        rv_name (Literal["skewnorm","exponnorm", "gennormsteep", "gennormflat", "t"]):
             Random variable name.
         distance (float): Wasserstein distance from the standard gaussian distribution.
 
@@ -81,7 +81,7 @@ def _binary_search(
 
 
 def generate_non_gaussian_rv(
-    rv_name: Literal["t", "skewnorm", "gennormsteep", "gennormflat", "exponnorm"],
+    rv_name: Literal["skewnorm", "exponnorm", "gennormsteep", "gennormflat", "t"],
     distance: float,
 ) -> rv_continuous:
     """Generate a random variable from the specified random variable family.
@@ -91,7 +91,7 @@ def generate_non_gaussian_rv(
     Wasserstein distance from the standard gaussian distribution.
 
     Args:
-        rv_name (Literal["t", "skewnorm", "gennormsteep", "gennormflat", "exponnorm"]):
+        rv_name (Literal["skewnorm","exponnorm", "gennormsteep", "gennormflat", "t"]):
             Random variable name to be generated.
         distance (float): Wasserstein distance between the generated random variable
             and the standard gaussian distribution. It is strongly
