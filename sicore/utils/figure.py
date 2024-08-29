@@ -4,7 +4,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.stats import ecdf, uniform  # type: ignore[import]
+from scipy.stats import ecdf, norm, uniform  # type: ignore[import]
 
 from sicore.core.base import SelectiveInferenceResult
 from sicore.utils.evaluation import rejection_rate
@@ -121,9 +121,15 @@ class SummaryFigure:
         self.title = title
         self.xlabel = xlabel
         self.ylabel = ylabel
-        self.data: dict[str, list] = {}
+        self.data: dict[str, list[tuple[str | float, float, float | None]]] = {}
+        self.red_lines: list[tuple[float, str | None]] = []
 
-    def add_value(self, value: float, label: str, xloc: str | float) -> None:
+    def add_value(
+        self,
+        value: float,
+        label: str,
+        xloc: str | float,
+    ) -> None:
         """Add a value to the figure.
 
         Args:
@@ -135,8 +141,7 @@ class SummaryFigure:
                 If float, it will be the exact location.
         """
         self.data.setdefault(label, [])
-        self.data[label].append((xloc, value))
-        self.red_lines: list[tuple[float, str | None]] = []
+        self.data[label].append((xloc, value, None))
 
     def add_results(
         self,
@@ -144,6 +149,7 @@ class SummaryFigure:
         label: str,
         xloc: str | float,
         alpha: float = 0.05,
+        confidence_level: float | None = None,
         *,
         naive: bool = False,
         bonferroni: bool = False,
@@ -159,6 +165,9 @@ class SummaryFigure:
             xloc (str | float):
                 Location of the results.
             alpha (float, optional): Significance level. Defaults to 0.05.
+            confidence_level (float | None, optional): Confidence level
+                used to compute the confidence interval for the rejection rate.
+                If None, no confidence interval will be displayed. Defaults to None.
             naive (bool, optional):
                 Whether to compute rejection rate of naive inference.
                 This option is available only when results are
@@ -179,7 +188,13 @@ class SummaryFigure:
             bonferroni=bonferroni,
             log_num_comparisons=log_num_comparisons,
         )
-        self.add_value(value, label, xloc)
+        if confidence_level is None:
+            self.add_value(value, label, xloc)
+        else:
+            scale = norm.ppf(1 - (1 - confidence_level) / 2)
+            error = scale * np.sqrt(value * (1 - value) / len(results))
+            self.data.setdefault(label, [])
+            self.data[label].append((xloc, value, error))
 
     def add_red_line(self, value: float = 0.05, label: str | None = None) -> None:
         """Add a red line at the specified value.
@@ -217,20 +232,30 @@ class SummaryFigure:
                 Font size of the legend. Defaults to 10.
         """
         plt.rcParams.update({"font.size": fontsize})
-        if self.title is not None:
-            plt.title(self.title)
-        if self.xlabel is not None:
-            plt.xlabel(self.xlabel)
-        if self.ylabel is not None:
-            plt.ylabel(self.ylabel)
 
-        for label, xloc_value_list in self.data.items():
-            xlocs_, values_ = zip(*xloc_value_list, strict=True)
-            xlocs, values = np.array(xlocs_), np.array(values_)
+        plt.title(self.title if self.title is not None else "")
+        plt.xlabel(self.xlabel if self.xlabel is not None else "")
+        plt.ylabel(self.ylabel if self.ylabel is not None else "")
+
+        for label, items in self.data.items():
+            xlocs, values, errors = map(np.array, zip(*items, strict=True))
             if not all(isinstance(xloc, (str)) for xloc in xlocs):
                 values = values[np.argsort(xlocs)]
+                errors = errors[np.argsort(xlocs)]
                 xlocs = np.sort(xlocs)
-            plt.plot(xlocs, values, label=label, marker="x")
+            if any(error is None for error in errors):
+                plt.plot(xlocs, values, label=label, marker="x")
+            else:
+                plt.errorbar(
+                    xlocs,
+                    values,
+                    errors,
+                    fmt="o-",
+                    capsize=3,
+                    markersize=4,
+                    label=label,
+                    elinewidth=1.2,
+                )
 
         for value, label_ in self.red_lines:
             plt.plot(
@@ -241,19 +266,38 @@ class SummaryFigure:
                 lw=0.5,
                 label=label_,
             )
+
         plt.xticks(xlocs)
+        plt.ylim(ylim)
+        plt.yticks(yticks)
 
-        if ylim is not None:
-            plt.ylim(ylim)
-        if yticks is not None:
-            plt.yticks(yticks)
+        handles_, labels_ = plt.gca().get_legend_handles_labels()
+        handles, labels = zip(
+            *(
+                [
+                    (handle, label)
+                    for handle, label in zip(handles_, labels_, strict=True)
+                    if not isinstance(handle, plt.Line2D)
+                ]
+                + [
+                    (handle, label)
+                    for handle, label in zip(handles_, labels_, strict=True)
+                    if isinstance(handle, plt.Line2D)
+                ]
+            ),
+            strict=False,
+        )
+        plt.legend(handles, labels, loc=legend_loc, frameon=False)
 
-        plt.legend(frameon=False, loc=legend_loc)
         if filepath is None:
             plt.show()
         else:
-            filename = str(filepath) if isinstance(filepath, Path) else filepath
-            plt.savefig(filename, transparent=True, bbox_inches="tight", pad_inches=0)
+            plt.savefig(
+                str(filepath) if isinstance(filepath, Path) else filepath,
+                transparent=True,
+                bbox_inches="tight",
+                pad_inches=0,
+            )
         plt.clf()
         plt.close()
 
