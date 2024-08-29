@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" />
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
-        <title>sicore 2.0.0 documentation</title>
+        <title>sicore 2.0.4 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
@@ -166,7 +166,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="#"><div class="brand">sicore 2.0.0 documentation</div></a>
+      <a href="#"><div class="brand">sicore 2.0.4 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -190,7 +190,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="#">
   
   
-  <span class="sidebar-brand-text">sicore 2.0.0 documentation</span>
+  <span class="sidebar-brand-text">sicore 2.0.4 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -303,7 +303,7 @@ Defaults to 0.001.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>InfiniteLoopError</strong> – If the search falls into an infinite loop.</p>
+<dd class="field-even"><p><a class="reference internal" href="#sicore.InfiniteLoopError" title="sicore.InfiniteLoopError"><strong>InfiniteLoopError</strong></a> – If the search falls into an infinite loop.</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The result of the selective inference.</p>
@@ -518,6 +518,13 @@ alternative hypothesis.</p>
 
 </dd></dl>
 
+<dl class="py exception">
+<dt class="sig sig-object py" id="sicore.InfiniteLoopError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">InfiniteLoopError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loop_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">LoopType</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sicore.InfiniteLoopError" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Exception raised when infinite loop errors occur.</p>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="sicore.rejection_rate">
 <span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">rejection_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#sicore.SelectiveInferenceResult" title="sicore.core.base.SelectiveInferenceResult"><span class="pre">SelectiveInferenceResult</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">naive</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bonferroni</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_num_comparisons</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#sicore.rejection_rate" title="Link to this definition">¶</a></dt>
@@ -601,6 +608,38 @@ be saved as a file. Defaults to None.</p></li>
 </ul>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span> <span class="o">=</span> <span class="n">SummaryFigure</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s1">&#39;Image Size&#39;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Type I Error Rate&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_fpr</span><span class="p">(</span><span class="mf">0.053</span><span class="p">,</span> <span class="s2">&quot;proposed&quot;</span><span class="p">,</span> <span class="s2">&quot;64&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_fpr</span><span class="p">(</span><span class="mf">0.048</span><span class="p">,</span> <span class="s2">&quot;proposed&quot;</span><span class="p">,</span> <span class="s2">&quot;256&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_fpr</span><span class="p">(</span><span class="mf">0.046</span><span class="p">,</span> <span class="s2">&quot;proposed&quot;</span><span class="p">,</span> <span class="s2">&quot;1024&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_fpr</span><span class="p">(</span><span class="mf">0.052</span><span class="p">,</span> <span class="s2">&quot;proposed&quot;</span><span class="p">,</span> <span class="s2">&quot;4096&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_fpr</span><span class="p">(</span><span class="mf">0.413</span><span class="p">,</span> <span class="s2">&quot;naive&quot;</span><span class="p">,</span> <span class="s2">&quot;64&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_fpr</span><span class="p">(</span><span class="mf">0.821</span><span class="p">,</span> <span class="s2">&quot;naive&quot;</span><span class="p">,</span> <span class="s2">&quot;256&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_fpr</span><span class="p">(</span><span class="mf">0.483</span><span class="p">,</span> <span class="s2">&quot;naive&quot;</span><span class="p">,</span> <span class="s2">&quot;1024&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_fpr</span><span class="p">(</span><span class="mf">0.418</span><span class="p">,</span> <span class="s2">&quot;naive&quot;</span><span class="p">,</span> <span class="s2">&quot;4096&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_red_line</span><span class="p">(</span><span class="mf">0.05</span><span class="p">,</span> <span class="s2">&quot;significance level&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="s2">&quot;fpr.pdf&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="sicore.SummaryFigure.add_value">
+<span class="sig-name descname"><span class="pre">add_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xloc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#sicore.SummaryFigure.add_value" title="Link to this definition">¶</a></dt>
+<dd><p>Add a value to the figure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<em>float</em>) – Value to be plotted.</p></li>
+<li><p><strong>label</strong> (<em>str</em>) – Label corresponding to the value.
+To note that the label well be shown in the given order.</p></li>
+<li><p><strong>xloc</strong> (<em>str</em><em> | </em><em>float</em>) – Location of the value.
+If str, it will be equally spaced in the given order.
+If float, it will be the exact location.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sicore.SummaryFigure.add_results">
 <span class="sig-name descname"><span class="pre">add_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#sicore.SelectiveInferenceResult" title="sicore.core.base.SelectiveInferenceResult"><span class="pre">SelectiveInferenceResult</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xloc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">naive</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bonferroni</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_num_comparisons</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#sicore.SummaryFigure.add_results" title="Link to this definition">¶</a></dt>
@@ -627,15 +666,30 @@ Defaults to 0.0, which means no correction.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="sicore.SummaryFigure.add_red_line">
+<span class="sig-name descname"><span class="pre">add_red_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#sicore.SummaryFigure.add_red_line" title="Link to this definition">¶</a></dt>
+<dd><p>Add a red line at the specified value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<em>float</em>) – Value to be plotted as a red line. Defaults to 0.05.</p></li>
+<li><p><strong>label</strong> (<em>str</em><em> | </em><em>None</em>) – Label of the red line. Defaults to None.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="sicore.SummaryFigure.plot">
-<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(0.0,</span> <span class="pre">1.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yticks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_loc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fontsize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#sicore.SummaryFigure.plot" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(0.0,</span> <span class="pre">1.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yticks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_loc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fontsize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#sicore.SummaryFigure.plot" title="Link to this definition">¶</a></dt>
 <dd><p>Plot the figure.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>fname</strong> (<em>str</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – File name. If <cite>fname</cite> is given, the plotted figure
+<li><p><strong>filepath</strong> (<em>Path</em><em> | </em><em>str</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – File path. If <cite>filepath</cite> is given, the plotted figure
 will be saved as a file. Defaults to None.</p></li>
-<li><p><strong>ylim</strong> (<em>tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em><em>, </em><em>optional</em>) – Range of y-axis. Defaults to (0.0, 1.0).</p></li>
+<li><p><strong>ylim</strong> (<em>tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>] </em><em>| </em><em>None</em><em>, </em><em>optional</em>) – Range of y-axis. Defaults to None.
+If None, range of y-axis will be automatically determined.</p></li>
 <li><p><strong>yticks</strong> (<em>list</em><em>[</em><em>float</em><em>] </em><em>| </em><em>None</em><em>, </em><em>optional</em>) – List of y-ticks. Defaults to None.
 If None, y-ticks will be automatically determined.</p></li>
 <li><p><strong>legend_loc</strong> (<em>str</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – Location of the legend. Defaults to None.
@@ -1189,7 +1243,7 @@ a_i + b_i * z &lt; 0.0 for all i in [len(a)].</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sicore.generate_non_gaussian_rv">
-<span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">generate_non_gaussian_rv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rv_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'t'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'skewnorm'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'gennormsteep'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'gennormflat'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'exponnorm'</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">rv_continuous</span></span></span><a class="headerlink" href="#sicore.generate_non_gaussian_rv" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">generate_non_gaussian_rv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rv_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'skewnorm'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'exponnorm'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'gennormsteep'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'gennormflat'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'t'</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">rv_continuous</span></span></span><a class="headerlink" href="#sicore.generate_non_gaussian_rv" title="Link to this definition">¶</a></dt>
 <dd><p>Generate a random variable from the specified random variable family.</p>
 <p>Generate a standardized random variable from
 the specified random variable family which has the specified
@@ -1197,7 +1251,7 @@ Wasserstein distance from the standard gaussian distribution.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>rv_name</strong> (<em>Literal</em><em>[</em><em>&quot;t&quot;</em><em>, </em><em>&quot;skewnorm&quot;</em><em>, </em><em>&quot;gennormsteep&quot;</em><em>, </em><em>&quot;gennormflat&quot;</em><em>, </em><em>&quot;exponnorm&quot;</em><em>]</em>) – Random variable name to be generated.</p></li>
+<li><p><strong>rv_name</strong> (<em>Literal</em><em>[</em><em>&quot;skewnorm&quot;</em><em>,</em><em>&quot;exponnorm&quot;</em><em>, </em><em>&quot;gennormsteep&quot;</em><em>, </em><em>&quot;gennormflat&quot;</em><em>, </em><em>&quot;t&quot;</em><em>]</em>) – Random variable name to be generated.</p></li>
 <li><p><strong>distance</strong> (<em>float</em>) – Wasserstein distance between the generated random variable
 and the standard gaussian distribution. It is strongly
 recommended to set a value between 0.01 and 0.15.</p></li>
@@ -1337,11 +1391,14 @@ Defaults to False.</p></li>
 <li><a class="reference internal" href="#sicore.SelectiveInferenceResult.bonferroni_p_value"><code class="docutils literal notranslate"><span class="pre">SelectiveInferenceResult.bonferroni_p_value()</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#sicore.InfiniteLoopError"><code class="docutils literal notranslate"><span class="pre">InfiniteLoopError</span></code></a></li>
 <li><a class="reference internal" href="#sicore.rejection_rate"><code class="docutils literal notranslate"><span class="pre">rejection_rate()</span></code></a></li>
 <li><a class="reference internal" href="#sicore.pvalues_hist"><code class="docutils literal notranslate"><span class="pre">pvalues_hist()</span></code></a></li>
 <li><a class="reference internal" href="#sicore.pvalues_qqplot"><code class="docutils literal notranslate"><span class="pre">pvalues_qqplot()</span></code></a></li>
 <li><a class="reference internal" href="#sicore.SummaryFigure"><code class="docutils literal notranslate"><span class="pre">SummaryFigure</span></code></a><ul>
+<li><a class="reference internal" href="#sicore.SummaryFigure.add_value"><code class="docutils literal notranslate"><span class="pre">SummaryFigure.add_value()</span></code></a></li>
 <li><a class="reference internal" href="#sicore.SummaryFigure.add_results"><code class="docutils literal notranslate"><span class="pre">SummaryFigure.add_results()</span></code></a></li>
+<li><a class="reference internal" href="#sicore.SummaryFigure.add_red_line"><code class="docutils literal notranslate"><span class="pre">SummaryFigure.add_red_line()</span></code></a></li>
 <li><a class="reference internal" href="#sicore.SummaryFigure.plot"><code class="docutils literal notranslate"><span class="pre">SummaryFigure.plot()</span></code></a></li>
 </ul>
 </li>
@@ -1400,7 +1457,7 @@ Defaults to False.</p></li>
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=51b770b3"></script>
+</div><script src="_static/documentation_options.js?v=adc66a14"></script>
     <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=5fa4622c"></script>
