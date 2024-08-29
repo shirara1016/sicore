@@ -1,6 +1,10 @@
 """Core package for selective inference."""
 
-from .core.base import SelectiveInference, SelectiveInferenceResult
+from .core.base import (
+    InfiniteLoopError,
+    SelectiveInference,
+    SelectiveInferenceResult,
+)
 from .core.real_subset import RealSubset
 from .main.inference import SelectiveInferenceChi, SelectiveInferenceNorm
 from .utils.constructor import OneVector, construct_projection_matrix
@@ -29,6 +33,7 @@ __all__ = [
     "SelectiveInferenceNorm",
     "SelectiveInferenceChi",
     "SelectiveInferenceResult",
+    "InfiniteLoopError",
     "rejection_rate",
     "pvalues_hist",
     "pvalues_qqplot",
