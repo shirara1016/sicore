@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" />
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
-        <title>sicore 2.0.5 documentation</title>
+        <title>sicore 2.0.6 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
@@ -166,7 +166,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="#"><div class="brand">sicore 2.0.5 documentation</div></a>
+      <a href="#"><div class="brand">sicore 2.0.6 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -190,7 +190,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="#">
   
   
-  <span class="sidebar-brand-text">sicore 2.0.5 documentation</span>
+  <span class="sidebar-brand-text">sicore 2.0.6 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -610,14 +610,14 @@ be saved as a file. Defaults to None.</p></li>
 </dl>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span> <span class="o">=</span> <span class="n">SummaryFigure</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s1">&#39;Image Size&#39;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Type I Error Rate&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_fpr</span><span class="p">(</span><span class="mf">0.053</span><span class="p">,</span> <span class="s2">&quot;proposed&quot;</span><span class="p">,</span> <span class="s2">&quot;64&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_fpr</span><span class="p">(</span><span class="mf">0.048</span><span class="p">,</span> <span class="s2">&quot;proposed&quot;</span><span class="p">,</span> <span class="s2">&quot;256&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_fpr</span><span class="p">(</span><span class="mf">0.046</span><span class="p">,</span> <span class="s2">&quot;proposed&quot;</span><span class="p">,</span> <span class="s2">&quot;1024&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_fpr</span><span class="p">(</span><span class="mf">0.052</span><span class="p">,</span> <span class="s2">&quot;proposed&quot;</span><span class="p">,</span> <span class="s2">&quot;4096&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_fpr</span><span class="p">(</span><span class="mf">0.413</span><span class="p">,</span> <span class="s2">&quot;naive&quot;</span><span class="p">,</span> <span class="s2">&quot;64&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_fpr</span><span class="p">(</span><span class="mf">0.821</span><span class="p">,</span> <span class="s2">&quot;naive&quot;</span><span class="p">,</span> <span class="s2">&quot;256&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_fpr</span><span class="p">(</span><span class="mf">0.483</span><span class="p">,</span> <span class="s2">&quot;naive&quot;</span><span class="p">,</span> <span class="s2">&quot;1024&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_fpr</span><span class="p">(</span><span class="mf">0.418</span><span class="p">,</span> <span class="s2">&quot;naive&quot;</span><span class="p">,</span> <span class="s2">&quot;4096&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="mf">0.053</span><span class="p">,</span> <span class="s2">&quot;proposed&quot;</span><span class="p">,</span> <span class="s2">&quot;64&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="mf">0.048</span><span class="p">,</span> <span class="s2">&quot;proposed&quot;</span><span class="p">,</span> <span class="s2">&quot;256&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="mf">0.046</span><span class="p">,</span> <span class="s2">&quot;proposed&quot;</span><span class="p">,</span> <span class="s2">&quot;1024&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="mf">0.052</span><span class="p">,</span> <span class="s2">&quot;proposed&quot;</span><span class="p">,</span> <span class="s2">&quot;4096&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="mf">0.413</span><span class="p">,</span> <span class="s2">&quot;naive&quot;</span><span class="p">,</span> <span class="s2">&quot;64&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="mf">0.821</span><span class="p">,</span> <span class="s2">&quot;naive&quot;</span><span class="p">,</span> <span class="s2">&quot;256&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="mf">0.483</span><span class="p">,</span> <span class="s2">&quot;naive&quot;</span><span class="p">,</span> <span class="s2">&quot;1024&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="mf">0.418</span><span class="p">,</span> <span class="s2">&quot;naive&quot;</span><span class="p">,</span> <span class="s2">&quot;4096&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_red_line</span><span class="p">(</span><span class="mf">0.05</span><span class="p">,</span> <span class="s2">&quot;significance level&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">filepath</span><span class="o">=</span><span class="s2">&quot;fpr.pdf&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
 </pre></div>
@@ -698,90 +698,6 @@ If None, y-ticks will be automatically determined.</p></li>
 <li><p><strong>legend_loc</strong> (<em>str</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – Location of the legend. Defaults to None.
 If None, the legend will be placed at the best location.</p></li>
 <li><p><strong>fontsize</strong> (<em>int</em><em>, </em><em>optional</em>) – Font size of the legend. Defaults to 10.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="sicore.FprFigure">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">FprFigure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Type</span> <span class="pre">I</span> <span class="pre">Error</span> <span class="pre">Rate'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sicore.FprFigure" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#sicore.SummaryFigure" title="sicore.utils.figure.SummaryFigure"><code class="xref py py-class docutils literal notranslate"><span class="pre">SummaryFigure</span></code></a></p>
-<p>A class plotting a false positive rate (type I error rate) summary figure.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>title</strong> (<em>str</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – Title of the figure. Defaults to None.</p></li>
-<li><p><strong>xlabel</strong> (<em>str</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – Label of x-axis. Defaults to None.</p></li>
-<li><p><strong>ylabel</strong> (<em>str</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – Label of y-axis. Defaults to Type I Error Rate.</p></li>
-</ul>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span> <span class="o">=</span> <span class="n">FprFigure</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s1">&#39;Image Size&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_fpr</span><span class="p">(</span><span class="mf">0.053</span><span class="p">,</span> <span class="s2">&quot;proposed&quot;</span><span class="p">,</span> <span class="s2">&quot;64&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_fpr</span><span class="p">(</span><span class="mf">0.048</span><span class="p">,</span> <span class="s2">&quot;proposed&quot;</span><span class="p">,</span> <span class="s2">&quot;256&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_fpr</span><span class="p">(</span><span class="mf">0.046</span><span class="p">,</span> <span class="s2">&quot;proposed&quot;</span><span class="p">,</span> <span class="s2">&quot;1024&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_fpr</span><span class="p">(</span><span class="mf">0.052</span><span class="p">,</span> <span class="s2">&quot;proposed&quot;</span><span class="p">,</span> <span class="s2">&quot;4096&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_fpr</span><span class="p">(</span><span class="mf">0.413</span><span class="p">,</span> <span class="s2">&quot;naive&quot;</span><span class="p">,</span> <span class="s2">&quot;64&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_fpr</span><span class="p">(</span><span class="mf">0.821</span><span class="p">,</span> <span class="s2">&quot;naive&quot;</span><span class="p">,</span> <span class="s2">&quot;256&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_fpr</span><span class="p">(</span><span class="mf">0.483</span><span class="p">,</span> <span class="s2">&quot;naive&quot;</span><span class="p">,</span> <span class="s2">&quot;1024&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_fpr</span><span class="p">(</span><span class="mf">0.418</span><span class="p">,</span> <span class="s2">&quot;naive&quot;</span><span class="p">,</span> <span class="s2">&quot;4096&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
-</pre></div>
-</div>
-<dl class="py method">
-<dt class="sig sig-object py" id="sicore.FprFigure.add_fpr">
-<span class="sig-name descname"><span class="pre">add_fpr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fpr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xloc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#sicore.FprFigure.add_fpr" title="Link to this definition">¶</a></dt>
-<dd><p>Add a fpr value to the figure.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>fpr</strong> (<em>float</em>) – FPR value.</p></li>
-<li><p><strong>label</strong> (<em>str</em>) – Label corresponding to the FPR value.</p></li>
-<li><p><strong>xloc</strong> (<em>str</em><em> | </em><em>float</em>) – Location of the FPR value.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="sicore.TprFigure">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">TprFigure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Power'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sicore.TprFigure" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#sicore.SummaryFigure" title="sicore.utils.figure.SummaryFigure"><code class="xref py py-class docutils literal notranslate"><span class="pre">SummaryFigure</span></code></a></p>
-<p>A class plotting a true positive rate (power) summary figure.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>title</strong> (<em>str</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – Title of the figure. Defaults to None.</p></li>
-<li><p><strong>xlabel</strong> (<em>str</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – Label of x-axis. Defaults to None.</p></li>
-<li><p><strong>ylabel</strong> (<em>str</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – Label of y-axis. Defaults to ‘Power’.</p></li>
-</ul>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span> <span class="o">=</span> <span class="n">TprFigure</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s1">&#39;signal&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_tpr</span><span class="p">(</span><span class="mf">0.183</span><span class="p">,</span> <span class="s2">&quot;proposed&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_tpr</span><span class="p">(</span><span class="mf">0.579</span><span class="p">,</span> <span class="s2">&quot;proposed&quot;</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_tpr</span><span class="p">(</span><span class="mf">0.846</span><span class="p">,</span> <span class="s2">&quot;proposed&quot;</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_tpr</span><span class="p">(</span><span class="mf">0.948</span><span class="p">,</span> <span class="s2">&quot;proposed&quot;</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
-</pre></div>
-</div>
-<dl class="py method">
-<dt class="sig sig-object py" id="sicore.TprFigure.add_tpr">
-<span class="sig-name descname"><span class="pre">add_tpr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tpr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xloc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#sicore.TprFigure.add_tpr" title="Link to this definition">¶</a></dt>
-<dd><p>Add a tpr value to the figure.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>tpr</strong> (<em>float</em>) – TPR value.</p></li>
-<li><p><strong>label</strong> (<em>str</em>) – Label corresponding to the TPR value.</p></li>
-<li><p><strong>xloc</strong> (<em>str</em><em> | </em><em>float</em>) – Location of the TPR value.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1405,14 +1321,6 @@ Defaults to False.</p></li>
 <li><a class="reference internal" href="#sicore.SummaryFigure.plot"><code class="docutils literal notranslate"><span class="pre">SummaryFigure.plot()</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#sicore.FprFigure"><code class="docutils literal notranslate"><span class="pre">FprFigure</span></code></a><ul>
-<li><a class="reference internal" href="#sicore.FprFigure.add_fpr"><code class="docutils literal notranslate"><span class="pre">FprFigure.add_fpr()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#sicore.TprFigure"><code class="docutils literal notranslate"><span class="pre">TprFigure</span></code></a><ul>
-<li><a class="reference internal" href="#sicore.TprFigure.add_tpr"><code class="docutils literal notranslate"><span class="pre">TprFigure.add_tpr()</span></code></a></li>
-</ul>
-</li>
 <li><a class="reference internal" href="#sicore.RealSubset"><code class="docutils literal notranslate"><span class="pre">RealSubset</span></code></a><ul>
 <li><a class="reference internal" href="#sicore.RealSubset.intervals"><code class="docutils literal notranslate"><span class="pre">RealSubset.intervals</span></code></a></li>
 <li><a class="reference internal" href="#sicore.RealSubset.simplify"><code class="docutils literal notranslate"><span class="pre">RealSubset.simplify()</span></code></a></li>
@@ -1460,7 +1368,7 @@ Defaults to False.</p></li>
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=09beee0d"></script>
+</div><script src="_static/documentation_options.js?v=3e466467"></script>
     <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=5fa4622c"></script>
