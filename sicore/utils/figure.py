@@ -93,14 +93,14 @@ class SummaryFigure:
 
     Examples:
         >>> fig = SummaryFigure(xlabel='Image Size', ylabel="Type I Error Rate")
-        >>> fig.add_fpr(0.053, "proposed", "64")
-        >>> fig.add_fpr(0.048, "proposed", "256")
-        >>> fig.add_fpr(0.046, "proposed", "1024")
-        >>> fig.add_fpr(0.052, "proposed", "4096")
-        >>> fig.add_fpr(0.413, "naive", "64")
-        >>> fig.add_fpr(0.821, "naive", "256")
-        >>> fig.add_fpr(0.483, "naive", "1024")
-        >>> fig.add_fpr(0.418, "naive", "4096")
+        >>> fig.add_value(0.053, "proposed", "64")
+        >>> fig.add_value(0.048, "proposed", "256")
+        >>> fig.add_value(0.046, "proposed", "1024")
+        >>> fig.add_value(0.052, "proposed", "4096")
+        >>> fig.add_value(0.413, "naive", "64")
+        >>> fig.add_value(0.821, "naive", "256")
+        >>> fig.add_value(0.483, "naive", "1024")
+        >>> fig.add_value(0.418, "naive", "4096")
         >>> fig.add_red_line(0.05, "significance level")
         >>> fig.plot(filepath="fpr.pdf", fontsize=16)
     """
@@ -300,90 +300,3 @@ class SummaryFigure:
             )
         plt.clf()
         plt.close()
-
-
-class FprFigure(SummaryFigure):
-    """A class plotting a false positive rate (type I error rate) summary figure.
-
-    Args:
-        title (str | None, optional): Title of the figure. Defaults to None.
-        xlabel (str | None, optional): Label of x-axis. Defaults to None.
-        ylabel (str | None, optional): Label of y-axis. Defaults to Type I Error Rate.
-
-    Examples:
-        >>> fig = FprFigure(xlabel='Image Size')
-        >>> fig.add_fpr(0.053, "proposed", "64")
-        >>> fig.add_fpr(0.048, "proposed", "256")
-        >>> fig.add_fpr(0.046, "proposed", "1024")
-        >>> fig.add_fpr(0.052, "proposed", "4096")
-        >>> fig.add_fpr(0.413, "naive", "64")
-        >>> fig.add_fpr(0.821, "naive", "256")
-        >>> fig.add_fpr(0.483, "naive", "1024")
-        >>> fig.add_fpr(0.418, "naive", "4096")
-        >>> fig.plot()
-    """
-
-    def __init__(
-        self,
-        title: str | None = None,
-        xlabel: str | None = None,
-        ylabel: str = "Type I Error Rate",
-    ) -> None:
-        """Initialize a false positive rate figure.
-
-        Args:
-            title (str | None, optional): Title of the figure. Defaults to None.
-            xlabel (str | None, optional): Label of x-axis. Defaults to None.
-            ylabel (str | None, optional):
-                Label of y-axis. Defaults to 'Type I Error Rate'.
-        """
-        super().__init__(title=title, xlabel=xlabel, ylabel=ylabel)
-        self.red_line = True
-
-    def add_fpr(self, fpr: float, label: str, xloc: str | float) -> None:
-        """Add a fpr value to the figure.
-
-        Args:
-            fpr (float): FPR value.
-            label (str): Label corresponding to the FPR value.
-            xloc (str | float): Location of the FPR value.
-        """
-        self.add_value(fpr, label, xloc)
-
-
-class TprFigure(SummaryFigure):
-    """A class plotting a true positive rate (power) summary figure.
-
-    Args:
-        title (str | None, optional): Title of the figure. Defaults to None.
-        xlabel (str | None, optional): Label of x-axis. Defaults to None.
-        ylabel (str | None, optional): Label of y-axis. Defaults to 'Power'.
-
-    Examples:
-        >>> fig = TprFigure(xlabel='signal')
-        >>> fig.add_tpr(0.183, "proposed", 1.0)
-        >>> fig.add_tpr(0.579, "proposed", 2.0)
-        >>> fig.add_tpr(0.846, "proposed", 3.0)
-        >>> fig.add_tpr(0.948, "proposed", 4.0)
-        >>> fig.plot()
-    """
-
-    def __init__(
-        self,
-        title: str | None = None,
-        xlabel: str | None = None,
-        ylabel: str = "Power",
-    ) -> None:
-        """Initialize a true positive rate figure."""
-        super().__init__(title=title, xlabel=xlabel, ylabel=ylabel)
-        self.red_line = False
-
-    def add_tpr(self, tpr: float, label: str, xloc: str | float) -> None:
-        """Add a tpr value to the figure.
-
-        Args:
-            tpr (float): TPR value.
-            label (str): Label corresponding to the TPR value.
-            xloc (str | float): Location of the TPR value.
-        """
-        self.add_value(tpr, label, xloc)

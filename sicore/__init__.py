@@ -10,9 +10,7 @@ from .main.inference import SelectiveInferenceChi, SelectiveInferenceNorm
 from .utils.constructor import OneVector, construct_projection_matrix
 from .utils.evaluation import rejection_rate
 from .utils.figure import (
-    FprFigure,
     SummaryFigure,
-    TprFigure,
     pvalues_hist,
     pvalues_qqplot,
 )
@@ -38,8 +36,6 @@ __all__ = [
     "pvalues_hist",
     "pvalues_qqplot",
     "SummaryFigure",
-    "FprFigure",
-    "TprFigure",
     "RealSubset",
     "complement",
     "union",
