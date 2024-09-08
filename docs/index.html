@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" />
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
-        <title>sicore 2.0.6 documentation</title>
+        <title>sicore 2.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
@@ -166,7 +166,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="#"><div class="brand">sicore 2.0.6 documentation</div></a>
+      <a href="#"><div class="brand">sicore 2.1.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -190,7 +190,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="#">
   
   
-  <span class="sidebar-brand-text">sicore 2.0.6 documentation</span>
+  <span class="sidebar-brand-text">sicore 2.1.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -1161,6 +1161,33 @@ a_i + b_i * z &lt; 0.0 for all i in [len(a)].</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="sicore.truncated_cdf">
+<span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">truncated_cdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rv</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">rv_continuous</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intervals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sicore.RealSubset" title="sicore.core.real_subset.RealSubset"><span class="pre">RealSubset</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">absolute</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#sicore.truncated_cdf" title="Link to this definition">¶</a></dt>
+<dd><p>Compute the cdf value of the truncated distribution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rv</strong> (<em>rv_continuous</em>) – The rv_continuous instance to be truncated.</p></li>
+<li><p><strong>z</strong> (<em>float</em>) – The value at which to compute the cdf of the truncated distribution.</p></li>
+<li><p><strong>intervals</strong> (<em>np.ndarray</em><em> | </em><em>list</em><em>[</em><em>list</em><em>[</em><em>float</em><em>]</em><em>] </em><em>| </em><a class="reference internal" href="#sicore.RealSubset" title="sicore.RealSubset"><em>RealSubset</em></a>) – The truncated intervals
+[[l1, u1], [l2, u2], …].</p></li>
+<li><p><strong>absolute</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to compute the cdf for the distribution of the
+absolute value of the random variable. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The cdf value at z.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the value z is not belong to the truncated intervals.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="sicore.generate_non_gaussian_rv">
 <span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">generate_non_gaussian_rv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rv_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'skewnorm'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'exponnorm'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'gennormsteep'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'gennormflat'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'t'</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">rv_continuous</span></span></span><a class="headerlink" href="#sicore.generate_non_gaussian_rv" title="Link to this definition">¶</a></dt>
 <dd><p>Generate a random variable from the specified random variable family.</p>
@@ -1349,6 +1376,7 @@ Defaults to False.</p></li>
 <li><a class="reference internal" href="#sicore.polynomial_below_zero"><code class="docutils literal notranslate"><span class="pre">polynomial_below_zero()</span></code></a></li>
 <li><a class="reference internal" href="#sicore.polytope_below_zero"><code class="docutils literal notranslate"><span class="pre">polytope_below_zero()</span></code></a></li>
 <li><a class="reference internal" href="#sicore.linear_polynomials_below_zero"><code class="docutils literal notranslate"><span class="pre">linear_polynomials_below_zero()</span></code></a></li>
+<li><a class="reference internal" href="#sicore.truncated_cdf"><code class="docutils literal notranslate"><span class="pre">truncated_cdf()</span></code></a></li>
 <li><a class="reference internal" href="#sicore.generate_non_gaussian_rv"><code class="docutils literal notranslate"><span class="pre">generate_non_gaussian_rv()</span></code></a></li>
 <li><a class="reference internal" href="#sicore.OneVector"><code class="docutils literal notranslate"><span class="pre">OneVector</span></code></a><ul>
 <li><a class="reference internal" href="#sicore.OneVector.get"><code class="docutils literal notranslate"><span class="pre">OneVector.get()</span></code></a></li>
@@ -1368,7 +1396,7 @@ Defaults to False.</p></li>
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=3e466467"></script>
+</div><script src="_static/documentation_options.js?v=20623aea"></script>
     <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=5fa4622c"></script>

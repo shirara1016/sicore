@@ -29,8 +29,7 @@ The following modules can be imported by `from sicore import *`.
 **Figure**
 - pvalues_hist() : Draws a histogram of p-values.
 - pvalues_qqplot() : Draws a uniform Q-Q plot of p-values.
-- FprFigure: Draws a figure of the false positive rate.
-- TprFigure: Draws a figure of the true positive rate.
+- SummaryFigure: Draws a summary figure.
 
 **Interval Operations**
 - RealSubset : Class for representing a subset of real numbers, which provides many operations with intuitive syntax.
@@ -43,7 +42,7 @@ The following modules can be imported by `from sicore import *`.
 **Inequalities Solver**
 - polynomial_below_zero() : Compute intervals where a given polynomial is below zero.
 - polytope_below_zero() : Compute intervals where a given polytope is below zero.
-- degree_one_polynomials_below_zero: Compute intervals where given degree-one polynomials are all below zero.
+- linear_polynomials_below_zero: Compute intervals where given degree-one polynomials are all below zero.
 
 **Non-Gaussian Random Variables**
 - generate_non_gaussian_rv(): Generate a standardized random variable in a given rv_name family with a given Wasserstein distance from the standard gaussian distribution.
@@ -51,6 +50,9 @@ The following modules can be imported by `from sicore import *`.
 **Constructor**
 - OneVector : Vector whose elements at specified positions are set to 1, and 0 otherwise.
 - construct_projection_matrix() : Construct projection matrix from basis.
+
+**Truncated Cumulative Distribution Function**
+- truncated_cdf(): Compute the truncated cumulative distribution function of a given distribution.
 
 ## Others
 Execute code test :
