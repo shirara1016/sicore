@@ -9,6 +9,7 @@ import numpy as np
 from joblib import Parallel, delayed  # type: ignore[import]
 from scipy.stats import rv_continuous  # type: ignore[import]
 
+from .cdf import truncated_cdf
 from .real_subset import RealSubset
 
 
@@ -219,8 +220,6 @@ class SelectiveInference:
         self.mode: float
         self.alternative: Literal["two-sided", "less", "greater"]
 
-        self.truncated_cdf: Callable[[float, RealSubset, bool], float]
-
     def inference(
         self,
         algorithm: Callable[
@@ -371,15 +370,7 @@ class SelectiveInference:
             if termination_criterion(searched_intervals, truncated_intervals):
                 break
 
-        finites = truncated_intervals.intervals[
-            np.isfinite(truncated_intervals.intervals)
-        ]
-        min_finite, max_finite = np.min(finites), np.max(finites)
-        if min_finite not in self.limits or max_finite not in self.limits:
-            p_value = self._compute_pvalue(truncated_intervals & self.limits)
-        else:
-            p_value = self._compute_pvalue(truncated_intervals)
-
+        p_value = self._compute_pvalue(truncated_intervals)
         inf_p, sup_p = self._evaluate_pvalue_bounds(
             searched_intervals,
             truncated_intervals,
@@ -408,7 +399,12 @@ class SelectiveInference:
             float: The p-value from the truncated intervals.
         """
         absolute = self.alternative == "two-sided"
-        cdf_value = self.truncated_cdf(self.stat, truncated_intervals, absolute)
+        cdf_value = truncated_cdf(
+            self.null_rv,
+            self.stat,
+            truncated_intervals,
+            absolute=absolute,
+        )
         return _compute_pvalue(cdf_value, self.alternative)
 
     def _evaluate_pvalue_bounds(
@@ -439,20 +435,8 @@ class SelectiveInference:
         inf_intervals = inf_intervals & self.support
         sup_intervals = sup_intervals & self.support
 
-        inf_finites = inf_intervals.intervals[np.isfinite(inf_intervals.intervals)]
-        if len(inf_finites) != 0:
-            inf_min_finite, inf_max_finite = np.min(inf_finites), np.max(inf_finites)
-            if inf_min_finite not in self.limits or inf_max_finite not in self.limits:
-                inf_intervals = inf_intervals & self.limits
-
-        sup_finites = sup_intervals.intervals[np.isfinite(sup_intervals.intervals)]
-        if len(sup_finites) != 0:
-            sup_min_finite, sup_max_finite = np.min(sup_finites), np.max(sup_finites)
-            if sup_min_finite not in self.limits or sup_max_finite not in self.limits:
-                sup_intervals = sup_intervals & self.limits
-
-        inf_f = self.truncated_cdf(self.stat, inf_intervals, absolute)
-        sup_f = self.truncated_cdf(self.stat, sup_intervals, absolute)
+        inf_f = truncated_cdf(self.null_rv, self.stat, inf_intervals, absolute=absolute)
+        sup_f = truncated_cdf(self.null_rv, self.stat, sup_intervals, absolute=absolute)
 
         inf_p, sup_p = _evaluate_pvalue_bounds(inf_f, sup_f, self.alternative)
         return inf_p, sup_p
