@@ -26,6 +26,7 @@ from .utils.intervals import (
     union,
 )
 from .utils.non_gaussian import generate_non_gaussian_rv
+from .utils.uniformity_test import uniformity_test
 
 __all__ = [
     "SelectiveInference",
@@ -48,6 +49,7 @@ __all__ = [
     "linear_polynomials_below_zero",
     "truncated_cdf",
     "generate_non_gaussian_rv",
+    "uniformity_test",
     "OneVector",
     "construct_projection_matrix",
 ]
