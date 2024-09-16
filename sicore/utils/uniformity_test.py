@@ -1,6 +1,7 @@
 """Module providing tests for uniformity of given samples."""
 
-from typing import TYPE_CHECKING, Literal
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Literal, cast
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -9,6 +10,60 @@ import numpy as np
 from numpy.polynomial import Polynomial
 from scipy.stats import chi2, ecdf, kstwo, norm  # type: ignore[import]
 from scipy.stats._hypotests import _cdf_cvm  # type: ignore[import]
+
+
+@dataclass
+class UniformityTestResult:
+    """A class containing the result of uniformity tests.
+
+    Attributes:
+        is_rejected: A dictionary containing the test name and a boolean value
+            indicating whether the null hypothesis is rejected
+    """
+
+    is_rejected: dict[str, bool]
+
+    def __post_init__(self) -> None:
+        """Separate the tests that are rejected and not rejected."""
+        self._rejected_tests = [
+            test_name
+            for test_name, is_rejected in self.is_rejected.items()
+            if is_rejected
+        ]
+        self._not_rejected_tests = [
+            test_name
+            for test_name, is_rejected in self.is_rejected.items()
+            if not is_rejected
+        ]
+
+    def __str__(self) -> str:
+        """Return a string representation of the UniformityTestResult object.
+
+        Returns:
+            str: String representation of the UniformityTestResult object.
+        """
+        return "\n".join(
+            [
+                f"Rejected tests ({len(self._rejected_tests)}/25):",
+                *self._rejected_tests,
+                "",
+                f"Not rejected tests ({len(self._not_rejected_tests)}/25):",
+                *self._not_rejected_tests,
+            ],
+        )
+
+    def __repr__(self) -> str:
+        """Return a string representation that can be used to recreate the object.
+
+        Returns:
+            str: String representation of the UniformityTestResult object.
+        """
+        return "\n".join(
+            [
+                f"{test_name}: {'rejected' if is_rejected else 'not rejected'}"
+                for test_name, is_rejected in self.is_rejected.items()
+            ],
+        )
 
 
 class UniformityTest:
@@ -631,6 +686,52 @@ class FroziniTest(UniformityTest):
             np.abs(sort_samples - (np.arange(1.0, n + 1.0) - 0.5) / n),
             axis=1,
         ) / np.sqrt(n)
+
+
+def uniformity_test(
+    samples: np.ndarray | list[float],
+    alpha: float = 0.05,
+) -> UniformityTestResult:
+    """Conduct 25 types of uniformity tests on the given samples.
+
+    Args:
+        samples (np.ndarray | list[float]): The samples to be tested. Must be 1D array.
+        alpha (float, optional): The significance level. Defaults to 0.05.
+
+    Returns:
+        UniformityTestResult: A class containing the result of uniformity tests.
+    """
+    test_instances: list[UniformityTest] = [
+        KolmogorovSmirnovTest(),
+        KuiperTest(),
+        CramerVonMisesTest(),
+        AndersonDarlingTest(),
+        WatsonTest(),
+        ZhangKolmogorovSmirnovTest(),
+        ZhangCramerVonMisesTest(),
+        ZhangAndersonDarlingTest(),
+        GreenwoodTest(),
+        QuesenberryMillerTest(),
+        PearsonTest(),
+        SukhatmeTest(),
+        NeymanFirstOrderTest(),
+        NeymanSecondOrderTest(),
+        NeymanThirdOrderTest(),
+        NeymanFourthOrderTest(),
+        ShermanTest(),
+        KimballTest(),
+        ChengSpiringTest(),
+        HegazyGreenAbsoluteTest(),
+        HegazyGreenModifiedAbsoluteTest(),
+        HegazyGreenQuadraticTest(),
+        HegazyGreenModifiedQuadraticTest(),
+        YangTest(),
+        FroziniTest(),
+    ]
+    results = {}
+    for test in test_instances:
+        results[test.name] = cast(bool, test.test(samples, alpha))
+    return UniformityTestResult(is_rejected=results)
 
 
 kolmogorov_smirnov_test = KolmogorovSmirnovTest().test
