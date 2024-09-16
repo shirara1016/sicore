@@ -44,15 +44,18 @@ The following modules can be imported by `from sicore import *`.
 - polytope_below_zero() : Compute intervals where a given polytope is below zero.
 - linear_polynomials_below_zero: Compute intervals where given degree-one polynomials are all below zero.
 
+**Truncated Cumulative Distribution Function**
+- truncated_cdf(): Compute the truncated cumulative distribution function of a given distribution.
+
 **Non-Gaussian Random Variables**
 - generate_non_gaussian_rv(): Generate a standardized random variable in a given rv_name family with a given Wasserstein distance from the standard gaussian distribution.
+
+**Uniformity Test**
+- uniformity_test(): Conduct multiple uniformity tests on the given samples.
 
 **Constructor**
 - OneVector : Vector whose elements at specified positions are set to 1, and 0 otherwise.
 - construct_projection_matrix() : Construct projection matrix from basis.
-
-**Truncated Cumulative Distribution Function**
-- truncated_cdf(): Compute the truncated cumulative distribution function of a given distribution.
 
 ## Others
 Execute code test :
