@@ -258,7 +258,7 @@ The user can inherit this class and implement the <cite>__init__</cite> method.<
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>algorithm</strong> (<em>Callable</em><em>[</em><em>[</em><em>np.ndarray</em><em>, </em><em>np.ndarray</em><em>, </em><em>float</em><em>]</em><em>, </em><em>tuple</em><em>[</em><em>Any</em><em>, </em><em>list</em><em>[</em><em>list</em><em>[</em><em>float</em><em>]</em><em>] </em><em>| </em><a class="reference internal" href="#sicore.RealSubset" title="sicore.RealSubset"><em>RealSubset</em></a><em>]</em><em>]</em>) – Callable function which takes two vectors a (np.ndarray) and
+<li><p><strong>algorithm</strong> (<em>Callable</em><em>[</em><em>[</em><em>np.ndarray</em><em>, </em><em>np.ndarray</em><em>, </em><em>float</em><em>]</em><em>, </em><em>tuple</em><em>[</em><em>Any</em><em>, </em><em>list</em><em>[</em><em>list</em><em>[</em><em>float</em><em>]</em><em>] </em><em>| </em><a class="reference internal" href="#sicore.RealSubset" title="sicore.RealSubset"><em>RealSubset</em></a><em>]</em><em>]</em><em>)</em>) – Callable function which takes two vectors a (np.ndarray) and
 b (np.ndarray), and a scalar z (float), and returns a model (Any) and
 intervals (list[list[float]] | RealSubset). For any point in
 the intervals, the same model must be selected.</p></li>
@@ -321,27 +321,6 @@ Defaults to 0.001.</p></li>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">SelectiveInferenceNorm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">csr_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_sparse</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_tf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_torch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sicore.SelectiveInferenceNorm" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sicore.SelectiveInference" title="sicore.core.base.SelectiveInference"><code class="xref py py-class docutils literal notranslate"><span class="pre">SelectiveInference</span></code></a></p>
 <p>A class conducting selective inference for the normal distribution.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<em>np.ndarray</em>) – Observed data in 1D array.</p></li>
-<li><p><strong>var</strong> (<em>float</em><em> | </em><em>np.ndarray</em><em> | </em><em>sparse.csr_matrix</em>) – Known covariance matrix.
-If float, covariance matrix equals to the scalar times identity matrix.
-If 1D array, covariance matrix equals to the diagonal matrix
-with the given array.
-If 2D array, covariance matrix equals to the given array.</p></li>
-<li><p><strong>eta</strong> (<em>np.ndarray</em>) – The direction of the test statistic in 1D array.</p></li>
-<li><p><strong>use_sparse</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to use sparse matrix.
-If True, the <cite>var</cite> must be given as a sparse matrix. Defaults to False.</p></li>
-<li><p><strong>use_tf</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to use TensorFlow.
-If True, the <cite>data</cite>, <cite>eta</cite>, and <cite>var</cite> must be given as TensorFlow tensors.
-Defaults to False.</p></li>
-<li><p><strong>use_torch</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to use PyTorch.
-If True, the <cite>data</cite>, <cite>eta</cite>, and <cite>var</cite> must be given as PyTorch tensors.
-Defaults to False.</p></li>
-</ul>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py class">
@@ -349,24 +328,6 @@ Defaults to False.</p></li>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">SelectiveInferenceChi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">projection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_sparse</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_tf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_torch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sicore.SelectiveInferenceChi" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sicore.SelectiveInference" title="sicore.core.base.SelectiveInference"><code class="xref py py-class docutils literal notranslate"><span class="pre">SelectiveInference</span></code></a></p>
 <p>A class conducting selective inference for the chi distribution.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<em>np.ndarray</em>) – Observed data in 1D array.</p></li>
-<li><p><strong>var</strong> (<em>float</em>) – Known covariance matrix, which equals to
-the scalar times identity matrix.</p></li>
-<li><p><strong>projection</strong> (<em>np.ndarray</em>) – The space of the test statistic in 2D array.</p></li>
-<li><p><strong>use_sparse</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to use sparse matrix.
-If True, the <cite>P</cite> must be given as a sparse matrix. Defaults to False.</p></li>
-<li><p><strong>use_tf</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to use TensorFlow.
-If True, the <cite>data</cite> and <cite>P</cite> must be given as TensorFlow tensors.
-Defaults to False.</p></li>
-<li><p><strong>use_torch</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to use PyTorch.
-If True, the <cite>data</cite> and <cite>P</cite> must be given as PyTorch tensors.
-Defaults to False.</p></li>
-</ul>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py class">
@@ -476,8 +437,7 @@ Defaults to False.</p></li>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="sicore.SelectiveInferenceResult.alternative">
 <span class="sig-name descname"><span class="pre">alternative</span></span><a class="headerlink" href="#sicore.SelectiveInferenceResult.alternative" title="Link to this definition">¶</a></dt>
-<dd><p>Type of the
-alternative hypothesis.</p>
+<dd><p>Type of the alternative hypothesis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Literal[“two-sided”, “less”, “greater”]</p>
@@ -534,7 +494,10 @@ alternative hypothesis.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>results</strong> (<em>list</em><em>[</em><a class="reference internal" href="#sicore.SelectiveInferenceResult" title="sicore.SelectiveInferenceResult"><em>SelectiveInferenceResult</em></a><em>] </em><em>| </em><em>np.ndarray</em><em> | </em><em>list</em><em>[</em><em>float</em><em>]</em>) – List of SelectiveInferenceResult objects or p-values.</p></li>
 <li><p><strong>alpha</strong> (<em>float</em><em>, </em><em>optional</em>) – Significance level. Defaults to 0.05.</p></li>
-<li><p><strong>naive</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to compute rejection rate of naive inference.
+<li><p><strong>(</strong><strong>bool</strong> (<em>naive</em>) – Whether to compute rejection rate of naive inference.
+This option is available only when results are
+SelectiveInferenceResult objects. Defaults to False.</p></li>
+<li><p><strong>optional</strong><strong>)</strong> – Whether to compute rejection rate of naive inference.
 This option is available only when results are
 SelectiveInferenceResult objects. Defaults to False.</p></li>
 <li><p><strong>bonferroni</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to compute rejection rate with Bonferroni correction.
@@ -552,7 +515,7 @@ Defaults to 0.0, which means no correction.</p></li>
 <dd class="field-odd"><p>float</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>ValueError</strong> – naive and bonferroni cannot be True at the same time.</p>
+<dd class="field-even"><p><strong>ValueError</strong> – The naive and bonferroni option cannot be True at the same time.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -567,8 +530,8 @@ Defaults to 0.0, which means no correction.</p></li>
 <li><p><strong>p_values</strong> (<em>list</em><em>[</em><em>float</em><em>] </em><em>| </em><em>np.ndarray</em>) – List of p-values.</p></li>
 <li><p><strong>bins</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of bins. Defaults to 20.</p></li>
 <li><p><strong>title</strong> (<em>str</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – Title of the figure. Defaults to None.</p></li>
-<li><p><strong>fname</strong> (<em>str</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – File name. If <cite>fname</cite> is given, the plotted figure will
-be saved as a file. Defaults to None.</p></li>
+<li><p><strong>fname</strong> (<em>str</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – File name. If <cite>fname</cite> is given, the plotted figure will be saved as a file.
+Defaults to None.</p></li>
 <li><p><strong>figsize</strong> (<em>tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em><em>, </em><em>optional</em>) – Size of the figure. Defaults to (6, 4).</p></li>
 </ul>
 </dd>
@@ -586,8 +549,8 @@ be saved as a file. Defaults to None.</p></li>
 <li><p><strong>plot_pos</strong> (<em>list</em><em>[</em><em>float</em><em>] </em><em>| </em><em>np.ndarray</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – Plotting positions. If None, default plotting positions will be used.
 Defaults to None.</p></li>
 <li><p><strong>title</strong> (<em>str</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – Title of the figure. Defaults to None.</p></li>
-<li><p><strong>fname</strong> (<em>str</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – File name. If <cite>fname</cite> is given, the plotted figure will
-be saved as a file. Defaults to None.</p></li>
+<li><p><strong>fname</strong> (<em>str</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – File name. If <cite>fname</cite> is given, the plotted figure will be saved as a file.
+Defaults to None.</p></li>
 <li><p><strong>figsize</strong> (<em>tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em><em>, </em><em>optional</em>) – Size of the figure. Defaults to (4, 4).</p></li>
 </ul>
 </dd>
@@ -599,15 +562,6 @@ be saved as a file. Defaults to None.</p></li>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">SummaryFigure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sicore.SummaryFigure" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A class plotting a summary figure of experiments.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>title</strong> (<em>str</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – Title of the figure. Defaults to None.</p></li>
-<li><p><strong>xlabel</strong> (<em>str</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – Label of x-axis. Defaults to None.</p></li>
-<li><p><strong>ylabel</strong> (<em>str</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – Label of y-axis. Defaults to None.</p></li>
-</ul>
-</dd>
-</dl>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span> <span class="o">=</span> <span class="n">SummaryFigure</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s1">&#39;Image Size&#39;</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="s2">&quot;Type I Error Rate&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">add_value</span><span class="p">(</span><span class="mf">0.053</span><span class="p">,</span> <span class="s2">&quot;proposed&quot;</span><span class="p">,</span> <span class="s2">&quot;64&quot;</span><span class="p">)</span>
@@ -647,14 +601,14 @@ If float, it will be the exact location.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>results</strong> (<em>list</em><em>[</em><a class="reference internal" href="#sicore.SelectiveInferenceResult" title="sicore.SelectiveInferenceResult"><em>SelectiveInferenceResult</em></a><em>] </em><em>| </em><em>list</em><em>[</em><em>float</em><em>] </em><em>| </em><em>np.ndarray</em>) – List of SelectiveInferenceResult objects or p-values.</p></li>
+<li><p><strong>results</strong> (<em>list</em><em>[</em><a class="reference internal" href="#sicore.SelectiveInferenceResult" title="sicore.SelectiveInferenceResult"><em>SelectiveInferenceResult</em></a><em>] </em><em>| </em><em>np.ndarray</em><em> | </em><em>list</em><em>[</em><em>float</em><em>]</em>) – List of SelectiveInferenceResult objects or p-values.</p></li>
 <li><p><strong>label</strong> (<em>str</em>) – Label corresponding to the results.</p></li>
 <li><p><strong>xloc</strong> (<em>str</em><em> | </em><em>float</em>) – Location of the results.</p></li>
 <li><p><strong>alpha</strong> (<em>float</em><em>, </em><em>optional</em>) – Significance level. Defaults to 0.05.</p></li>
-<li><p><strong>confidence_level</strong> (<em>float</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – Confidence level
-used to compute the confidence interval for the rejection rate.
-If None, no confidence interval will be displayed. Defaults to None.</p></li>
-<li><p><strong>naive</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to compute rejection rate of naive inference.
+<li><p><strong>(</strong><strong>bool</strong> (<em>naive</em>) – Whether to compute rejection rate of naive inference.
+This option is available only when results are
+SelectiveInferenceResult objects. Defaults to False.</p></li>
+<li><p><strong>optional</strong><strong>)</strong> – Whether to compute rejection rate of naive inference.
 This option is available only when results are
 SelectiveInferenceResult objects. Defaults to False.</p></li>
 <li><p><strong>bonferroni</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to compute rejection rate with Bonferroni correction.
@@ -675,8 +629,8 @@ Defaults to 0.0, which means no correction.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>value</strong> (<em>float</em>) – Value to be plotted as a red line. Defaults to 0.05.</p></li>
-<li><p><strong>label</strong> (<em>str</em><em> | </em><em>None</em>) – Label of the red line. Defaults to None.</p></li>
+<li><p><strong>value</strong> (<em>float</em><em>, </em><em>optional</em>) – Value to be plotted as a red line. Defaults to 0.05.</p></li>
+<li><p><strong>label</strong> (<em>str</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – Label of the red line. Defaults to None.</p></li>
 </ul>
 </dd>
 </dl>
@@ -689,14 +643,14 @@ Defaults to 0.0, which means no correction.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>filepath</strong> (<em>Path</em><em> | </em><em>str</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – File path. If <cite>filepath</cite> is given, the plotted figure
-will be saved as a file. Defaults to None.</p></li>
-<li><p><strong>ylim</strong> (<em>tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>] </em><em>| </em><em>None</em><em>, </em><em>optional</em>) – Range of y-axis. Defaults to None.
-If None, range of y-axis will be automatically determined.</p></li>
-<li><p><strong>yticks</strong> (<em>list</em><em>[</em><em>float</em><em>] </em><em>| </em><em>None</em><em>, </em><em>optional</em>) – List of y-ticks. Defaults to None.
-If None, y-ticks will be automatically determined.</p></li>
-<li><p><strong>legend_loc</strong> (<em>str</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – Location of the legend. Defaults to None.
-If None, the legend will be placed at the best location.</p></li>
+<li><p><strong>filepath</strong> (<em>Path</em><em> | </em><em>str</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – File path. If <cite>filepath</cite> is given, the plotted figure will be saved as a file.
+Defaults to None.</p></li>
+<li><p><strong>ylim</strong> (<em>tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>] </em><em>| </em><em>None</em><em>, </em><em>optional</em>) – Range of y-axis. If None, range of y-axis will be automatically determined.
+Defaults to None.</p></li>
+<li><p><strong>yticks</strong> (<em>list</em><em>[</em><em>float</em><em>] </em><em>| </em><em>None</em><em>, </em><em>optional</em>) – List of y-ticks. If None, y-ticks will be automatically determined.
+Defaults to None.</p></li>
+<li><p><strong>legend_loc</strong> (<em>str</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – Location of the legend. If None, the legend will be placed at the best location.
+Defaults to None.</p></li>
 <li><p><strong>fontsize</strong> (<em>int</em><em>, </em><em>optional</em>) – Font size of the legend. Defaults to 10.</p></li>
 </ul>
 </dd>
@@ -716,8 +670,7 @@ and computation.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="sicore.RealSubset.intervals">
 <span class="sig-name descname"><span class="pre">intervals</span></span><a class="headerlink" href="#sicore.RealSubset.intervals" title="Link to this definition">¶</a></dt>
-<dd><p>An array of shape (n, 2) representing n intervals.
-Each row [a, b] represents the interval [a, b].</p>
+<dd><p>An array of shape (n, 2) representing n intervals. Each row [a, b] represents the interval [a, b].</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>np.ndarray</p>
@@ -725,16 +678,6 @@ Each row [a, b] represents the interval [a, b].</p>
 </dl>
 </dd></dl>
 
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>intervals</strong> (<em>np.array</em><em>, </em><em>list</em><em>[</em><em>list</em><em>[</em><em>int</em><em>]</em><em>]</em><em>, </em><em>None</em><em>, </em><em>optional</em>) – Initial intervals to create the subset. Defaults to None,
-which creates an empty set.</p></li>
-<li><p><strong>is_simplify</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to simplify (merge overlapping) intervals upon creation.
-Defaults to True.</p></li>
-</ul>
-</dd>
-</dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <ul class="simple">
@@ -1035,11 +978,7 @@ Defaults to True.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><dl class="simple">
-<dt>Intersection of the two input intervals</dt><dd><p>[[l1’, u1’], [l2’, u2’], …].</p>
-</dd>
-</dl>
-</p>
+<dd class="field-even"><p>Intersection of the two input intervals [[l1’, u1’], [l2’, u2’], …].</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>np.ndarray</p>
@@ -1059,8 +998,7 @@ Defaults to True.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Difference of the first input intervals with the second input intervals
-[[l1’, u1’], [l2’, u2’], …].</p>
+<dd class="field-even"><p>Difference of the first input intervals with the second input intervals [[l1’, u1’], [l2’, u2’], …].</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>np.ndarray</p>
@@ -1080,8 +1018,7 @@ Defaults to True.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Symmetric difference of the two input intervals
-[[l1’, u1’], [l2’, u2’], …].</p>
+<dd class="field-even"><p>Symmetric difference of the two input intervals [[l1’, u1’], [l2’, u2’], …].</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>np.ndarray</p>
@@ -1097,9 +1034,8 @@ Defaults to True.</p></li>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>poly_or_coef</strong> (<em>Polynomial</em><em> | </em><em>np.ndarray</em><em> | </em><em>list</em><em>[</em><em>float</em><em>]</em>) – Polynomial or its coefficients e.g. [a, b, c] for a + b * z + c * z ** 2.</p></li>
-<li><p><strong>tol</strong> (<em>float</em><em>, </em><em>optional</em>) – Tolerance error parameter. It is recommended to set a
-large value (about 1e-5) for high order polynomial (&gt;= 3) or a polynomial
-with multiple root. Defaults to 1e-10.</p></li>
+<li><p><strong>tol</strong> (<em>float</em><em>, </em><em>optional</em>) – Tolerance error parameter. It is recommended to set a large value (about 1e-5)
+for high order polynomial (&gt;= 3) or a polynomial with multiple root. Defaults to 1e-10.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1169,8 +1105,7 @@ a_i + b_i * z &lt; 0.0 for all i in [len(a)].</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>rv</strong> (<em>rv_continuous</em>) – The rv_continuous instance to be truncated.</p></li>
 <li><p><strong>z</strong> (<em>float</em>) – The value at which to compute the cdf of the truncated distribution.</p></li>
-<li><p><strong>intervals</strong> (<em>np.ndarray</em><em> | </em><em>list</em><em>[</em><em>list</em><em>[</em><em>float</em><em>]</em><em>] </em><em>| </em><a class="reference internal" href="#sicore.RealSubset" title="sicore.RealSubset"><em>RealSubset</em></a>) – The truncated intervals
-[[l1, u1], [l2, u2], …].</p></li>
+<li><p><strong>intervals</strong> (<em>np.ndarray</em><em> | </em><em>list</em><em>[</em><em>list</em><em>[</em><em>float</em><em>]</em><em>] </em><em>| </em><a class="reference internal" href="#sicore.RealSubset" title="sicore.RealSubset"><em>RealSubset</em></a>) – The truncated intervals [[l1, u1], [l2, u2], …].</p></li>
 <li><p><strong>absolute</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to compute the cdf for the distribution of the
 absolute value of the random variable. Defaults to False.</p></li>
 </ul>
@@ -1198,15 +1133,13 @@ Wasserstein distance from the standard gaussian distribution.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>rv_name</strong> (<em>Literal</em><em>[</em><em>&quot;skewnorm&quot;</em><em>,</em><em>&quot;exponnorm&quot;</em><em>, </em><em>&quot;gennormsteep&quot;</em><em>, </em><em>&quot;gennormflat&quot;</em><em>, </em><em>&quot;t&quot;</em><em>]</em>) – Random variable name to be generated.</p></li>
-<li><p><strong>distance</strong> (<em>float</em>) – Wasserstein distance between the generated random variable
-and the standard gaussian distribution. It is strongly
-recommended to set a value between 0.01 and 0.15.</p></li>
+<li><p><strong>distance</strong> (<em>float</em>) – Wasserstein distance between the generated random variable and the standard gaussian distribution.
+It is strongly recommended to set a value between 0.01 and 0.15.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Generated standardized random variable from the
-specified random variable family which has the specified
-Wasserstein distance from the standard gaussian distribution.</p>
+<dd class="field-even"><p>Generated standardized random variable from the specified random variable family
+which has the specified Wasserstein distance from the standard gaussian distribution.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>rv_continuous</p>
@@ -1239,11 +1172,12 @@ Wasserstein distance from the standard gaussian distribution.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">OneVector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sicore.OneVector" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Vector whose elements from position <cite>i</cite> to <cite>j</cite> are set to 1, and 0 otherwise.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>length</strong> (<em>int</em>) – Dimension of the vector.</p>
-</dd>
-</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sicore.OneVector.int">
+<span class="sig-name descname"><span class="pre">int</span></span><a class="headerlink" href="#sicore.OneVector.int" title="Link to this definition">¶</a></dt>
+<dd><p>Dimension of the vector.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sicore.OneVector.get">
 <span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#sicore.OneVector.get" title="Link to this definition">¶</a></dt>
@@ -1252,9 +1186,8 @@ Wasserstein distance from the standard gaussian distribution.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>i</strong> (<em>int</em>) – Start index of 1 (1&lt;=i&lt;=`length`).</p></li>
-<li><p><strong>j</strong> (<em>int</em><em>, </em><em>optional</em>) – End index of 1 (1&lt;=j&lt;=`length`). If None, it returns a
-vector whose <cite>i</cite>-th element is set to 1, and 0 otherwise.
-Defaults to None.</p></li>
+<li><p><strong>j</strong> (<em>int</em><em>, </em><em>optional</em>) – End index of 1 (1&lt;=j&lt;=`length`).
+If None, it returns a vector whose <cite>i</cite>-th element is set to 1, and 0 otherwise.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1275,15 +1208,13 @@ Defaults to None.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>basis</strong> (<em>np.ndarray</em><em> | </em><em>list</em><em>[</em><em>list</em><em>[</em><em>float</em><em>]</em><em>]</em>) – The basis of the k-dimensional subspace
-to be projected. The shape of the basis should be (k, n),
-where n is the dimension of the data space.</p></li>
-<li><p><strong>verify</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to verify the constructed projection matrix.
-Defaults to False.</p></li>
+<li><p><strong>basis</strong> (<em>np.ndarray</em><em> | </em><em>list</em><em>[</em><em>list</em><em>[</em><em>float</em><em>]</em><em>]</em>) – The basis of the k-dimensional subspace to be projected.
+The shape of the basis should be (k, n), where n is the dimension of the data space.</p></li>
+<li><p><strong>verify</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to verify the constructed projection matrix. Defaults to False.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>ValueError</strong> – The constructed projection matrix is not consistent with the definition.</p>
+<dd class="field-even"><p><strong>ValueError:</strong> – The constructed projection matrix is not consistent with the definition.</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The constructed projection matrix</p>
@@ -1400,6 +1331,7 @@ Defaults to False.</p></li>
 <li><a class="reference internal" href="#sicore.generate_non_gaussian_rv"><code class="docutils literal notranslate"><span class="pre">generate_non_gaussian_rv()</span></code></a></li>
 <li><a class="reference internal" href="#sicore.uniformity_test"><code class="docutils literal notranslate"><span class="pre">uniformity_test()</span></code></a></li>
 <li><a class="reference internal" href="#sicore.OneVector"><code class="docutils literal notranslate"><span class="pre">OneVector</span></code></a><ul>
+<li><a class="reference internal" href="#sicore.OneVector.int"><code class="docutils literal notranslate"><span class="pre">OneVector.int</span></code></a></li>
 <li><a class="reference internal" href="#sicore.OneVector.get"><code class="docutils literal notranslate"><span class="pre">OneVector.get()</span></code></a></li>
 </ul>
 </li>

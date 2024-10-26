@@ -17,28 +17,34 @@ def rejection_rate(
 ) -> float:
     """Compute rejection rate from list of SelectiveInferenceResult objects or p-values.
 
-    Args:
-        results (list[SelectiveInferenceResult] | np.ndarray | list[float]):
-            List of SelectiveInferenceResult objects or p-values.
-        alpha (float, optional): Significance level. Defaults to 0.05.
-        naive (bool, optional):
-            Whether to compute rejection rate of naive inference.
-            This option is available only when results are
-            SelectiveInferenceResult objects. Defaults to False.
-        bonferroni (bool, optional):
-            Whether to compute rejection rate with Bonferroni correction.
-            This option is available only when results are
-            SelectiveInferenceResult objects. Defaults to False.
-        log_num_comparisons (float, optional):
-            Logarithm of the number of comparisons for the Bonferroni correction.
-            This option is ignored when bonferroni is False.
-            Defaults to 0.0, which means no correction.
+    Parameters
+    ----------
+    results : list[SelectiveInferenceResult] | np.ndarray | list[float]
+        List of SelectiveInferenceResult objects or p-values.
+    alpha : float, optional
+        Significance level. Defaults to 0.05.
+    naive (bool, optional):
+        Whether to compute rejection rate of naive inference.
+        This option is available only when results are
+        SelectiveInferenceResult objects. Defaults to False.
+    bonferroni : bool, optional
+        Whether to compute rejection rate with Bonferroni correction.
+        This option is available only when results are
+        SelectiveInferenceResult objects. Defaults to False.
+    log_num_comparisons : float, optional
+        Logarithm of the number of comparisons for the Bonferroni correction.
+        This option is ignored when bonferroni is False.
+        Defaults to 0.0, which means no correction.
 
-    Returns:
-        float: Rejection rate.
+    Returns
+    -------
+    float
+        Rejection rate.
 
-    Raises:
-        ValueError: naive and bonferroni cannot be True at the same time.
+    Raises
+    ------
+    ValueError
+        The naive and bonferroni option cannot be True at the same time.
     """
     if naive and bonferroni:
         raise ValueError

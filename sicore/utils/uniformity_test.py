@@ -16,9 +16,11 @@ from scipy.stats._hypotests import _cdf_cvm  # type: ignore[import]
 class UniformityTestResult:
     """A class containing the result of uniformity tests.
 
-    Attributes:
-        is_rejected: A dictionary containing the test name and a boolean value
-            indicating whether the null hypothesis is rejected
+    Attributes
+    ----------
+    is_rejected:
+        A dictionary containing the test name and a boolean value indicating
+        whether the null hypothesis is rejected
     """
 
     is_rejected: dict[str, bool]
@@ -39,8 +41,10 @@ class UniformityTestResult:
     def __str__(self) -> str:
         """Return a string representation of the UniformityTestResult object.
 
-        Returns:
-            str: String representation of the UniformityTestResult object.
+        Returns
+        -------
+        str
+            String representation of the UniformityTestResult object.
         """
         return "\n".join(
             [
@@ -55,8 +59,10 @@ class UniformityTestResult:
     def __repr__(self) -> str:
         """Return a string representation that can be used to recreate the object.
 
-        Returns:
-            str: String representation of the UniformityTestResult object.
+        Returns
+        -------
+        str
+            String representation of the UniformityTestResult object.
         """
         return "\n".join(
             [
@@ -89,7 +95,7 @@ class UniformityTest:
 
     @staticmethod
     def diff_samples(samples: np.ndarray | list[float]) -> np.ndarray:
-        """Computed differences between samples."""
+        """Compute differences between samples."""
         samples = UniformityTest.sort_samples(samples)
         samples = np.hstack(
             [np.zeros((samples.shape[0], 1)), samples, np.ones((samples.shape[0], 1))],
@@ -694,12 +700,17 @@ def uniformity_test(
 ) -> UniformityTestResult:
     """Conduct 25 types of uniformity tests on the given samples.
 
-    Args:
-        samples (np.ndarray | list[float]): The samples to be tested. Must be 1D array.
-        alpha (float, optional): The significance level. Defaults to 0.05.
+    Parameters
+    ----------
+    samples : np.ndarray | list[float]
+        The samples to be tested. Must be 1D array.
+    alpha : float, optional
+        The significance level. Defaults to 0.05.
 
-    Returns:
-        UniformityTestResult: A class containing the result of uniformity tests.
+    Returns
+    -------
+    UniformityTestResult
+        A class containing the result of uniformity tests.
     """
     test_instances: list[UniformityTest] = [
         KolmogorovSmirnovTest(),

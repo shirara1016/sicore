@@ -52,10 +52,11 @@ ignore = [
     "PLR0915", # too many statements
     "C901",    # function too complex
     "E501",    # line too long
+    "PD",      # disable pandas warnings
 ]
 
 [tool.ruff.lint.pydocstyle]
-convention = "google"
+convention = "numpy"
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*.py" = [

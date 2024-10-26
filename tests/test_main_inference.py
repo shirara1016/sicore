@@ -19,11 +19,16 @@ class MarginalScreening:
     def __init__(self, X: np.ndarray, y: np.ndarray, sigma: float, k: int) -> None:
         """Initialize a MarginalScreening object.
 
-        Args:
-            X (np.ndarray): Feature matrix, whose shape is (n_samples, n_features).
-            y (np.ndarray): Response vector, whose shape is (n_samples,).
-            sigma (float): Standard deviation of the response vector.
-            k (int): Number of features to select.
+        Parameters
+        ----------
+        X : np.ndarray
+            Feature matrix, whose shape is (n_samples, n_features).
+        y : np.ndarray
+            Response vector, whose shape is (n_samples,).
+        sigma : float
+            Standard deviation of the response vector.
+        k : int
+            Number of features to select.
         """
         self.X, self.y, self.sigma, self.k = X, y, sigma, k
         self.M = self._feature_selection(X, y, k)
@@ -31,13 +36,19 @@ class MarginalScreening:
     def _feature_selection(self, X: np.ndarray, y: np.ndarray, k: int) -> list[int]:
         """Select the top k features based on the correlation with the response vector.
 
-        Args:
-            X (np.ndarray): Feature matrix, whose shape is (n_samples, n_features).
-            y (np.ndarray): Response vector, whose shape is (n_samples,).
-            k (int): Number of features to select.
+        Parameters
+        ----------
+        X : np.ndarray
+            Feature matrix, whose shape is (n_samples, n_features).
+        y : np.ndarray
+            Response vector, whose shape is (n_samples,).
+        k : int
+            Number of features to select.
 
-        Returns:
-            list[int]: Indices of the selected features.
+        Returns
+        -------
+        list[int]
+            Indices of the selected features.
         """
         return np.argsort(np.abs(X.T @ y))[::-1][:k].tolist()
 
@@ -47,20 +58,26 @@ class MarginalScreening:
         b: np.ndarray,
         z: float,
     ) -> tuple[list[int], RealSubset]:
-        """A function to conduct selective inference.
+        """Conduct selective inference.
 
         It takes a, b, and z as input and apply marginal screening to the dataset
         (self.X, a + b * z) to select the top self.k features M. It returns
         the selected features and the intervals where the same features are selected,
         i.e., from (self.X, a + b * r) we can select the features M for any r in the intervals.
 
-        Args:
-            a (np.ndarray): _description_
-            b (np.ndarray): _description_
-            z (float): _description_
+        Parameters
+        ----------
+        a : np.ndarray
+            Search direction vector, whose shape is same to the data.
+        b : np.ndarray
+            Search direction vector, whose shape is same to the data.
+        z : float
+            Search point.
 
-        Returns:
-            tuple[list[int], RealSubset]: _description_
+        Returns
+        -------
+        tuple[list[int], RealSubset]
+            Selected features and the intervals where the same features are selected.
         """
         a, b = self.X.T @ a, self.X.T @ b
 
@@ -87,17 +104,20 @@ class MarginalScreening:
         return indexes[: self.k].tolist(), intervals
 
     def model_selector(self, M: list[int]) -> bool:
-        """A function to conduct selective inference.
+        """Conduct selective inference.
 
         It takes a list of indices M as input and returns True if the selected features
         are the same as the features selected from the obsearved dataset (self.X, self.y).
 
-        Args:
-            M (list[int]): A list of indices of the selected features.
+        Parameters
+        ----------
+        M : list[int]
+            A list of indices of the selected features.
 
-        Returns:
-            bool: True if the selected features are the same as the features selected
-                from the obsearved dataset (self.X, self.y).
+        Returns
+        -------
+        bool
+            True if the selected features are the same as the features selected from the obsearved dataset (self.X, self.y).
         """
         return set(self.M) == set(M)
 
@@ -108,11 +128,15 @@ class MarginalScreeningNorm(MarginalScreening):
     def construct_eta(self, index: int) -> np.ndarray:
         """Construct the eta vector for the selective inference.
 
-        Args:
-            index (int): Target index for the selective inference.
+        Parameters
+        ----------
+        index : int
+            Target index for the selective inference.
 
-        Returns:
-            np.ndarray: Constructed eta vector.
+        Returns
+        -------
+        np.ndarray
+            Constructed eta vector.
         """
         return (
             self.X[:, self.M]
@@ -127,15 +151,19 @@ class MarginalScreeningNorm(MarginalScreening):
     ) -> SelectiveInferenceResult:
         """Conduct selective inference for the normal distribution.
 
-        Args:
-            index (int): Target index for the selective inference.
-            search_strategy (Literal["pi1", "pi2", "pi3"]):
-                Search strategy for the test.
-            termination_criterion (Literal["precision", "decision"]):
-                Termination criterion for the test.
+        Parameters
+        ----------
+        index : int
+            Target index for the selective inference.
+        search_strategy : Literal["pi1", "pi2", "pi3"]
+            Search strategy for the test.
+        termination_criterion : Literal["precision", "decision"]
+            Termination criterion for the test.
 
-        Returns:
-            SelectiveInferenceResult: The result of the selective inference.
+        Returns
+        -------
+        SelectiveInferenceResult
+            The result of the selective inference.
         """
         eta = self.construct_eta(index)
         si = SelectiveInferenceNorm(self.y, self.sigma, eta)
@@ -153,11 +181,15 @@ class MarginalScreeningChi(MarginalScreening):
     def construct_projection(self, indexes: list[int]) -> np.ndarray:
         """Construct the P matrix for the selective inference.
 
-        Args:
-            indexes (int): Target indexes for the selective inference.
+        Parameters
+        ----------
+        indexes : list[int]
+            Target indexes for the selective inference.
 
-        Returns:
-            np.ndarray: Constructed P vector.
+        Returns
+        -------
+        np.ndarray
+            Constructed P vector.
         """
         return construct_projection_matrix(self.X[:, np.array(self.M)[indexes]].T)
 
@@ -169,15 +201,19 @@ class MarginalScreeningChi(MarginalScreening):
     ) -> SelectiveInferenceResult:
         """Conduct selective inference for the chi distribution.
 
-        Args:
-            indexes (list[int]): Target indexes for the selective inference.
-            search_strategy (Literal["pi1", "pi2", "pi3"]):
-                Search strategy for the test.
-            termination_criterion (Literal["precision", "decision"]):
-                Termination criterion for the test.
+        Parameters
+        ----------
+        indexes : list[int]
+            Target indexes for the selective inference.
+        search_strategy : Literal["pi1", "pi2", "pi3"]
+            Search strategy for the test.
+        termination_criterion : Literal["precision", "decision"]
+            Termination criterion for the test.
 
-        Returns:
-            SelectiveInferenceResult: The result of the selective inference.
+        Returns
+        -------
+        SelectiveInferenceResult
+            The result of the selective inference.
         """
         projection = self.construct_projection(indexes)
         si = SelectiveInferenceChi(self.y, self.sigma, projection)

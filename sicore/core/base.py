@@ -17,20 +17,28 @@ from .real_subset import RealSubset
 class SelectiveInferenceResult:
     """A class containing the results of selective inference.
 
-    Attributes:
-        stat (float): Test statistic value.
-        p_value (float): Selective p-value.
-        inf_p (float): Lower bound of selective p-value.
-        sup_p (float): Upper bound of selective p-value.
-        searched_intervals (list[list[float]]):
-            Intervals where the search was performed.
-        truncated_intervals (list[list[float]]):
-            Intervals where the selected model is obtained.
-        search_count (int): Number of times the search was performed.
-        detect_count (int): Number of times the selected model was obtained.
-        null_rv (rv_continuous): Null distribution of the unconditional test statistic.
-        alternative (Literal["two-sided", "less", "greater"]): Type of the
-            alternative hypothesis.
+    Attributes
+    ----------
+    stat : float
+        Test statistic value.
+    p_value : float
+        Selective p-value.
+    inf_p : float
+        Lower bound of selective p-value.
+    sup_p : float
+        Upper bound of selective p-value.
+    searched_intervals : list[list[float]]
+        Intervals where the search was performed.
+    truncated_intervals : list[list[float]]
+        Intervals where the selected model is obtained.
+    search_count : int
+        Number of times the search was performed.
+    detect_count : int
+        Number of times the selected model was obtained.
+    null_rv : rv_continuous
+        Null distribution of the unconditional test statistic.
+    alternative : Literal["two-sided", "less", "greater"]
+        Type of the alternative hypothesis.
     """
 
     stat: float
@@ -59,19 +67,25 @@ class SelectiveInferenceResult:
     def naive_p_value(self) -> float:
         """Compute the naive p-value.
 
-        Returns:
-            float: The naive p-value.
+        Returns
+        -------
+        float
+            The naive p-value.
         """
         return np.exp(self._log_naive_p_value)
 
     def bonferroni_p_value(self, log_num_comparisons: float) -> float:
         """Compute the Bonferroni-corrected p-value.
 
-        Args:
-            log_num_comparisons (float): Logarithm of the number of comparisons.
+        Parameters
+        ----------
+        log_num_comparisons : float
+            Logarithm of the number of comparisons.
 
-        Returns:
-            float: The Bonferroni-corrected p-value.
+        Returns
+        -------
+        float
+            The Bonferroni-corrected p-value.
         """
         log_bonferroni_p_value = np.clip(
             self._log_naive_p_value + log_num_comparisons,
@@ -83,8 +97,10 @@ class SelectiveInferenceResult:
     def __str__(self) -> str:
         """Return a string representation of the SelectiveInferenceResult object.
 
-        Returns:
-            str: A string representation of the SelectiveInferenceResult object.
+        Returns
+        -------
+        str
+            A string representation of the SelectiveInferenceResult object.
         """
         precision = 6
 
@@ -151,19 +167,25 @@ def _compute_pvalue(
 ) -> float:
     """Compute the p-value from the CDF value.
 
-    Args:
-        cdf_value (float): The CDF value.
-        alternative (Literal["two-sided", "less", "greater"]):
-            Must be one of 'two-sided', 'less', or 'greater'.
-            If 'two-sided', the p-value is computed for the two-tailed test.
-            If 'less', the p-value is computed for the right-tailed test.
-            If 'greater', the p-value is computed for the left-tailed test.
+    Parameters
+    ----------
+    cdf_value : float
+        The CDF value.
+    alternative : Literal["two-sided", "less", "greater"]
+        Must be one of 'two-sided', 'less', or 'greater'.
+        If 'two-sided', the p-value is computed for the two-tailed test.
+        If 'less', the p-value is computed for the right-tailed test.
+        If 'greater', the p-value is computed for the left-tailed test.
 
-    Returns:
-        float: The p-value.
+    Returns
+    -------
+    float
+        The p-value.
 
-    Raises:
-        ValueError: If `alternative` is not one of 'two-sided', 'less', or 'greater'.
+    Raises
+    ------
+    ValueError
+        If `alternative` is not one of 'two-sided', 'less', or 'greater'.
     """
     match alternative:
         case "two-sided" | "less":
@@ -181,17 +203,22 @@ def _evaluate_pvalue_bounds(
 ) -> tuple[float, float]:
     """Evaluate the bounds of the p-value from the bounds of the CDF values.
 
-    Args:
-        inf_cdf (float): The lower bound of the CDF value.
-        sup_cdf (float): The upper bound of the CDF value.
-        alternative (Literal["two-sided", "less", "greater"]):
-            Must be one of 'two-sided', 'less', or 'greater'.
-            If 'two sided', the p-value is computed for the two-tailed test.
-            If 'less', the p-value is computed for the right-tailed test.
-            If 'greater', the p-value is computed for the left-tailed test.
+    Parameters
+    ----------
+    inf_cdf : float
+        The lower bound of the CDF value.
+    sup_cdf : float
+        The upper bound of the CDF value.
+    alternative : Literal["two-sided", "less", "greater"]
+        Must be one of 'two-sided', 'less', or 'greater'.
+        If 'two sided', the p-value is computed for the two-tailed test.
+        If 'less', the p-value is computed for the right-tailed test.
+        If 'greater', the p-value is computed for the left-tailed test.
 
-    Returns:
-        tuple[float, float]: The lower and upper bounds of the p-value.
+    Returns
+    -------
+    tuple[float, float]
+        The lower and upper bounds of the p-value.
     """
     p_value_from_inf = _compute_pvalue(inf_cdf, alternative)
     p_value_from_sup = _compute_pvalue(sup_cdf, alternative)
@@ -248,66 +275,71 @@ class SelectiveInference:
     ) -> SelectiveInferenceResult:
         """Conduct selective inference.
 
-        Args:
-            algorithm (Callable[[np.ndarray, np.ndarray, float], tuple[Any, list[list[float]] | RealSubset]]):
-                Callable function which takes two vectors a (np.ndarray) and
-                b (np.ndarray), and a scalar z (float), and returns a model (Any) and
-                intervals (list[list[float]] | RealSubset). For any point in
-                the intervals, the same model must be selected.
-            model_selector (Callable[[Any], bool]):
-                Callable function which takes a model (Any) and returns a boolean value,
-                indicating whether the model is the same as the selected model.
-            alternative (Literal["two-sided", "less", "greater"] | None, optional):
-                Must be one of 'two-sided', 'less', or 'greater' or None.
-                If 'two-sided', we consider the two-tailed test.
-                If 'less', we consider the right-tailed test.
-                If 'greater', we consider the left-tailed test.
-                If set to None, defaults to 'two-sided' for the normal distribution
-                and 'less' for the chi distribution. Defaults to None.
-            inference_mode (Literal["parametric", "exhaustive", "over_conditioning"], optional):
-                Must be one of 'parametric', 'exhaustive',or 'over_conditioning'.
-                Defaults to 'parametric'.
-            search_strategy (Callable[[RealSubset], list[float]] | Literal["pi1", "pi2", "pi3", "parallel"], optional):
-                Callable function which takes a searched_intervals (RealSubset) and
-                returns next search points (list[float]).
-                If not callable, it must be one of 'pi1', 'pi2', 'pi3', or 'parallel'.
-                If 'pi1', the search strategy focuses on the truncated intervals.
-                If 'pi2', the search strategy focuses on the searched intervals.
-                If 'pi3', the search strategy focuses on the both of the truncated
-                and searched intervals.
-                If 'parallel', the search strategy focuses on the both of the
-                truncated and searched intervals for the parallel computing.
-                This option is ignored when the inference_mode is
-                'exhaustive' or 'over_conditioning'. Defaults to 'pi3'.
-            termination_criterion (Callable[[RealSubset, RealSubset], bool] | Literal["precision", "decision"], optional):
-                Callable function which takes searched_intervals (RealSubset) and
-                truncated_intervals (RealSubset) and returns a boolean value, indicating
-                whether the search should be terminated.
-                If not callable, it must be one of 'precision' or 'decision'.
-                If 'precision', the termination criterion is based on
-                the precision in the computation of the p-value.
-                If 'decision', the termination criterion is based on
-                the decision result by the p-value.
-                This option is ignored when the inference_mode is 'exhaustive' or
-                'over_conditioning'. Defaults to 'precision'.
-            max_iter (int, optional):
-                Maximum number of iterations. Defaults to 100_000.
-            n_jobs (int, optional):
-                Number of jobs to run in parallel. Defaults to 1.
-            step (float, optional):
-                Step size for the search strategy. Defaults to 1e-6.
-            significance_level (float, optional):
-                Significance level only for the termination criterion 'decision'.
-                Defaults to 0.05.
-            precision (float, optional):
-                Precision only for the termination criterion 'precision'.
-                Defaults to 0.001.
+        Parameters
+        ----------
+        algorithm : Callable[[np.ndarray, np.ndarray, float], tuple[Any, list[list[float]] | RealSubset]])
+            Callable function which takes two vectors a (np.ndarray) and
+            b (np.ndarray), and a scalar z (float), and returns a model (Any) and
+            intervals (list[list[float]] | RealSubset). For any point in
+            the intervals, the same model must be selected.
+        model_selector : Callable[[Any], bool]
+            Callable function which takes a model (Any) and returns a boolean value,
+            indicating whether the model is the same as the selected model.
+        alternative : Literal["two-sided", "less", "greater"] | None, optional
+            Must be one of 'two-sided', 'less', or 'greater' or None.
+            If 'two-sided', we consider the two-tailed test.
+            If 'less', we consider the right-tailed test.
+            If 'greater', we consider the left-tailed test.
+            If set to None, defaults to 'two-sided' for the normal distribution
+            and 'less' for the chi distribution. Defaults to None.
+        inference_mode : Literal["parametric", "exhaustive", "over_conditioning"], optional
+            Must be one of 'parametric', 'exhaustive',or 'over_conditioning'.
+            Defaults to 'parametric'.
+        search_strategy : Callable[[RealSubset], list[float]] | Literal["pi1", "pi2", "pi3", "parallel"], optional
+            Callable function which takes a searched_intervals (RealSubset) and
+            returns next search points (list[float]).
+            If not callable, it must be one of 'pi1', 'pi2', 'pi3', or 'parallel'.
+            If 'pi1', the search strategy focuses on the truncated intervals.
+            If 'pi2', the search strategy focuses on the searched intervals.
+            If 'pi3', the search strategy focuses on the both of the truncated
+            and searched intervals.
+            If 'parallel', the search strategy focuses on the both of the
+            truncated and searched intervals for the parallel computing.
+            This option is ignored when the inference_mode is
+            'exhaustive' or 'over_conditioning'. Defaults to 'pi3'.
+        termination_criterion : Callable[[RealSubset, RealSubset], bool] | Literal["precision", "decision"], optional
+            Callable function which takes searched_intervals (RealSubset) and
+            truncated_intervals (RealSubset) and returns a boolean value, indicating
+            whether the search should be terminated.
+            If not callable, it must be one of 'precision' or 'decision'.
+            If 'precision', the termination criterion is based on
+            the precision in the computation of the p-value.
+            If 'decision', the termination criterion is based on
+            the decision result by the p-value.
+            This option is ignored when the inference_mode is 'exhaustive' or
+            'over_conditioning'. Defaults to 'precision'.
+        max_iter : int, optional
+            Maximum number of iterations. Defaults to 100_000.
+        n_jobs : int, optional
+            Number of jobs to run in parallel. Defaults to 1.
+        step : float, optional
+            Step size for the search strategy. Defaults to 1e-6.
+        significance_level : float, optional
+            Significance level only for the termination criterion 'decision'.
+            Defaults to 0.05.
+        precision : float, optional
+            Precision only for the termination criterion 'precision'.
+            Defaults to 0.001.
 
-        Raises:
-            InfiniteLoopError: If the search falls into an infinite loop.
+        Raises
+        ------
+        InfiniteLoopError
+            If the search falls into an infinite loop.
 
-        Returns:
-            SelectiveInferenceResult: The result of the selective inference.
+        Returns
+        -------
+        SelectiveInferenceResult
+            The result of the selective inference.
         """
         self.n_jobs = n_jobs
         self.step = step
@@ -392,11 +424,15 @@ class SelectiveInference:
     def _compute_pvalue(self, truncated_intervals: RealSubset) -> float:
         """Compute p-value for the given truncated intervals.
 
-        Args:
-            truncated_intervals (RealSubset): The truncated intervals.
+        Parameters
+        ----------
+        truncated_intervals : RealSubset
+            The truncated intervals.
 
-        Returns:
-            float: The p-value from the truncated intervals.
+        Returns
+        -------
+        float
+            The p-value from the truncated intervals.
         """
         absolute = self.alternative == "two-sided"
         cdf_value = truncated_cdf(
@@ -414,12 +450,17 @@ class SelectiveInference:
     ) -> tuple[float, float]:
         """Evaluate the bounds of the p-value from the truncated and searched intervals.
 
-        Args:
-            searched_intervals (RealSubset): The searched intervals.
-            truncated_intervals (RealSubset): The truncated intervals.
+        Parameters
+        ----------
+        searched_intervals : RealSubset
+            The searched intervals.
+        truncated_intervals : RealSubset
+            The truncated intervals.
 
-        Returns:
-            tuple[float, float]: The lower and upper bounds of the p-value.
+        Returns
+        -------
+        tuple[float, float]
+            The lower and upper bounds of the p-value.
         """
         absolute = self.alternative == "two-sided"
         if absolute:
@@ -448,20 +489,23 @@ class SelectiveInference:
     ) -> Callable[[RealSubset], list[float]]:
         """Create a search strategy.
 
-        Args:
-            inference_mode (Literal["parametric", "exhaustive", "over_conditioning"]):
-                Must be one of 'parametric', 'exhaustive', or 'over_conditioning'.
-            search_strategy_name (Literal["pi1", "pi2", "pi3", "parallel"]):
-                Must be one of 'pi1', 'pi2', 'pi3', or 'parallel'.
-                If 'pi1', the search strategy focuses on the truncated intervals.
-                If 'pi2', the search strategy focuses on the searched intervals.
-                If 'pi3', the search strategy focuses on the both of
-                the truncated and searched intervals.
-                If 'parallel', the search strategy focuses on the both of the
-                truncated and searched intervals for the parallel computing.
+        Parameters
+        ----------
+        inference_mode : Literal["parametric", "exhaustive", "over_conditioning"]
+            Must be one of 'parametric', 'exhaustive', or 'over_conditioning'.
+        search_strategy_name : Literal["pi1", "pi2", "pi3", "parallel"]
+            Must be one of 'pi1', 'pi2', 'pi3', or 'parallel'.
+            If 'pi1', the search strategy focuses on the truncated intervals.
+            If 'pi2', the search strategy focuses on the searched intervals.
+            If 'pi3', the search strategy focuses on the both of
+            the truncated and searched intervals.
+            If 'parallel', the search strategy focuses on the both of the
+            truncated and searched intervals for the parallel computing.
 
-        Returns:
-            Callable[[RealSubset], list[float]]: The search strategy.
+        Returns
+        -------
+        Callable[[RealSubset], list[float]]
+            The search strategy.
         """
         match inference_mode, search_strategy_name:
             case "exhaustive", _:
@@ -560,18 +604,21 @@ class SelectiveInference:
     ) -> Callable[[RealSubset, RealSubset], bool]:
         """Create a termination criterion.
 
-        Args:
-            inference_mode (Literal["parametric", "exhaustive", "over_conditioning"]):
-                Must be one of 'parametric', 'exhaustive', or 'over_conditioning'.
-            termination_criterion_name (Literal["precision", "decision"]):
-                Must be one of 'precision' or 'decision'.
-                If 'precision', the termination criterion is based on
-                the precision in the computation of the p-value.
-                If 'decision', the termination criterion is based on
-                the decision result by the p-value.
+        Parameters
+        ----------
+        inference_mode : Literal["parametric", "exhaustive", "over_conditioning"]
+            Must be one of 'parametric', 'exhaustive', or 'over_conditioning'.
+        termination_criterion_name : Literal["precision", "decision"]
+            Must be one of 'precision' or 'decision'.
+            If 'precision', the termination criterion is based on
+            the precision in the computation of the p-value.
+            If 'decision', the termination criterion is based on
+            the decision result by the p-value.
 
-        Returns:
-            Callable[[RealSubset, RealSubset], list[float]]: The termination criterion.
+        Returns
+        -------
+        Callable[[RealSubset, RealSubset], list[float]]
+            The termination criterion.
         """
         match inference_mode, termination_criterion_name:
             case "exhaustive", _:

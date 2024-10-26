@@ -21,14 +21,19 @@ def pvalues_hist(
 ) -> None:
     """Plot histogram of p-values.
 
-    Args:
-        p_values (list[float] | np.ndarray): List of p-values.
-        bins (int, optional): The number of bins. Defaults to 20.
-        title (str | None, optional): Title of the figure. Defaults to None.
-        fname (str | None, optional):
-            File name. If `fname` is given, the plotted figure will
-            be saved as a file. Defaults to None.
-        figsize (tuple[float, float], optional): Size of the figure. Defaults to (6, 4).
+    Parameters
+    ----------
+    p_values : list[float] | np.ndarray
+        List of p-values.
+    bins : int, optional
+        The number of bins. Defaults to 20.
+    title : str | None, optional
+        Title of the figure. Defaults to None.
+    fname : str | None, optional
+        File name. If `fname` is given, the plotted figure will be saved as a file.
+        Defaults to None.
+    figsize : tuple[float, float], optional
+        Size of the figure. Defaults to (6, 4).
     """
     plt.figure(figsize=figsize)
     if title is not None:
@@ -53,16 +58,20 @@ def pvalues_qqplot(
 ) -> None:
     """Plot uniform Q-Q plot of p-values.
 
-    Args:
-        p_values (list[float] | np.ndarray): List of p-values.
-        plot_pos (list[float] | np.ndarray | None, optional):
-            Plotting positions. If None, default plotting positions will be used.
-            Defaults to None.
-        title (str | None, optional): Title of the figure. Defaults to None.
-        fname (str | None, optional):
-            File name. If `fname` is given, the plotted figure will
-            be saved as a file. Defaults to None.
-        figsize (tuple[float, float], optional): Size of the figure. Defaults to (4, 4).
+    Parameters
+    ----------
+    p_values : list[float] | np.ndarray
+        List of p-values.
+    plot_pos : list[float] | np.ndarray | None, optional
+        Plotting positions. If None, default plotting positions will be used.
+        Defaults to None.
+    title : str | None, optional
+        Title of the figure. Defaults to None.
+    fname : str | None, optional
+        File name. If `fname` is given, the plotted figure will be saved as a file.
+        Defaults to None.
+    figsize : tuple[float, float], optional
+        Size of the figure. Defaults to (4, 4).
     """
     n = len(p_values)
     plot_pos = plot_pos or [k / (n + 1) for k in range(1, n + 1)]
@@ -86,23 +95,19 @@ def pvalues_qqplot(
 class SummaryFigure:
     """A class plotting a summary figure of experiments.
 
-    Args:
-        title (str | None, optional): Title of the figure. Defaults to None.
-        xlabel (str | None, optional): Label of x-axis. Defaults to None.
-        ylabel (str | None, optional): Label of y-axis. Defaults to None.
-
-    Examples:
-        >>> fig = SummaryFigure(xlabel='Image Size', ylabel="Type I Error Rate")
-        >>> fig.add_value(0.053, "proposed", "64")
-        >>> fig.add_value(0.048, "proposed", "256")
-        >>> fig.add_value(0.046, "proposed", "1024")
-        >>> fig.add_value(0.052, "proposed", "4096")
-        >>> fig.add_value(0.413, "naive", "64")
-        >>> fig.add_value(0.821, "naive", "256")
-        >>> fig.add_value(0.483, "naive", "1024")
-        >>> fig.add_value(0.418, "naive", "4096")
-        >>> fig.add_red_line(0.05, "significance level")
-        >>> fig.plot(filepath="fpr.pdf", fontsize=16)
+    Examples
+    --------
+    >>> fig = SummaryFigure(xlabel='Image Size', ylabel="Type I Error Rate")
+    >>> fig.add_value(0.053, "proposed", "64")
+    >>> fig.add_value(0.048, "proposed", "256")
+    >>> fig.add_value(0.046, "proposed", "1024")
+    >>> fig.add_value(0.052, "proposed", "4096")
+    >>> fig.add_value(0.413, "naive", "64")
+    >>> fig.add_value(0.821, "naive", "256")
+    >>> fig.add_value(0.483, "naive", "1024")
+    >>> fig.add_value(0.418, "naive", "4096")
+    >>> fig.add_red_line(0.05, "significance level")
+    >>> fig.plot(filepath="fpr.pdf", fontsize=16)
     """
 
     def __init__(
@@ -113,10 +118,14 @@ class SummaryFigure:
     ) -> None:
         """Initialize a summary figure.
 
-        Args:
-            title (str | None, optional): Title of the figure. Defaults to None.
-            xlabel (str | None, optional): Label of x-axis. Defaults to None.
-            ylabel (str | None, optional): Label of y-axis. Defaults to None.
+        Parameters
+        ----------
+        title : str | None, optional
+            Title of the figure. Defaults to None.
+        xlabel : str | None, optional
+            Label of x-axis. Defaults to None.
+        ylabel : str | None, optional
+            Label of y-axis. Defaults to None.
         """
         self.title = title
         self.xlabel = xlabel
@@ -132,13 +141,17 @@ class SummaryFigure:
     ) -> None:
         """Add a value to the figure.
 
-        Args:
-            value (float): Value to be plotted.
-            label (str): Label corresponding to the value.
-                To note that the label well be shown in the given order.
-            xloc (str | float): Location of the value.
-                If str, it will be equally spaced in the given order.
-                If float, it will be the exact location.
+        Parameters
+        ----------
+        value : float
+            Value to be plotted.
+        label : str
+            Label corresponding to the value.
+            To note that the label well be shown in the given order.
+        xloc : str | float
+            Location of the value.
+            If str, it will be equally spaced in the given order.
+            If float, it will be the exact location.
         """
         self.data.setdefault(label, [])
         self.data[label].append((xloc, value, None))
@@ -157,29 +170,28 @@ class SummaryFigure:
     ) -> None:
         """Add rejection rate computed from the given results to the figure.
 
-        Args:
-            results (list[SelectiveInferenceResult] | list[float] | np.ndarray):
-                List of SelectiveInferenceResult objects or p-values.
-            label (str):
-                Label corresponding to the results.
-            xloc (str | float):
-                Location of the results.
-            alpha (float, optional): Significance level. Defaults to 0.05.
-            confidence_level (float | None, optional): Confidence level
-                used to compute the confidence interval for the rejection rate.
-                If None, no confidence interval will be displayed. Defaults to None.
-            naive (bool, optional):
-                Whether to compute rejection rate of naive inference.
-                This option is available only when results are
-                SelectiveInferenceResult objects. Defaults to False.
-            bonferroni (bool, optional):
-                Whether to compute rejection rate with Bonferroni correction.
-                This option is available only when results are
-                SelectiveInferenceResult objects. Defaults to False.
-            log_num_comparisons (float, optional):
-                Logarithm of the number of comparisons for the Bonferroni correction.
-                This option is ignored when bonferroni is False.
-                Defaults to 0.0, which means no correction.
+        Parameters
+        ----------
+        results : list[SelectiveInferenceResult] | np.ndarray | list[float]
+            List of SelectiveInferenceResult objects or p-values.
+        label : str
+            Label corresponding to the results.
+        xloc : str | float
+            Location of the results.
+        alpha : float, optional
+            Significance level. Defaults to 0.05.
+        naive (bool, optional):
+            Whether to compute rejection rate of naive inference.
+            This option is available only when results are
+            SelectiveInferenceResult objects. Defaults to False.
+        bonferroni : bool, optional
+            Whether to compute rejection rate with Bonferroni correction.
+            This option is available only when results are
+            SelectiveInferenceResult objects. Defaults to False.
+        log_num_comparisons : float, optional
+            Logarithm of the number of comparisons for the Bonferroni correction.
+            This option is ignored when bonferroni is False.
+            Defaults to 0.0, which means no correction.
         """
         value = rejection_rate(
             results,
@@ -199,9 +211,12 @@ class SummaryFigure:
     def add_red_line(self, value: float = 0.05, label: str | None = None) -> None:
         """Add a red line at the specified value.
 
-        Args:
-            value (float): Value to be plotted as a red line. Defaults to 0.05.
-            label (str | None): Label of the red line. Defaults to None.
+        Parameters
+        ----------
+        value : float, optional
+            Value to be plotted as a red line. Defaults to 0.05.
+        label : str | None, optional
+            Label of the red line. Defaults to None.
         """
         self.red_lines.append((value, label))
 
@@ -215,21 +230,22 @@ class SummaryFigure:
     ) -> None:
         """Plot the figure.
 
-        Args:
-            filepath (Path | str | None, optional):
-                File path. If `filepath` is given, the plotted figure
-                will be saved as a file. Defaults to None.
-            ylim (tuple[float, float] | None, optional):
-                Range of y-axis. Defaults to None.
-                If None, range of y-axis will be automatically determined.
-            yticks (list[float] | None, optional):
-                List of y-ticks. Defaults to None.
-                If None, y-ticks will be automatically determined.
-            legend_loc (str | None, optional):
-                Location of the legend. Defaults to None.
-                If None, the legend will be placed at the best location.
-            fontsize (int, optional):
-                Font size of the legend. Defaults to 10.
+        Parameters
+        ----------
+        filepath : Path | str | None, optional
+            File path. If `filepath` is given, the plotted figure will be saved as a file.
+            Defaults to None.
+        ylim : tuple[float, float] | None, optional
+            Range of y-axis. If None, range of y-axis will be automatically determined.
+            Defaults to None.
+        yticks : list[float] | None, optional
+            List of y-ticks. If None, y-ticks will be automatically determined.
+            Defaults to None.
+        legend_loc : str | None, optional
+            Location of the legend. If None, the legend will be placed at the best location.
+            Defaults to None.
+        fontsize : int, optional
+            Font size of the legend. Defaults to 10.
         """
         plt.rcParams.update({"font.size": fontsize})
 

@@ -12,14 +12,17 @@ from sicore.core.real_subset import complement, intersection, simplify, union
 def difference(intervals1: np.ndarray, intervals2: np.ndarray) -> np.ndarray:
     """Take the difference of first intervals with second intervals.
 
-    Args:
-        intervals1 (np.ndarray): Intervals [[l1, u1], [l2, u2], ...].
-        intervals2 (np.ndarray): Intervals [[l1, u1], [l2, u2], ...].
+    Parameters
+    ----------
+    intervals1 : np.ndarray
+        Intervals [[l1, u1], [l2, u2], ...].
+    intervals2 : np.ndarray
+        Intervals [[l1, u1], [l2, u2], ...].
 
-    Returns:
-        np.ndarray:
-            Difference of the first input intervals with the second input intervals
-            [[l1', u1'], [l2', u2'], ...].
+    Returns
+    -------
+    np.ndarray
+        Difference of the first input intervals with the second input intervals [[l1', u1'], [l2', u2'], ...].
     """
     return intersection(intervals1, complement(intervals2))
 
@@ -27,14 +30,17 @@ def difference(intervals1: np.ndarray, intervals2: np.ndarray) -> np.ndarray:
 def symmetric_difference(intervals1: np.ndarray, intervals2: np.ndarray) -> np.ndarray:
     """Take the symmetric difference of two intervals.
 
-    Args:
-        intervals1 (np.ndarray): Intervals [[l1, u1], [l2, u2], ...].
-        intervals2 (np.ndarray): Intervals [[l1, u1], [l2, u2], ...].
+    Parameters
+    ----------
+    intervals1 : np.ndarray
+        Intervals [[l1, u1], [l2, u2], ...].
+    intervals2 : np.ndarray
+        Intervals [[l1, u1], [l2, u2], ...].
 
-    Returns:
-        np.ndarray:
-            Symmetric difference of the two input intervals
-            [[l1', u1'], [l2', u2'], ...].
+    Returns
+    -------
+    np.ndarray
+        Symmetric difference of the two input intervals [[l1', u1'], [l2', u2'], ...].
     """
     return union(difference(intervals1, intervals2), difference(intervals2, intervals1))
 
@@ -45,15 +51,18 @@ def polynomial_below_zero(
 ) -> list[list[float]]:
     """Compute intervals where a given polynomial is below zero.
 
-    Args:
-        poly_or_coef (Polynomial | np.ndarray | list[float]):
-            Polynomial or its coefficients e.g. [a, b, c] for a + b * z + c * z ** 2.
-        tol (float, optional): Tolerance error parameter. It is recommended to set a
-            large value (about 1e-5) for high order polynomial (>= 3) or a polynomial
-            with multiple root. Defaults to 1e-10.
+    Parameters
+    ----------
+    poly_or_coef : Polynomial | np.ndarray | list[float]
+        Polynomial or its coefficients e.g. [a, b, c] for a + b * z + c * z ** 2.
+    tol : float, optional
+        Tolerance error parameter. It is recommended to set a large value (about 1e-5)
+        for high order polynomial (>= 3) or a polynomial with multiple root. Defaults to 1e-10.
 
-    Returns:
-        list[list[float]]: Intervals where the polynomial is below zero.
+    Returns
+    -------
+    list[list[float]]
+        Intervals where the polynomial is below zero.
     """
     if isinstance(poly_or_coef, Polynomial):
         coef = poly_or_coef.coef.tolist()
@@ -110,21 +119,27 @@ def polytope_below_zero(
     The polytope is defined as the set of z such that
     (a_vec+b_vec*z)^T A (a_vec+b_vec*z) + b^T (a_vec+b_vec*z) + c < 0.0.
 
-    Args:
-        a_vector (np.ndarray): Vector a_vec in the polytope.
-        b_vector (np.ndarray): Vector b_vec in the polytope.
-        a (np.ndarray | sparse.csr_matrix, optional):
-            Matrix A in the polytope. Defaults to None.
-        b (np.ndarray, optional):
-            Vector b in the polytope. Defaults to None.
-        c (float, optional):
-            Scalar c in the polytope. Defaults to None.
-        tol (float, optional): Tolerance error parameter. Defaults to 1e-10.
-        use_sparse (bool, optional):
-            Whether to use sparse matrix for computation of A matrix. Defaults to False.
+    Parameters
+    ----------
+    a_vector : np.ndarray
+        Vector a_vec in the polytope.
+    b_vector : np.ndarray
+        Vector b_vec in the polytope.
+    a : np.ndarray | sparse.csr_matrix, optional
+        Matrix A in the polytope. Defaults to None.
+    b : np.ndarray, optional
+        Vector b in the polytope. Defaults to None.
+    c : float, optional
+        Scalar c in the polytope. Defaults to None.
+    tol : float, optional
+        Tolerance error parameter. Defaults to 1e-10.
+    use_sparse : bool, optional
+        Whether to use sparse matrix for computation of A matrix. Defaults to False.
 
-    Returns:
-        list[list[float]]: Intervals where the polytope is below zero.
+    Returns
+    -------
+    list[list[float]]
+        Intervals where the polytope is below zero.
     """
     alpha, beta, gamma = 0.0, 0.0, 0.0
 
@@ -155,12 +170,17 @@ def linear_polynomials_below_zero(
     The linear polynomials are defined as the set of z such that
     a_i + b_i * z < 0.0 for all i in [len(a)].
 
-    Args:
-        a (np.ndarray): Constant terms of the linear polynomials.
-        b (np.ndarray): Coefficients of the linear polynomials.
+    Parameters
+    ----------
+    a : np.ndarray
+        Constant terms of the linear polynomials.
+    b : np.ndarray
+        Coefficients of the linear polynomials.
 
-    Returns:
-        list[list[float]]: Intervals where the linear polynomials are all below zero.
+    Returns
+    -------
+    list[list[float]]
+        Intervals where the linear polynomials are all below zero.
     """
     l, u = -np.inf, np.inf
     if np.any(a[b == 0.0] > 0.0):

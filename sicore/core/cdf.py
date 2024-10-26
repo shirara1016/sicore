@@ -16,19 +16,27 @@ def truncated_cdf(
 ) -> float:
     """Compute the cdf value of the truncated distribution.
 
-    Args:
-        rv (rv_continuous): The rv_continuous instance to be truncated.
-        z (float): The value at which to compute the cdf of the truncated distribution.
-        intervals (np.ndarray | list[list[float]] | RealSubset): The truncated intervals
-            [[l1, u1], [l2, u2], ...].
-        absolute (bool, optional): Whether to compute the cdf for the distribution of the
-            absolute value of the random variable. Defaults to False.
+    Parameters
+    ----------
+    rv : rv_continuous
+        The rv_continuous instance to be truncated.
+    z : float
+        The value at which to compute the cdf of the truncated distribution.
+    intervals : np.ndarray | list[list[float]] | RealSubset
+        The truncated intervals [[l1, u1], [l2, u2], ...].
+    absolute : bool, optional
+        Whether to compute the cdf for the distribution of the
+        absolute value of the random variable. Defaults to False.
 
-    Returns:
-        float: The cdf value at z.
+    Returns
+    -------
+    float
+        The cdf value at z.
 
-    Raises:
-        ValueError: If the value z is not belong to the truncated intervals.
+    Raises
+    ------
+    ValueError
+        If the value z is not belong to the truncated intervals.
     """
     if not isinstance(intervals, RealSubset):
         intervals = RealSubset(intervals)
@@ -54,12 +62,17 @@ def truncated_cdf(
 def _compute_log_area(rv: rv_continuous, intervals: RealSubset) -> float:
     """Compute the logarithm of the integral of the pdf over the each interval.
 
-    Args:
-        rv (rv_continuous): The rv_continuous instance to be integrated.
-        intervals (RealSubset): The intervals on which to compute the integral.
+    Parameters
+    ----------
+    rv : rv_continuous
+        The rv_continuous instance to be integrated.
+    intervals : RealSubset
+        The intervals on which to compute the integral.
 
-    Returns:
-        float: The logarithm of the integral.
+    Returns
+    -------
+    float
+        The logarithm of the integral.
     """
     left_ends, right_ends = intervals.intervals.T
     log_each_area = np.empty(len(intervals))
@@ -80,11 +93,15 @@ def _compute_log_area(rv: rv_continuous, intervals: RealSubset) -> float:
 def _log1mexp(z: np.ndarray) -> np.ndarray:
     """Compute the logarithm of one minus the exponential of the input array, element-wise.
 
-    Args:
-        z (np.ndarray): Input values.
+    Parameters
+    ----------
+    z : np.ndarray
+        Input values.
 
-    Returns:
-        np.ndarray: Logarithm of one minus the exponential of the input array.
+    Returns
+    -------
+    np.ndarray
+        Logarithm of one minus the exponential of the input array.
     """
     z = np.asarray(z)
     values = np.empty_like(z)
@@ -103,18 +120,25 @@ def truncated_norm_cdf(
 ) -> float:
     """Compute the cdf value of the truncated normal distribution.
 
-    Args:
-        z (float): The value at which to compute the cdf of the truncated distribution.
-        intervals (np.ndarray | list[list[float]] | RealSubset): The truncated intervals
-            [[l1, u1], [l2, u2], ...].
-        absolute (bool, optional): Whether to compute the cdf for the distribution of the
-            absolute value of the random variable. Defaults to False.
+    Parameters
+    ----------
+    z : float
+        The value at which to compute the cdf of the truncated distribution.
+    intervals : np.ndarray | list[list[float]] | RealSubset
+        The truncated intervals [[l1, u1], [l2, u2], ...].
+    absolute : bool, optional
+        Whether to compute the cdf for the distribution of the
+        absolute value of the random variable. Defaults to False.
 
-    Returns:
-        float: The cdf value at z.
+    Returns
+    -------
+    float
+        The cdf value at z.
 
-    Raises:
-        ValueError: If the value z is not belong to the truncated intervals.
+    Raises
+    ------
+    ValueError
+        If the value z is not belong to the truncated intervals.
     """
     return truncated_cdf(norm(), z, intervals, absolute=absolute)
 
@@ -128,18 +152,26 @@ def truncated_chi_cdf(
 ) -> float:
     """Compute the cdf value of the truncated normal distribution.
 
-    Args:
-        z (float): The value at which to compute the cdf of the truncated distribution.
-        df (int): The degrees of freedom.
-        intervals (np.ndarray | list[list[float]] | RealSubset): The truncated intervals
-            [[l1, u1], [l2, u2], ...].
-        absolute (bool, optional): Whether to compute the cdf for the distribution of the
-            absolute value of the random variable. Defaults to False.
+    Parameters
+    ----------
+    z : float
+        The value at which to compute the cdf of the truncated distribution.
+    df : int
+        The degrees of freedom.
+    intervals : np.ndarray | list[list[float]] | RealSubset
+        The truncated intervals [[l1, u1], [l2, u2], ...].
+    absolute : bool, optional
+        Whether to compute the cdf for the distribution of the
+        absolute value of the random variable. Defaults to False.
 
-    Returns:
-        float: The cdf value at z.
+    Returns
+    -------
+    float
+        The cdf value at z.
 
-    Raises:
-        ValueError: If the value z is not belong to the truncated intervals.
+    Raises
+    ------
+    ValueError
+        If the value z is not belong to the truncated intervals.
     """
     return truncated_cdf(chi(df), z, intervals, absolute=absolute)

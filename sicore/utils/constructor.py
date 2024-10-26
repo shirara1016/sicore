@@ -6,29 +6,37 @@ import numpy as np
 class OneVector:
     """Vector whose elements from position `i` to `j` are set to 1, and 0 otherwise.
 
-    Args:
-        length (int): Dimension of the vector.
+    Attributes
+    ----------
+    int
+        Dimension of the vector.
     """
 
     def __init__(self, length: int) -> None:
         """Initialize the vector constructor.
 
-        Args:
-            length (int): Dimension of the vector.
+        Parameters
+        ----------
+        length : int
+            Dimension of the vector.
         """
         self.length = length
 
     def get(self, i: int, j: int | None = None) -> np.ndarray:
         """Get the vector.
 
-        Args:
-            i (int): Start index of 1 (1<=i<=`length`).
-            j (int, optional): End index of 1 (1<=j<=`length`). If None, it returns a
-                vector whose `i`-th element is set to 1, and 0 otherwise.
-                Defaults to None.
+        Parameters
+        ----------
+        i : int
+            Start index of 1 (1<=i<=`length`).
+        j : int, optional
+            End index of 1 (1<=j<=`length`).
+            If None, it returns a vector whose `i`-th element is set to 1, and 0 otherwise.
 
-        Returns:
-            np.ndarray: One-zero vector
+        Returns
+        -------
+        np.ndarray
+            One-zero vector
         """
         vector = np.zeros(self.length)
 
@@ -47,19 +55,23 @@ def construct_projection_matrix(
 ) -> np.ndarray:
     """Construct projection matrix from basis.
 
-    Args:
-        basis (np.ndarray | list[list[float]]): The basis of the k-dimensional subspace
-            to be projected. The shape of the basis should be (k, n),
-            where n is the dimension of the data space.
-        verify (bool, optional): Whether to verify the constructed projection matrix.
-            Defaults to False.
+    Parameters
+    ----------
+    basis : np.ndarray | list[list[float]]
+        The basis of the k-dimensional subspace to be projected.
+        The shape of the basis should be (k, n), where n is the dimension of the data space.
+    verify : bool, optional
+        Whether to verify the constructed projection matrix. Defaults to False.
 
-    Raises:
-        ValueError:
-            The constructed projection matrix is not consistent with the definition.
+    Raises
+    ------
+    ValueError:
+        The constructed projection matrix is not consistent with the definition.
 
-    Returns:
-        np.ndarray: The constructed projection matrix
+    Returns
+    -------
+    np.ndarray
+        The constructed projection matrix
     """
     basis = np.array(basis)
     u, _, _ = np.linalg.svd(basis.T, full_matrices=False)

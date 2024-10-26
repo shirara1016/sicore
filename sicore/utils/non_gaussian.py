@@ -165,12 +165,17 @@ _PARAMETERS_CACHE = {
 def _standardize(rv: rv_continuous, param: float) -> rv_continuous:
     """Standardize a random variable.
 
-    Args:
-        rv (rv_continuous): Random variable object to be standardized.
-        param (float): Parameter of a given random variable to be standardized.
+    Parameters
+    ----------
+    rv : rv_continuous
+        Random variable object to be standardized.
+    param : float
+        Parameter of a given random variable to be standardized.
 
-    Returns:
-        rv_continuous: Standardized random variable object with the given parameter.
+    Returns
+    -------
+    rv_continuous
+        Standardized random variable object with the given parameter.
     """
     mean = rv.mean(param)
     std = rv.std(param)
@@ -187,18 +192,19 @@ def generate_non_gaussian_rv(
     the specified random variable family which has the specified
     Wasserstein distance from the standard gaussian distribution.
 
-    Args:
-        rv_name (Literal["skewnorm","exponnorm", "gennormsteep", "gennormflat", "t"]):
-            Random variable name to be generated.
-        distance (float): Wasserstein distance between the generated random variable
-            and the standard gaussian distribution. It is strongly
-            recommended to set a value between 0.01 and 0.15.
+    Parameters
+    ----------
+    rv_name : Literal["skewnorm","exponnorm", "gennormsteep", "gennormflat", "t"]
+        Random variable name to be generated.
+    distance : float
+        Wasserstein distance between the generated random variable and the standard gaussian distribution.
+        It is strongly recommended to set a value between 0.01 and 0.15.
 
-    Returns:
-        rv_continuous:
-            Generated standardized random variable from the
-            specified random variable family which has the specified
-            Wasserstein distance from the standard gaussian distribution.
+    Returns
+    -------
+    rv_continuous:
+        Generated standardized random variable from the specified random variable family
+        which has the specified Wasserstein distance from the standard gaussian distribution.
     """
     rv = RandomVariable.rv_of(rv_name)
     try:
