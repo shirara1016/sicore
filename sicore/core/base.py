@@ -6,6 +6,7 @@ from enum import Enum, auto
 from typing import Any, Literal
 
 import numpy as np
+from joblib import Parallel, delayed  # type: ignore[import]
 from scipy.stats import rv_continuous  # type: ignore[import]
 
 from .cdf import truncated_cdf
@@ -238,9 +239,9 @@ class SelectiveInference:
         max_iter : int, optional
             Maximum number of iterations. Defaults to 100_000.
         n_jobs : int, optional
-            Number of jobs to run in parallel. If set to more than 1, `inference_mode` is forced to
-            `exhaustive` and then options `search_strategy` and `termination_criterion` are ignored.
-            Defaults to 1.
+            Number of jobs to run in parallel. If set to other than 1, `inference_mode` is forced to
+            'exhaustive' and then options `search_strategy` and `termination_criterion` are ignored.
+            If set to -1, the all available cores are used. Defaults to 1.
         step : float, optional
             Step size for the search strategy. Defaults to 1e-6.
         significance_level : float, optional
@@ -266,7 +267,7 @@ class SelectiveInference:
         if alternative is not None:
             self.alternative = alternative
 
-        if n_jobs > 1:
+        if n_jobs > 1 or n_jobs == -1:
             return self._inference_parallel(algorithm, model_selector, n_jobs)
 
         if not callable(search_strategy):
@@ -580,5 +581,132 @@ class SelectiveInference:
         model_selector: Callable[[Any], bool],
         n_jobs: int,
     ) -> SelectiveInferenceResult:
-        """Inference in parallel."""
-        raise NotImplementedError
+        """Inference in parallel.
+
+        Parameters
+        ----------
+        algorithm : Callable[[np.ndarray, np.ndarray, float], tuple[Any, list[list[float]] | RealSubset]])
+            Callable function which takes two vectors a (np.ndarray) and
+            b (np.ndarray), and a scalar z (float), and returns a model (Any) and
+            intervals (list[list[float]] | RealSubset). For any point in
+            the intervals, the same model must be selected.
+        model_selector : Callable[[Any], bool]
+            Callable function which takes a model (Any) and returns a boolean value,
+            indicating whether the model is the same as the selected model.
+        n_jobs : int
+            Number of jobs to run in parallel. If set to -1, the all available cores are used.
+
+        Returns
+        -------
+        SelectiveInferenceResult
+            The result of the selective inference.
+        """
+        interval_list = []
+        current_point = self.limits.intervals[0][0]
+        length = self.limits.intervals[0][1] - self.limits.intervals[0][0]
+        each_length = length / n_jobs
+        for _ in range(n_jobs):
+            interval = RealSubset([[current_point, current_point + each_length]])
+            interval_list.append(interval)
+            current_point += each_length
+
+        searched_intervals = RealSubset()
+        truncated_intervals = RealSubset()
+        search_count, detect_count = 0, 0
+
+        with Parallel(n_jobs=n_jobs) as parallel:
+            results = parallel(
+                delayed(_search_interval)(
+                    algorithm,
+                    model_selector,
+                    self.step,
+                    self.a,
+                    self.b,
+                    each_interval,
+                )
+                for each_interval in interval_list
+            )
+        for result in results:
+            (
+                searched_intervals_,
+                truncated_intervals_,
+                search_count_,
+                detect_count_,
+            ) = result
+            searched_intervals = searched_intervals | searched_intervals_
+            truncated_intervals = truncated_intervals | truncated_intervals_
+            search_count += search_count_
+            detect_count += detect_count_
+
+        return SelectiveInferenceResult(
+            self.stat,
+            self._compute_pvalue(truncated_intervals),
+            *self._evaluate_pvalue_bounds(searched_intervals, truncated_intervals),
+            searched_intervals.tolist(),
+            truncated_intervals.tolist(),
+            search_count,
+            detect_count,
+            self.null_rv,
+            self.alternative,
+        )
+
+
+def _search_interval(
+    algorithm: Callable[
+        [np.ndarray, np.ndarray, float],
+        tuple[Any, list[list[float]] | RealSubset],
+    ],
+    model_selector: Callable[[Any], bool],
+    step: float,
+    a: np.ndarray,
+    b: np.ndarray,
+    each_interval: RealSubset,
+) -> tuple[RealSubset, RealSubset, int, int]:
+    """Search the interval for the parallel processing.
+
+    Parameters
+    ----------
+    algorithm : Callable[[np.ndarray, np.ndarray, float], tuple[Any, list[list[float]] | RealSubset]])
+        Callable function which takes two vectors a (np.ndarray) and
+        b (np.ndarray), and a scalar z (float), and returns a model (Any) and
+        intervals (list[list[float]] | RealSubset). For any point in
+        the intervals, the same model must be selected.
+    model_selector : Callable[[Any], bool]
+        Callable function which takes a model (Any) and returns a boolean value,
+        indicating whether the model is the same as the selected model.
+    step : float
+        Step size for the search.
+    a : np.ndarray
+        Search direction vector, whose shape is same to the data.
+    b : np.ndarray
+        Search direction vector, whose shape is same to the data.
+    each_interval : RealSubset
+        The interval for the search.
+
+    Returns
+    -------
+    tuple[RealSubset, RealSubset, int, int]
+        The searched intervals, the truncated intervals,
+        the number of times the search was performed,
+        and the number of times the selected model was obtained.
+    """
+    searched_intervals = RealSubset()
+    truncated_intervals = RealSubset()
+    search_count, detect_count = 0, 0
+
+    z = each_interval.intervals[0][0]
+    while True:
+        model, intervals_ = algorithm(a, b, z)
+        intervals = (
+            intervals_ if isinstance(intervals_, RealSubset) else RealSubset(intervals_)
+        )
+        search_count += 1
+        searched_intervals = searched_intervals | intervals
+        if model_selector(model):
+            detect_count += 1
+            truncated_intervals = truncated_intervals | intervals
+
+        if each_interval <= searched_intervals:
+            break
+        z = searched_intervals.intervals[0][1] + step
+    return searched_intervals, truncated_intervals, search_count, detect_count

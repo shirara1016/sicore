@@ -6,3 +6,6 @@
 
 *.ipynb
 develop*.py
+data.csv
+
+time/*
