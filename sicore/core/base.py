@@ -6,7 +6,6 @@ from enum import Enum, auto
 from typing import Any, Literal
 
 import numpy as np
-from joblib import Parallel, delayed  # type: ignore[import]
 from scipy.stats import rv_continuous  # type: ignore[import]
 
 from .cdf import truncated_cdf
@@ -261,8 +260,7 @@ class SelectiveInference:
             "over_conditioning",
         ] = "parametric",
         search_strategy: (
-            Callable[[RealSubset], list[float]]
-            | Literal["pi1", "pi2", "pi3", "parallel"]
+            Callable[[RealSubset], float] | Literal["pi1", "pi2", "pi3"]
         ) = "pi3",
         termination_criterion: (
             Callable[[RealSubset, RealSubset], bool] | Literal["precision", "decision"]
@@ -295,41 +293,35 @@ class SelectiveInference:
         inference_mode : Literal["parametric", "exhaustive", "over_conditioning"], optional
             Must be one of 'parametric', 'exhaustive',or 'over_conditioning'.
             Defaults to 'parametric'.
-        search_strategy : Callable[[RealSubset], list[float]] | Literal["pi1", "pi2", "pi3", "parallel"], optional
-            Callable function which takes a searched_intervals (RealSubset) and
-            returns next search points (list[float]).
+        search_strategy : Callable[[RealSubset], float] | Literal["pi1", "pi2", "pi3"], optional
+            Callable function which takes a searched_intervals (RealSubset) and returns next search point (float).
             If not callable, it must be one of 'pi1', 'pi2', 'pi3', or 'parallel'.
             If 'pi1', the search strategy focuses on the truncated intervals.
             If 'pi2', the search strategy focuses on the searched intervals.
-            If 'pi3', the search strategy focuses on the both of the truncated
-            and searched intervals.
-            If 'parallel', the search strategy focuses on the both of the
-            truncated and searched intervals for the parallel computing.
-            This option is ignored when the inference_mode is
-            'exhaustive' or 'over_conditioning'. Defaults to 'pi3'.
+            If 'pi3', the search strategy focuses on the both of the truncated and searched intervals.
+            This option is ignored when the `inference_mode` is 'exhaustive' or 'over_conditioning'.
+            Defaults to 'pi3'.
         termination_criterion : Callable[[RealSubset, RealSubset], bool] | Literal["precision", "decision"], optional
             Callable function which takes searched_intervals (RealSubset) and
             truncated_intervals (RealSubset) and returns a boolean value, indicating
             whether the search should be terminated.
             If not callable, it must be one of 'precision' or 'decision'.
-            If 'precision', the termination criterion is based on
-            the precision in the computation of the p-value.
-            If 'decision', the termination criterion is based on
-            the decision result by the p-value.
-            This option is ignored when the inference_mode is 'exhaustive' or
-            'over_conditioning'. Defaults to 'precision'.
+            If 'precision', the termination criterion is based on the precision in the computation of the p-value.
+            If 'decision', the termination criterion is based on the decision result by the p-value.
+            This option is ignored when the `inference_mode` is 'exhaustive' or 'over_conditioning'.
+            Defaults to 'precision'.
         max_iter : int, optional
             Maximum number of iterations. Defaults to 100_000.
         n_jobs : int, optional
-            Number of jobs to run in parallel. Defaults to 1.
+            Number of jobs to run in parallel. If set to more than 1, `inference_mode` is forced to
+            `exhaustive` and then options `search_strategy` and `termination_criterion` are ignored.
+            Defaults to 1.
         step : float, optional
             Step size for the search strategy. Defaults to 1e-6.
         significance_level : float, optional
-            Significance level only for the termination criterion 'decision'.
-            Defaults to 0.05.
+            Significance level only for the termination criterion 'decision'. Defaults to 0.05.
         precision : float, optional
-            Precision only for the termination criterion 'precision'.
-            Defaults to 0.001.
+            Precision only for the termination criterion 'precision'. Defaults to 0.001.
 
         Raises
         ------
@@ -341,7 +333,6 @@ class SelectiveInference:
         SelectiveInferenceResult
             The result of the selective inference.
         """
-        self.n_jobs = n_jobs
         self.step = step
         self.significance_level = significance_level
         self.precision = precision
@@ -366,32 +357,19 @@ class SelectiveInference:
 
         before_searched_intervals = RealSubset()
         while True:
-            z_list = search_strategy(searched_intervals)
+            z = search_strategy(searched_intervals)
+            model, intervals_ = algorithm(self.a, self.b, z)
+            intervals = (
+                intervals_
+                if isinstance(intervals_, RealSubset)
+                else RealSubset(intervals_)
+            )
 
-            if n_jobs == 1:
-                results = []
-                for z in z_list:
-                    model, intervals = algorithm(self.a, self.b, z)
-                    results.append((model, intervals))
-            else:
-                with Parallel(n_jobs=n_jobs) as parallel:
-                    results = parallel(
-                        delayed(algorithm)(self.a, self.b, z) for z in z_list
-                    )
-
-            for model, intervals_ in results:
-                intervals = (
-                    intervals_
-                    if isinstance(intervals_, RealSubset)
-                    else RealSubset(intervals_)
-                )
-
-                search_count += 1
-                searched_intervals = searched_intervals | intervals
-
-                if model_selector(model):
-                    detect_count += 1
-                    truncated_intervals = truncated_intervals | intervals
+            search_count += 1
+            searched_intervals = searched_intervals | intervals
+            if model_selector(model):
+                detect_count += 1
+                truncated_intervals = truncated_intervals | intervals
 
             if search_count > max_iter:
                 raise InfiniteLoopError(LoopType.ITER)
@@ -485,115 +463,71 @@ class SelectiveInference:
     def _create_search_strategy(
         self,
         inference_mode: Literal["parametric", "exhaustive", "over_conditioning"],
-        search_strategy_name: Literal["pi1", "pi2", "pi3", "parallel"],
-    ) -> Callable[[RealSubset], list[float]]:
+        search_strategy_name: Literal["pi1", "pi2", "pi3"],
+    ) -> Callable[[RealSubset], float]:
         """Create a search strategy.
 
         Parameters
         ----------
         inference_mode : Literal["parametric", "exhaustive", "over_conditioning"]
             Must be one of 'parametric', 'exhaustive', or 'over_conditioning'.
-        search_strategy_name : Literal["pi1", "pi2", "pi3", "parallel"]
+        search_strategy_name : Literal["pi1", "pi2", "pi3"]
             Must be one of 'pi1', 'pi2', 'pi3', or 'parallel'.
             If 'pi1', the search strategy focuses on the truncated intervals.
             If 'pi2', the search strategy focuses on the searched intervals.
-            If 'pi3', the search strategy focuses on the both of
-            the truncated and searched intervals.
-            If 'parallel', the search strategy focuses on the both of the
-            truncated and searched intervals for the parallel computing.
+            If 'pi3', the search strategy focuses on the both of the truncated and searched intervals.
 
         Returns
         -------
-        Callable[[RealSubset], list[float]]
+        Callable[[RealSubset], float]
             The search strategy.
         """
-        match inference_mode, search_strategy_name:
+        match inference_mode:
             case "exhaustive", _:
                 return lambda searched_intervals: (
-                    [self.limits.intervals[0][0]]
+                    self.limits.intervals[0][0]
                     if searched_intervals.is_empty()
-                    else [searched_intervals.intervals[0][1] + self.step]
+                    else searched_intervals.intervals[0][1] + self.step
                 )
 
-            case "over_conditioning", _:
-                return lambda _: [self.stat]
+            case "over_conditioning":
+                return lambda _: self.stat
 
-            case "parametric", "pi1" | "pi2" | "pi3":
-                match search_strategy_name:
-                    case "pi1":
-                        target_value = self.stat
+        match search_strategy_name:
+            case "pi1":
+                target_value = self.stat
 
-                        def metric(z: list[float]) -> list[float]:
-                            return np.abs(np.array(z) - self.stat)
-                    case "pi2":
-                        target_value = self.mode
+                def metric(z: list[float]) -> list[float]:
+                    return np.abs(np.array(z) - self.stat)
+            case "pi2":
+                target_value = self.mode
 
-                        def metric(z: list[float]) -> list[float]:
-                            return -self.null_rv.logpdf(np.array(z))
-                    case "pi3":
-                        target_value = self.stat
+                def metric(z: list[float]) -> list[float]:
+                    return -self.null_rv.logpdf(np.array(z))
+            case "pi3":
+                target_value = self.stat
 
-                        def metric(z: list[float]) -> list[float]:
-                            return -self.null_rv.logpdf(np.array(z))
+                def metric(z: list[float]) -> list[float]:
+                    return -self.null_rv.logpdf(np.array(z))
 
-                def search_strategy(searched_intervals: RealSubset) -> list[float]:
-                    min_step = 1e-11
-                    if searched_intervals.is_empty():
-                        return [self.stat]
-                    unsearched_intervals = self.support - searched_intervals
-                    if target_value in unsearched_intervals:
-                        return [target_value]
+        def search_strategy(searched_intervals: RealSubset) -> float:
+            if searched_intervals.is_empty():
+                return self.stat
+            unsearched_intervals = self.support - searched_intervals
+            if target_value in unsearched_intervals:
+                return target_value
 
-                    candidates = []
-                    l, u = searched_intervals.find_interval_containing(target_value)
-                    for candidate, step_ in [(l, -self.step), (u, self.step)]:
-                        step = step_
-                        if candidate in unsearched_intervals and np.isfinite(candidate):
-                            while np.abs(step) > min_step:
-                                if candidate + step in unsearched_intervals:
-                                    candidates.append(candidate + step)
-                                    break
-                                step /= 10
-
-                    return [np.array(candidates)[np.argmin(metric(candidates))]]
-
-                return search_strategy
-
-            case "parametric", "parallel":
-
-                def search_strategy(searched_intervals: RealSubset) -> list[float]:
-                    num_points_per_core = 4
-                    num_points = self.n_jobs * num_points_per_core
-                    expand_width = 0.5
-
-                    unsearched_intervals = self.support - searched_intervals
-                    if self.stat in unsearched_intervals:
-                        z_list = [self.stat]
-                        loc = self.stat
-                    else:
-                        z_list = []
-                        edges = searched_intervals.find_interval_containing(self.stat)
-                        loc = edges[np.argmin(-self.null_rv.logpdf(edges))]
-
-                    tail = 0.0
-                    while len(z_list) < num_points:
-                        inner, outer = tail, tail + expand_width
-                        intervals = unsearched_intervals & RealSubset(
-                            [[loc - outer, loc - inner], [loc + inner, loc + outer]],
-                        )
-                        for l, u in intervals.intervals:
-                            if l + self.step < u:
-                                z_list += np.arange(
-                                    l + self.step,
-                                    u,
-                                    self.step,
-                                ).tolist()
-                            else:
-                                z_list.append((l + u) / 2)
-                        tail = outer
-                    return z_list[:num_points]
-
-                return search_strategy
+            candidates, min_step = [], 1e-11
+            l, u = searched_intervals.find_interval_containing(target_value)
+            for candidate, step_ in [(l, -self.step), (u, self.step)]:
+                step = step_
+                if candidate in unsearched_intervals and np.isfinite(candidate):
+                    while np.abs(step) > min_step:
+                        if candidate + step in unsearched_intervals:
+                            candidates.append(candidate + step)
+                            break
+                        step /= 10
+            return np.array(candidates)[np.argmin(metric(candidates))]
 
         return search_strategy
 
