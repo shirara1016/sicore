@@ -1318,13 +1318,14 @@ wheels = [
 
 [[package]]
 name = "sicore"
-version = "2.2.0"
+version = "2.3.0"
 source = { editable = "." }
 dependencies = [
     { name = "joblib" },
     { name = "matplotlib" },
     { name = "numpy" },
     { name = "scipy" },
+    { name = "typing-extensions" },
 ]
 
 [package.dev-dependencies]
@@ -1347,6 +1348,7 @@ requires-dist = [
     { name = "matplotlib", specifier = ">=3.9.1" },
     { name = "numpy", specifier = ">=1.26.4,<2.0.0" },
     { name = "scipy", specifier = ">=1.14.0" },
+    { name = "typing-extensions", specifier = ">=4.12.2" },
 ]
 
 [package.metadata.requires-dev]
