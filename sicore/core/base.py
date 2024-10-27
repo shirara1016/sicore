@@ -150,81 +150,6 @@ class InfiniteLoopError(Exception):
         super().__init__(message)
 
 
-class InvalidAlternativeError(Exception):
-    """Exception when raised invalid alternative is given."""
-
-    def __init__(self, alternative: str) -> None:
-        """Initialize an InvalidAlternativeError object."""
-        super().__init__(
-            f"'{alternative}' is not valid, must be 'two-sided', 'less', or 'greater'.",
-        )
-
-
-def _compute_pvalue(
-    cdf_value: float,
-    alternative: Literal["two-sided", "less", "greater"],
-) -> float:
-    """Compute the p-value from the CDF value.
-
-    Parameters
-    ----------
-    cdf_value : float
-        The CDF value.
-    alternative : Literal["two-sided", "less", "greater"]
-        Must be one of 'two-sided', 'less', or 'greater'.
-        If 'two-sided', the p-value is computed for the two-tailed test.
-        If 'less', the p-value is computed for the right-tailed test.
-        If 'greater', the p-value is computed for the left-tailed test.
-
-    Returns
-    -------
-    float
-        The p-value.
-
-    Raises
-    ------
-    ValueError
-        If `alternative` is not one of 'two-sided', 'less', or 'greater'.
-    """
-    match alternative:
-        case "two-sided" | "less":
-            return float(1.0 - cdf_value)
-        case "greater":
-            return float(cdf_value)
-        case _:
-            raise InvalidAlternativeError(alternative)
-
-
-def _evaluate_pvalue_bounds(
-    inf_cdf: float,
-    sup_cdf: float,
-    alternative: Literal["two-sided", "less", "greater"],
-) -> tuple[float, float]:
-    """Evaluate the bounds of the p-value from the bounds of the CDF values.
-
-    Parameters
-    ----------
-    inf_cdf : float
-        The lower bound of the CDF value.
-    sup_cdf : float
-        The upper bound of the CDF value.
-    alternative : Literal["two-sided", "less", "greater"]
-        Must be one of 'two-sided', 'less', or 'greater'.
-        If 'two sided', the p-value is computed for the two-tailed test.
-        If 'less', the p-value is computed for the right-tailed test.
-        If 'greater', the p-value is computed for the left-tailed test.
-
-    Returns
-    -------
-    tuple[float, float]
-        The lower and upper bounds of the p-value.
-    """
-    p_value_from_inf = _compute_pvalue(inf_cdf, alternative)
-    p_value_from_sup = _compute_pvalue(sup_cdf, alternative)
-    inf_p, sup_p = np.sort([p_value_from_inf, p_value_from_sup])
-    return inf_p, sup_p
-
-
 class SelectiveInference:
     """An abstract class conducting selective inference.
 
@@ -333,9 +258,16 @@ class SelectiveInference:
         SelectiveInferenceResult
             The result of the selective inference.
         """
+        self.max_iter = max_iter
         self.step = step
         self.significance_level = significance_level
         self.precision = precision
+
+        if alternative is not None:
+            self.alternative = alternative
+
+        if n_jobs > 1:
+            return self._inference_parallel(algorithm, model_selector, n_jobs)
 
         if not callable(search_strategy):
             search_strategy = self._create_search_strategy(
@@ -347,9 +279,6 @@ class SelectiveInference:
                 inference_mode,
                 termination_criterion,
             )
-
-        if alternative is not None:
-            self.alternative = alternative
 
         searched_intervals = RealSubset()
         truncated_intervals = RealSubset()
@@ -419,7 +348,7 @@ class SelectiveInference:
             truncated_intervals,
             absolute=absolute,
         )
-        return _compute_pvalue(cdf_value, self.alternative)
+        return self._convert_cdf_value_to_pvalue(cdf_value)
 
     def _evaluate_pvalue_bounds(
         self,
@@ -454,11 +383,45 @@ class SelectiveInference:
         inf_intervals = inf_intervals & self.support
         sup_intervals = sup_intervals & self.support
 
-        inf_f = truncated_cdf(self.null_rv, self.stat, inf_intervals, absolute=absolute)
-        sup_f = truncated_cdf(self.null_rv, self.stat, sup_intervals, absolute=absolute)
+        inf_cdf = truncated_cdf(
+            self.null_rv,
+            self.stat,
+            inf_intervals,
+            absolute=absolute,
+        )
+        sup_cdf = truncated_cdf(
+            self.null_rv,
+            self.stat,
+            sup_intervals,
+            absolute=absolute,
+        )
 
-        inf_p, sup_p = _evaluate_pvalue_bounds(inf_f, sup_f, self.alternative)
+        p_value_from_inf = self._convert_cdf_value_to_pvalue(inf_cdf)
+        p_value_from_sup = self._convert_cdf_value_to_pvalue(sup_cdf)
+        inf_p, sup_p = np.sort([p_value_from_inf, p_value_from_sup])
         return inf_p, sup_p
+
+    def _convert_cdf_value_to_pvalue(
+        self,
+        cdf_value: float,
+    ) -> float:
+        """Convert the CDF value to the p-value.
+
+        Parameters
+        ----------
+        cdf_value : float
+            The CDF value.
+
+        Returns
+        -------
+        float
+            The p-value.
+        """
+        match self.alternative:
+            case "two-sided" | "less":
+                return float(1.0 - cdf_value)
+            case "greater":
+                return float(cdf_value)
 
     def _create_search_strategy(
         self,
@@ -607,3 +570,15 @@ class SelectiveInference:
                 return termination_criterion
 
         return termination_criterion
+
+    def _inference_parallel(
+        self,
+        algorithm: Callable[
+            [np.ndarray, np.ndarray, float],
+            tuple[Any, list[list[float]] | RealSubset],
+        ],
+        model_selector: Callable[[Any], bool],
+        n_jobs: int,
+    ) -> SelectiveInferenceResult:
+        """Inference in parallel."""
+        raise NotImplementedError
