@@ -588,6 +588,17 @@ class RealSubset:
         """
         return self.intervals.tolist()
 
+    @property
+    def measure(self) -> float:
+        """Return the measure of the subset.
+
+        Returns
+        -------
+        float
+            Measure of the subset.
+        """
+        return np.sum(self.intervals[:, 1] - self.intervals[:, 0]).item()
+
     def __len__(self) -> int:
         """Return the number of intervals in the subset.
 

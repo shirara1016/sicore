@@ -256,6 +256,18 @@ def test_tolist(intervals: list[list[float]]) -> None:
 
 
 @pytest.mark.parametrize(
+    ("intervals", "measure"),
+    [
+        ([[1.0, 3.0], [5.0, 7.0]], 4.0),
+        ([[-np.inf, 2.0], [3.0, 4.0], [5.0, 7.0]], np.inf),
+    ],
+)
+def test_measure(intervals: list[list[float]], measure: float) -> None:
+    """Test the tolist method."""
+    assert RealSubset(intervals).measure == measure
+
+
+@pytest.mark.parametrize(
     ("intervals", "expected"),
     [
         ([[1.0, 3.0], [5.0, 7.0]], 2),
