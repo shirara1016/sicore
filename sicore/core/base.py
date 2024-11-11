@@ -190,7 +190,8 @@ class SelectiveInference:
             Callable[[RealSubset], float] | Literal["pi1", "pi2", "pi3"]
         ) = "pi3",
         termination_criterion: (
-            Callable[[RealSubset, RealSubset], bool] | Literal["precision", "decision"]
+            Callable[[RealSubset, RealSubset, tqdm | None], bool]
+            | Literal["precision", "decision"]
         ) = "precision",
         max_iter: int = 100_000,
         n_jobs: int = 1,
@@ -230,9 +231,10 @@ class SelectiveInference:
             If 'pi3', the search strategy focuses on the both of the truncated and searched intervals.
             This option is ignored when the `inference_mode` is 'exhaustive' or 'over_conditioning'.
             Defaults to 'pi3'.
-        termination_criterion : Callable[[RealSubset, RealSubset], bool] | Literal["precision", "decision"], optional
-            Callable function which takes searched_intervals (RealSubset) and
-            truncated_intervals (RealSubset) and returns a boolean value, indicating
+        termination_criterion : Callable[[RealSubset, RealSubset, tqdm | None], bool] | Literal["precision", "decision"], optional
+            Callable function which takes searched_intervals (RealSubset),
+            truncated_intervals (RealSubset) and progress bar (tqdm, optional),
+            updates the progress bar, and returns a boolean value, indicating
             whether the search should be terminated.
             If not callable, it must be one of 'precision' or 'decision'.
             If 'precision', the termination criterion is based on the precision in the computation of the p-value.
@@ -281,6 +283,16 @@ class SelectiveInference:
                 progress=progress,
             )
 
+        bar = None
+        if progress:
+            total = 100
+            bar = tqdm(
+                total=total,
+                desc="Progress",
+                unit="%",
+                bar_format="{desc}: {percentage:3.2f}{unit}|{bar}| [{elapsed}<{remaining}, {rate_fmt}{postfix}]",
+            )
+
         if not callable(search_strategy):
             search_strategy = self._create_search_strategy(
                 inference_mode,
@@ -318,7 +330,7 @@ class SelectiveInference:
                 raise InfiniteLoopError(LoopType.SAME)
             before_searched_intervals = searched_intervals
 
-            if termination_criterion(searched_intervals, truncated_intervals):
+            if termination_criterion(searched_intervals, truncated_intervals, bar):
                 break
 
         p_value = self._compute_pvalue(truncated_intervals)
@@ -510,7 +522,7 @@ class SelectiveInference:
         self,
         inference_mode: Literal["parametric", "exhaustive", "over_conditioning"],
         termination_criterion_name: Literal["precision", "decision"],
-    ) -> Callable[[RealSubset, RealSubset], bool]:
+    ) -> Callable[[RealSubset, RealSubset, tqdm | None], bool]:
         """Create a termination criterion.
 
         Parameters
@@ -535,9 +547,19 @@ class SelectiveInference:
                 def termination_criterion(
                     searched_intervals: RealSubset,
                     truncated_intervals: RealSubset,
+                    bar: tqdm | None = None,
                 ) -> bool:
                     _ = truncated_intervals
-                    return self.limits <= searched_intervals
+                    flag = self.limits <= searched_intervals
+                    if bar is not None:
+                        if flag:
+                            bar.update(bar.total - bar.n)
+                        else:
+                            ratio = (
+                                searched_intervals & self.limits
+                            ).measure / self.limits.measure
+                            bar.update(bar.total * ratio - bar.n)
+                    return flag
 
                 return termination_criterion
 
@@ -546,8 +568,11 @@ class SelectiveInference:
                 def termination_criterion(
                     searched_intervals: RealSubset,
                     truncated_intervals: RealSubset,
+                    bar: tqdm | None = None,
                 ) -> bool:
                     _ = searched_intervals, truncated_intervals
+                    if bar is not None:
+                        bar.update(bar.total)
                     return True
 
             case "parametric", "precision":
@@ -555,12 +580,23 @@ class SelectiveInference:
                 def termination_criterion(
                     searched_intervals: RealSubset,
                     truncated_intervals: RealSubset,
+                    bar: tqdm | None = None,
                 ) -> bool:
                     inf_p, sup_p = self._evaluate_pvalue_bounds(
                         searched_intervals,
                         truncated_intervals,
                     )
-                    return np.abs(sup_p - inf_p) < self.precision
+                    value = np.abs(sup_p - inf_p)
+                    if bar is not None:
+                        shift = 0.001
+                        start, end = 1.0, self.precision
+                        scale = 1.0 / np.log((end + shift) / (start + shift))
+                        bias = -scale * np.log(start + shift)
+                        current = bar.total * (
+                            scale * np.log(np.max([value, end]) + shift) + bias
+                        )
+                        bar.update(current - bar.n)
+                    return value < self.precision
 
                 return termination_criterion
 
@@ -569,15 +605,24 @@ class SelectiveInference:
                 def termination_criterion(
                     searched_intervals: RealSubset,
                     truncated_intervals: RealSubset,
+                    bar: tqdm | None = None,
                 ) -> bool:
                     inf_p, sup_p = self._evaluate_pvalue_bounds(
                         searched_intervals,
                         truncated_intervals,
                     )
-                    return (
-                        inf_p > self.significance_level
-                        or sup_p <= self.significance_level
-                    )
+                    alpha = self.significance_level
+                    value = np.min([alpha - inf_p, sup_p - alpha])
+                    if bar is not None:
+                        shift = 0.001
+                        start, end = np.min([alpha, 1.0 - alpha]), 0.0
+                        scale = 1.0 / np.log((end + shift) / (start + shift))
+                        bias = -scale * np.log(start + shift)
+                        current = bar.total * (
+                            scale * np.log(np.max([value, end]) + shift) + bias
+                        )
+                        bar.update(current - bar.n)
+                    return value < 0.0
 
                 return termination_criterion
 
@@ -739,14 +784,13 @@ def _search_interval(
             detect_count += 1
             truncated_intervals = truncated_intervals | intervals
 
-        if progress:
-            if each_interval <= searched_intervals:
+        if each_interval <= searched_intervals:
+            if progress:
                 bar.update(total - bar.n)
-                break
+            break
+        if progress:
             update = total * (intervals & each_interval).measure / each_interval.measure
             bar.update(update)
 
-        if each_interval <= searched_intervals:
-            break
         z = searched_intervals.intervals[0][1] + step
     return searched_intervals, truncated_intervals, search_count, detect_count
