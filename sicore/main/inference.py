@@ -39,7 +39,29 @@ class NotPyTorchTensorError(Exception):
 
 
 class SelectiveInferenceNorm(SelectiveInference):
-    """A class conducting selective inference for the normal distribution."""
+    """A class conducting selective inference for the normal distribution.
+
+    Parameters
+    ----------
+    data : np.ndarray
+        Observed data in 1D array.
+    var : float | np.ndarray | sparse.csr_matrix
+        Known covariance matrix.
+        If float, covariance matrix equals to the scalar times identity matrix.
+        If 1D array, covariance matrix equals to the diagonal matrix with the given array.
+        If 2D array, covariance matrix equals to the given array.
+    eta : np.ndarray
+        The direction of the test statistic in 1D array.
+    use_sparse : bool, optional
+        Whether to use sparse matrix.
+        If True, the `var` must be given as a sparse matrix. Defaults to False.
+    use_tf : bool, optional
+        Whether to use TensorFlow.
+        If True, the `data`, `eta`, and `var` must be given as TensorFlow tensors. Defaults to False.
+    use_torch : bool, optional
+        Whether to use PyTorch.
+        If True, the `data`, `eta`, and `var` must be given as PyTorch tensors. Defaults to False.
+    """
 
     def __init__(
         self,
@@ -142,7 +164,26 @@ class SelectiveInferenceNorm(SelectiveInference):
 
 
 class SelectiveInferenceChi(SelectiveInference):
-    """A class conducting selective inference for the chi distribution."""
+    """A class conducting selective inference for the chi distribution.
+
+    Parameters
+    ----------
+    data : np.ndarray
+        Observed data in 1D array.
+    var : float
+        Known covariance matrix, which equals to the scalar times identity matrix.
+    projection : np.ndarray
+        The space of the test statistic in 2D array.
+    use_sparse : bool, optional
+        Whether to use sparse matrix.
+        If True, the `P` must be given as a sparse matrix. Defaults to False.
+    use_tf : bool, optional
+        Whether to use TensorFlow.
+        If True, the `data` and `P` must be given as TensorFlow tensors. Defaults to False.
+    use_torch : bool, optional
+        Whether to use PyTorch.
+        If True, the `data` and `P` must be given as PyTorch tensors. Defaults to False.
+    """
 
     def __init__(
         self,

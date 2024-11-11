@@ -109,11 +109,17 @@ class RealSubset:
     complement, intersection, and union. It uses numpy arrays for efficient storage
     and computation.
 
+    Parameters
+    ----------
+    intervals : np.array | list[list[int]] | None, optional
+        Initial intervals to create the subset. Defaults to None, which creates an empty set.
+    is_simplify : bool, optional
+        Whether to simplify (merge overlapping) intervals upon creation. Defaults to True.
+
     Attributes
     ----------
     intervals : np.ndarray
         An array of shape (n, 2) representing n intervals. Each row [a, b] represents the interval [a, b].
-
 
     Note
     ----
