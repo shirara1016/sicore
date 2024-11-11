@@ -8,6 +8,7 @@ from typing import Any, Literal
 import numpy as np
 from joblib import Parallel, delayed  # type: ignore[import]
 from scipy.stats import rv_continuous  # type: ignore[import]
+from tqdm import tqdm  # type: ignore[import]
 
 from .cdf import truncated_cdf
 from .real_subset import RealSubset
@@ -196,6 +197,8 @@ class SelectiveInference:
         step: float = 1e-6,
         significance_level: float = 0.05,
         precision: float = 0.001,
+        *,
+        progress: bool = False,
     ) -> SelectiveInferenceResult:
         """Conduct selective inference.
 
@@ -248,6 +251,8 @@ class SelectiveInference:
             Significance level only for the termination criterion 'decision'. Defaults to 0.05.
         precision : float, optional
             Precision only for the termination criterion 'precision'. Defaults to 0.001.
+        progress : bool, optional
+            Whether to show the progress bar. Defaults to `False`.
 
         Raises
         ------
@@ -263,12 +268,18 @@ class SelectiveInference:
         self.step = step
         self.significance_level = significance_level
         self.precision = precision
+        self.progress = progress
 
         if alternative is not None:
             self.alternative = alternative
 
         if n_jobs > 1 or n_jobs == -1:
-            return self._inference_parallel(algorithm, model_selector, n_jobs)
+            return self._inference_parallel(
+                algorithm,
+                model_selector,
+                n_jobs,
+                progress=progress,
+            )
 
         if not callable(search_strategy):
             search_strategy = self._create_search_strategy(
@@ -580,6 +591,8 @@ class SelectiveInference:
         ],
         model_selector: Callable[[Any], bool],
         n_jobs: int,
+        *,
+        progress: bool = False,
     ) -> SelectiveInferenceResult:
         """Inference in parallel.
 
@@ -595,6 +608,8 @@ class SelectiveInference:
             indicating whether the model is the same as the selected model.
         n_jobs : int
             Number of jobs to run in parallel. If set to -1, the all available cores are used.
+        progress : bool, optional
+            Whether to show the progress bar. Defaults to `False`.
 
         Returns
         -------
@@ -623,8 +638,10 @@ class SelectiveInference:
                     self.a,
                     self.b,
                     each_interval,
+                    job_id=job_id,
+                    progress=progress,
                 )
-                for each_interval in interval_list
+                for job_id, each_interval in enumerate(interval_list)
             )
         for result in results:
             (
@@ -661,6 +678,9 @@ def _search_interval(
     a: np.ndarray,
     b: np.ndarray,
     each_interval: RealSubset,
+    *,
+    job_id: int,
+    progress: bool = False,
 ) -> tuple[RealSubset, RealSubset, int, int]:
     """Search the interval for the parallel processing.
 
@@ -682,6 +702,10 @@ def _search_interval(
         Search direction vector, whose shape is same to the data.
     each_interval : RealSubset
         The interval for the search.
+    job_id : int
+        Job ID for the parallel processing.
+    progress : bool, optional
+        Whether to show the progress bar. Defaults to `False`.
 
     Returns
     -------
@@ -694,6 +718,15 @@ def _search_interval(
     truncated_intervals = RealSubset()
     search_count, detect_count = 0, 0
 
+    if progress:
+        total = 100
+        bar = tqdm(
+            total=total,
+            desc=f"Progress at job {job_id:02}",
+            unit="%",
+            bar_format="{desc}: {percentage:3.2f}{unit}|{bar}| [{elapsed}<{remaining}, {rate_fmt}{postfix}]",
+        )
+
     z = each_interval.intervals[0][0]
     while True:
         model, intervals_ = algorithm(a, b, z)
@@ -705,6 +738,13 @@ def _search_interval(
         if model_selector(model):
             detect_count += 1
             truncated_intervals = truncated_intervals | intervals
+
+        if progress:
+            if each_interval <= searched_intervals:
+                bar.update(total - bar.n)
+                break
+            update = total * (intervals & each_interval).measure / each_interval.measure
+            bar.update(update)
 
         if each_interval <= searched_intervals:
             break
