@@ -1,5 +1,9 @@
 # sicore package
 
+![PyPI - Version](https://img.shields.io/pypi/v/sicore)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/sicore)
+![PyPI - License](https://img.shields.io/pypi/l/sicore)
+
 This package provides core functions for selective inference.
 
 Detailed API reference is [here](https://shirara1016.github.io/sicore/).
