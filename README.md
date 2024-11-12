@@ -2,8 +2,7 @@
 
 [![PyPI - Version](https://img.shields.io/pypi/v/sicore)](https://pypi.org/project/sicore/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/sicore)](https://pypi.org/project/sicore/)
-[![PyPI - License](https://img.shields.io/pypi/l/sicore)
-](https://opensource.org/license/MIT)
+[![PyPI - License](https://img.shields.io/pypi/l/sicore)](https://opensource.org/license/MIT)
 
 This package provides core functions for selective inference.
 
