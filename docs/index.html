@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" />
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
-        <title>sicore 2.4.0 documentation</title>
+        <title>sicore 2.4.3 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
@@ -166,7 +166,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="#"><div class="brand">sicore 2.4.0 documentation</div></a>
+      <a href="#"><div class="brand">sicore 2.4.3 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -190,7 +190,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="#">
   
   
-  <span class="sidebar-brand-text">sicore 2.4.0 documentation</span>
+  <span class="sidebar-brand-text">sicore 2.4.3 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -244,6 +244,19 @@
 <section id="module-sicore">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-sicore" title="Link to this heading">¶</a></h2>
 <p>Core package for selective inference.</p>
+<a class="reference external image-reference" href="https://pypi.org/project/sicore/"><img alt="PyPI - Version" src="https://img.shields.io/pypi/v/sicore" />
+</a>
+<a class="reference external image-reference" href="https://pypi.org/project/sicore/"><img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/sicore" />
+</a>
+<a class="reference external image-reference" href="https://opensource.org/license/MIT"><img alt="PyPI - License" src="https://img.shields.io/pypi/l/sicore" />
+</a>
+<section id="installation">
+<h3>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h3>
+<p>This package requires python 3.10 or higher and automatically installs any dependent packages. If you want to use tensorflow and pytorch’s tensors, please install them manually.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>sicore
+</pre></div>
+</div>
+</section>
 <dl class="py class">
 <dt class="sig sig-object py" id="sicore.SelectiveInference">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">SelectiveInference</span></span><a class="headerlink" href="#sicore.SelectiveInference" title="Link to this definition">¶</a></dt>
@@ -258,7 +271,7 @@ The user can inherit this class and implement the <cite>__init__</cite> method.<
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>algorithm</strong> (<em>Callable</em><em>[</em><em>[</em><em>np.ndarray</em><em>, </em><em>np.ndarray</em><em>, </em><em>float</em><em>]</em><em>, </em><em>tuple</em><em>[</em><em>Any</em><em>, </em><em>list</em><em>[</em><em>list</em><em>[</em><em>float</em><em>]</em><em>] </em><em>| </em><a class="reference internal" href="#sicore.RealSubset" title="sicore.RealSubset"><em>RealSubset</em></a><em>]</em><em>]</em><em>)</em>) – Callable function which takes two vectors a (np.ndarray) and
+<li><p><strong>algorithm</strong> (<em>Callable</em><em>[</em><em>[</em><em>np.ndarray</em><em>, </em><em>np.ndarray</em><em>, </em><em>float</em><em>]</em><em>, </em><em>tuple</em><em>[</em><em>Any</em><em>, </em><em>list</em><em>[</em><em>list</em><em>[</em><em>float</em><em>]</em><em>] </em><em>| </em><a class="reference internal" href="#sicore.RealSubset" title="sicore.RealSubset"><em>RealSubset</em></a><em>]</em><em>]</em>) – Callable function which takes two vectors a (np.ndarray) and
 b (np.ndarray), and a scalar z (float), and returns a model (Any) and
 intervals (list[list[float]] | RealSubset). For any point in
 the intervals, the same model must be selected.</p></li>
@@ -1318,6 +1331,7 @@ The shape of the basis should be (k, n), where n is the dimension of the data sp
             <ul>
 <li><a class="reference internal" href="#">sicore package</a><ul>
 <li><a class="reference internal" href="#module-sicore">Module contents</a><ul>
+<li><a class="reference internal" href="#installation">Installation</a></li>
 <li><a class="reference internal" href="#sicore.SelectiveInference"><code class="docutils literal notranslate"><span class="pre">SelectiveInference</span></code></a><ul>
 <li><a class="reference internal" href="#sicore.SelectiveInference.inference"><code class="docutils literal notranslate"><span class="pre">SelectiveInference.inference()</span></code></a></li>
 </ul>
@@ -1401,7 +1415,7 @@ The shape of the basis should be (k, n), where n is the dimension of the data sp
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=4d935f96"></script>
+</div><script src="_static/documentation_options.js?v=7a6bd5fc"></script>
     <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=5fa4622c"></script>

@@ -205,7 +205,7 @@ class SelectiveInference:
 
         Parameters
         ----------
-        algorithm : Callable[[np.ndarray, np.ndarray, float], tuple[Any, list[list[float]] | RealSubset]])
+        algorithm : Callable[[np.ndarray, np.ndarray, float], tuple[Any, list[list[float]] | RealSubset]]
             Callable function which takes two vectors a (np.ndarray) and
             b (np.ndarray), and a scalar z (float), and returns a model (Any) and
             intervals (list[list[float]] | RealSubset). For any point in

@@ -1,6 +1,6 @@
 [project]
 name = "sicore"
-version = "2.4.2"
+version = "2.4.3"
 description = "Core Package for Selective Inference"
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10"

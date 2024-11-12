@@ -1,4 +1,24 @@
-"""Core package for selective inference."""
+"""Core package for selective inference.
+
+.. image:: https://img.shields.io/pypi/v/sicore
+    :alt: PyPI - Version
+    :target: https://pypi.org/project/sicore/
+.. image:: https://img.shields.io/pypi/pyversions/sicore
+    :alt: PyPI - Python Version
+    :target: https://pypi.org/project/sicore/
+.. image:: https://img.shields.io/pypi/l/sicore
+   :alt: PyPI - License
+   :target: https://opensource.org/license/MIT
+
+============
+Installation
+============
+This package requires python 3.10 or higher and automatically installs any dependent packages. If you want to use tensorflow and pytorch's tensors, please install them manually.
+
+.. code-block:: bash
+
+    $ pip install sicore
+"""
 
 from .core.base import (
     InfiniteLoopError,
