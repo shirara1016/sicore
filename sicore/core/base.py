@@ -771,7 +771,7 @@ def _search_interval(
             bar_format="{desc}: {percentage:3.2f}{unit}|{bar}| [{elapsed}<{remaining}, {rate_fmt}{postfix}]",
         )
 
-    z = each_interval.intervals[0][0]
+    z = (each_interval.intervals[0][1] - each_interval.intervals[0][0]) / 2
 
     before_searched_intervals = RealSubset()
     while True:
