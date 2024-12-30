@@ -663,8 +663,7 @@ class SelectiveInference:
         """
         interval_list = []
         current_point = self.limits.intervals[0][0]
-        length = self.limits.intervals[0][1] - self.limits.intervals[0][0]
-        each_length = length / n_jobs
+        each_length = self.limits.measure / n_jobs
         for _ in range(n_jobs):
             interval = RealSubset([[current_point, current_point + each_length]])
             interval_list.append(interval)
@@ -679,11 +678,11 @@ class SelectiveInference:
                 delayed(_search_interval)(
                     algorithm,
                     model_selector,
-                    self.step,
                     self.a,
                     self.b,
                     each_interval,
                     job_id=job_id,
+                    max_iter=int(self.max_iter / n_jobs),
                     progress=progress,
                 )
                 for job_id, each_interval in enumerate(interval_list)
@@ -719,12 +718,12 @@ def _search_interval(
         tuple[Any, list[list[float]] | RealSubset],
     ],
     model_selector: Callable[[Any], bool],
-    step: float,
     a: np.ndarray,
     b: np.ndarray,
     each_interval: RealSubset,
-    *,
     job_id: int,
+    max_iter: int,
+    *,
     progress: bool = False,
 ) -> tuple[RealSubset, RealSubset, int, int]:
     """Search the interval for the parallel processing.
@@ -739,8 +738,6 @@ def _search_interval(
     model_selector : Callable[[Any], bool]
         Callable function which takes a model (Any) and returns a boolean value,
         indicating whether the model is the same as the selected model.
-    step : float
-        Step size for the search.
     a : np.ndarray
         Search direction vector, whose shape is same to the data.
     b : np.ndarray
@@ -749,6 +746,8 @@ def _search_interval(
         The interval for the search.
     job_id : int
         Job ID for the parallel processing.
+    max_iter : int
+        Maximum number of iterations.
     progress : bool, optional
         Whether to show the progress bar. Defaults to `False`.
 
@@ -773,6 +772,8 @@ def _search_interval(
         )
 
     z = each_interval.intervals[0][0]
+
+    before_searched_intervals = RealSubset()
     while True:
         model, intervals_ = algorithm(a, b, z)
         intervals = (
@@ -784,13 +785,26 @@ def _search_interval(
             detect_count += 1
             truncated_intervals = truncated_intervals | intervals
 
-        if each_interval <= searched_intervals:
+        unsearched_intervals = each_interval - searched_intervals
+        if unsearched_intervals.is_empty():
             if progress:
                 bar.update(total - bar.n)
             break
-        if progress:
-            update = total * (intervals & each_interval).measure / each_interval.measure
-            bar.update(update)
 
-        z = searched_intervals.intervals[0][1] + step
+        if search_count > max_iter:
+            raise InfiniteLoopError(LoopType.ITER)
+        if searched_intervals == before_searched_intervals:
+            raise InfiniteLoopError(LoopType.SAME)
+        before_searched_intervals = searched_intervals
+
+        if progress:
+            current = (
+                total
+                * (searched_intervals & each_interval).measure
+                / each_interval.measure
+            )
+            bar.update(current - bar.n)
+
+        l, u = unsearched_intervals.intervals[0].tolist()
+        z = (l + u) / 2
     return searched_intervals, truncated_intervals, search_count, detect_count
