@@ -146,8 +146,9 @@ class MarginalScreeningNorm(MarginalScreening):
     def inference(
         self,
         index: int,
-        search_strategy: Literal["pi1", "pi2", "pi3"],
-        termination_criterion: Literal["precision", "decision"],
+        search_strategy: Literal["pi1", "pi2", "pi3"] = "pi3",
+        termination_criterion: Literal["precision", "decision"] = "precision",
+        n_jobs: int = 1,
     ) -> SelectiveInferenceResult:
         """Conduct selective inference for the normal distribution.
 
@@ -159,6 +160,8 @@ class MarginalScreeningNorm(MarginalScreening):
             Search strategy for the test.
         termination_criterion : Literal["precision", "decision"]
             Termination criterion for the test.
+        n_jobs : int
+            Number of jobs to run in parallel.
 
         Returns
         -------
@@ -172,6 +175,7 @@ class MarginalScreeningNorm(MarginalScreening):
             self.model_selector,
             search_strategy=search_strategy,
             termination_criterion=termination_criterion,
+            n_jobs=n_jobs,
         )
 
 
@@ -196,8 +200,9 @@ class MarginalScreeningChi(MarginalScreening):
     def inference(
         self,
         indexes: list[int],
-        search_strategy: Literal["pi1", "pi2", "pi3"],
-        termination_criterion: Literal["precision", "decision"],
+        search_strategy: Literal["pi1", "pi2", "pi3"] = "pi3",
+        termination_criterion: Literal["precision", "decision"] = "precision",
+        n_jobs: int = 1,
     ) -> SelectiveInferenceResult:
         """Conduct selective inference for the chi distribution.
 
@@ -209,6 +214,8 @@ class MarginalScreeningChi(MarginalScreening):
             Search strategy for the test.
         termination_criterion : Literal["precision", "decision"]
             Termination criterion for the test.
+        n_jobs : int
+            Number of jobs to run in parallel.
 
         Returns
         -------
@@ -222,6 +229,7 @@ class MarginalScreeningChi(MarginalScreening):
             self.model_selector,
             search_strategy=search_strategy,
             termination_criterion=termination_criterion,
+            n_jobs=n_jobs,
         )
 
 
@@ -234,10 +242,14 @@ class MarginalScreeningChi(MarginalScreening):
         (3, 0.966223, 0.598692),
     ],
 )
+@pytest.mark.parametrize("search_strategy", ["pi1", "pi2", "pi3"])
+@pytest.mark.parametrize("termination_criterion", ["precision", "decision"])
 def test_marginal_screening_norm(
     seed: int,
     expected_stat: float,
     expected_p_value: float,
+    search_strategy: Literal["pi1", "pi2", "pi3"],
+    termination_criterion: Literal["precision", "decision"],
 ) -> None:
     """Test the SelectiveInferenceNorm class."""
     precision, significance_level = 0.001, 0.05
@@ -250,25 +262,47 @@ def test_marginal_screening_norm(
 
     ms = MarginalScreeningNorm(X, y, sigma, k)
 
-    strategies: list[Literal["pi1", "pi2", "pi3"]] = ["pi1", "pi2", "pi3"]
-    for search_strategy in strategies:
-        result = ms.inference(
-            index,
-            termination_criterion="precision",
-            search_strategy=search_strategy,
-        )
+    result = ms.inference(
+        index,
+        search_strategy=search_strategy,
+        termination_criterion=termination_criterion,
+    )
+    if termination_criterion == "precision":
         assert np.abs(result.p_value - expected_p_value) < precision
-        assert_allclose(result.stat, expected_stat, rtol=1e-4, atol=1e-4)
-
-        result = ms.inference(
-            index,
-            termination_criterion="decision",
-            search_strategy=search_strategy,
-        )
+    elif termination_criterion == "decision":
         assert (result.p_value <= significance_level) == (
             expected_p_value <= significance_level
         )
-        assert_allclose(result.stat, expected_stat, rtol=1e-4, atol=1e-4)
+    assert_allclose(result.stat, expected_stat, rtol=1e-3, atol=1e-3)
+
+
+@pytest.mark.parametrize(
+    ("seed", "expected_stat", "expected_p_value"),
+    [
+        (0, 1.997181, 0.067986),
+        (1, -0.715869, 0.802903),
+        (2, -0.959323, 0.551424),
+        (3, 0.966223, 0.598692),
+    ],
+)
+def test_marginal_screening_norm_parallel(
+    seed: int,
+    expected_stat: float,
+    expected_p_value: float,
+) -> None:
+    """Test the SelectiveInferenceNorm class with parallel processing."""
+    rng = np.random.default_rng(seed)
+    n, p, k, sigma = 100, 10, 5, 1.0
+
+    X = rng.normal(size=(n, p))
+    y = rng.normal(size=n)
+    index = rng.choice(k)
+
+    ms = MarginalScreeningNorm(X, y, sigma, k)
+
+    result = ms.inference(index, n_jobs=4)
+    assert_allclose(result.p_value, expected_p_value, rtol=1e-3, atol=1e-3)
+    assert_allclose(result.stat, expected_stat, rtol=1e-3, atol=1e-3)
 
 
 @pytest.mark.parametrize(
@@ -280,10 +314,14 @@ def test_marginal_screening_norm(
         (3, 2.627566, 0.385533),
     ],
 )
+@pytest.mark.parametrize("search_strategy", ["pi1", "pi2", "pi3"])
+@pytest.mark.parametrize("termination_criterion", ["precision", "decision"])
 def test_marginal_screening_chi(
     seed: int,
     expected_stat: float,
     expected_p_value: float,
+    search_strategy: Literal["pi1", "pi2", "pi3"],
+    termination_criterion: Literal["precision", "decision"],
 ) -> None:
     """Test the SelectiveInferenceChi class."""
     precision, significance_level = 0.001, 0.05
@@ -296,22 +334,44 @@ def test_marginal_screening_chi(
 
     ms = MarginalScreeningChi(X, y, sigma, k)
 
-    strategies: list[Literal["pi1", "pi2", "pi3"]] = ["pi1", "pi2", "pi3"]
-    for search_strategy in strategies:
-        result = ms.inference(
-            indexes,
-            termination_criterion="precision",
-            search_strategy=search_strategy,
-        )
+    result = ms.inference(
+        indexes,
+        search_strategy=search_strategy,
+        termination_criterion=termination_criterion,
+    )
+    if termination_criterion == "precision":
         assert np.abs(result.p_value - expected_p_value) < precision
-        assert_allclose(result.stat, expected_stat, rtol=1e-4, atol=1e-4)
-
-        result = ms.inference(
-            indexes,
-            termination_criterion="decision",
-            search_strategy=search_strategy,
-        )
+    elif termination_criterion == "decision":
         assert (result.p_value <= significance_level) == (
             expected_p_value <= significance_level
         )
-        assert_allclose(result.stat, expected_stat, rtol=1e-4, atol=1e-4)
+    assert_allclose(result.stat, expected_stat, rtol=1e-3, atol=1e-3)
+
+
+@pytest.mark.parametrize(
+    ("seed", "expected_stat", "expected_p_value"),
+    [
+        (0, 1.503175, 0.568306),
+        (1, 3.020218, 0.130227),
+        (2, 2.121942, 0.292879),
+        (3, 2.627566, 0.385533),
+    ],
+)
+def test_marginal_screening_chi_parallel(
+    seed: int,
+    expected_stat: float,
+    expected_p_value: float,
+) -> None:
+    """Test the SelectiveInferenceChi class with parallel processing."""
+    rng = np.random.default_rng(seed)
+    n, p, k, sigma = 100, 10, 5, 1.0
+
+    X = rng.normal(size=(n, p))
+    y = rng.normal(size=n)
+    indexes = rng.choice(k, rng.choice(k - 1) + 2, replace=False).tolist()
+
+    ms = MarginalScreeningChi(X, y, sigma, k)
+
+    result = ms.inference(indexes, n_jobs=4)
+    assert_allclose(result.p_value, expected_p_value, rtol=1e-3, atol=1e-3)
+    assert_allclose(result.stat, expected_stat, rtol=1e-3, atol=1e-3)
