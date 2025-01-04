@@ -559,6 +559,21 @@ class RealSubset:
             return False
         return np.any((self.intervals[:, 0] <= z) & (z <= self.intervals[:, 1])).item()
 
+    def __getitem__(self, key: int) -> list[float]:
+        """Get the interval at the specified index.
+
+        Parameters
+        ----------
+        key : int
+            Index of the interval.
+
+        Returns
+        -------
+        list[float]
+            Interval at the specified index.
+        """
+        return self.intervals[key].tolist()
+
     def find_interval_containing(self, z: float) -> list[float]:
         """Find the interval containing a real number.
 

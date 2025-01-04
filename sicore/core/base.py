@@ -472,9 +472,9 @@ class SelectiveInference:
         match inference_mode:
             case "exhaustive", _:
                 return lambda searched_intervals: (
-                    self.limits.intervals[0][0]
+                    self.limits[0][0]
                     if searched_intervals.is_empty()
-                    else searched_intervals.intervals[0][1] + self.step
+                    else searched_intervals[0][1] + self.step
                 )
 
             case "over_conditioning":
@@ -662,7 +662,7 @@ class SelectiveInference:
             The result of the selective inference.
         """
         interval_list = []
-        current_point = self.limits.intervals[0][0]
+        current_point = self.limits[0][0]
         each_length = self.limits.measure / n_jobs
         for _ in range(n_jobs):
             interval = RealSubset([[current_point, current_point + each_length]])
@@ -771,7 +771,7 @@ def _search_interval(
             bar_format="{desc}: {percentage:3.2f}{unit}|{bar}| [{elapsed}<{remaining}, {rate_fmt}{postfix}]",
         )
 
-    z = (each_interval.intervals[0][1] - each_interval.intervals[0][0]) / 2
+    z = (each_interval[0][1] - each_interval[0][0]) / 2
 
     before_searched_intervals = RealSubset()
     while True:
@@ -805,6 +805,6 @@ def _search_interval(
             )
             bar.update(current - bar.n)
 
-        l, u = unsearched_intervals.intervals[0].tolist()
+        l, u = unsearched_intervals[0]
         z = (l + u) / 2
     return searched_intervals, truncated_intervals, search_count, detect_count
