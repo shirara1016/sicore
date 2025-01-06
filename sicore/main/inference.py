@@ -153,14 +153,15 @@ class SelectiveInferenceNorm(SelectiveInference):
         self.b = sigma_eta / sqrt_eta_sigma_eta
         self.a = data - self.stat * self.b
 
+        self.null_rv = norm()
         self.mode = 0.0
         self.support = RealSubset([[-np.inf, np.inf]])
+        self.alternative = "two-sided"
+
         self.limits = (
             RealSubset([[-10.0 - np.abs(self.stat), 10.0 + np.abs(self.stat)]])
             & self.support
         )
-        self.null_rv = norm()
-        self.alternative = "two-sided"
 
 
 class SelectiveInferenceChi(SelectiveInference):
@@ -256,9 +257,10 @@ class SelectiveInferenceChi(SelectiveInference):
         self.b = projected_data / self.stat
         self.a = data - self.stat * self.b
 
+        self.null_rv = chi(df=degree)
         self.mode = np.sqrt(degree - 1)
         self.support = RealSubset([[0.0, np.inf]])
+        self.alternative = "less"
+
         left, right = np.sort([self.stat, self.mode])
         self.limits = RealSubset([[left - 10.0, right + 10.0]]) & self.support
-        self.null_rv = chi(df=degree)
-        self.alternative = "less"

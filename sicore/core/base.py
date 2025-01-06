@@ -157,6 +157,25 @@ class SelectiveInference:
 
     This class provides the basic structure for conducting selective inference.
     The user can inherit this class and implement the `__init__` method.
+
+    Attributes
+    ----------
+    stat : float
+        Test statistic value.
+    a : np.ndarray
+        Search direction vector, whose shape is same to the data.
+    b : np.ndarray
+        Search direction vector, whose shape is same to the data.
+    null_rv : rv_continuous
+        Null distribution of the unconditional test statistic.
+    mode : float
+        Mode of the null distribution of the unconditional test statistic.
+    support : RealSubset
+        Support of the null distribution of the unconditional test statistic.
+    alternative : Literal["two-sided", "less", "greater"]
+        Type of the alternative hypothesis.
+    limits : RealSubset
+        Limits of the search space.
     """
 
     def __init__(self) -> None:
@@ -166,12 +185,12 @@ class SelectiveInference:
         self.a: np.ndarray
         self.b: np.ndarray
 
-        self.support: RealSubset
-        self.limits: RealSubset
-
         self.null_rv: rv_continuous
         self.mode: float
+        self.support: RealSubset
         self.alternative: Literal["two-sided", "less", "greater"]
+
+        self.limits: RealSubset
 
     def inference(
         self,
