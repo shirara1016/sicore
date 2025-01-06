@@ -258,9 +258,7 @@ class SelectiveInferenceChi(SelectiveInference):
 
         self.mode = np.sqrt(degree - 1)
         self.support = RealSubset([[0.0, np.inf]])
-        self.limits = (
-            RealSubset([[self.mode - 20.0, np.max([self.stat, self.mode]) + 10.0]])
-            & self.support
-        )
+        left, right = np.sort([self.stat, self.mode])
+        self.limits = RealSubset([[left - 10.0, right + 10.0]]) & self.support
         self.null_rv = chi(df=degree)
         self.alternative = "less"
