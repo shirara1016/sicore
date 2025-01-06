@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" />
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
-        <title>sicore 2.4.3 documentation</title>
+        <title>sicore 2.5.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
@@ -166,7 +166,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="#"><div class="brand">sicore 2.4.3 documentation</div></a>
+      <a href="#"><div class="brand">sicore 2.5.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -190,7 +190,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="#">
   
   
-  <span class="sidebar-brand-text">sicore 2.4.3 documentation</span>
+  <span class="sidebar-brand-text">sicore 2.5.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -264,9 +264,97 @@
 <p>An abstract class conducting selective inference.</p>
 <p>This class provides the basic structure for conducting selective inference.
 The user can inherit this class and implement the <cite>__init__</cite> method.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sicore.SelectiveInference.stat">
+<span class="sig-name descname"><span class="pre">stat</span></span><a class="headerlink" href="#sicore.SelectiveInference.stat" title="Link to this definition">¶</a></dt>
+<dd><p>Test statistic value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sicore.SelectiveInference.a">
+<span class="sig-name descname"><span class="pre">a</span></span><a class="headerlink" href="#sicore.SelectiveInference.a" title="Link to this definition">¶</a></dt>
+<dd><p>Search direction vector, whose shape is same to the data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sicore.SelectiveInference.b">
+<span class="sig-name descname"><span class="pre">b</span></span><a class="headerlink" href="#sicore.SelectiveInference.b" title="Link to this definition">¶</a></dt>
+<dd><p>Search direction vector, whose shape is same to the data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sicore.SelectiveInference.null_rv">
+<span class="sig-name descname"><span class="pre">null_rv</span></span><a class="headerlink" href="#sicore.SelectiveInference.null_rv" title="Link to this definition">¶</a></dt>
+<dd><p>Null distribution of the unconditional test statistic.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>rv_continuous</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sicore.SelectiveInference.mode">
+<span class="sig-name descname"><span class="pre">mode</span></span><a class="headerlink" href="#sicore.SelectiveInference.mode" title="Link to this definition">¶</a></dt>
+<dd><p>Mode of the null distribution of the unconditional test statistic.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sicore.SelectiveInference.support">
+<span class="sig-name descname"><span class="pre">support</span></span><a class="headerlink" href="#sicore.SelectiveInference.support" title="Link to this definition">¶</a></dt>
+<dd><p>Support of the null distribution of the unconditional test statistic.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#sicore.RealSubset" title="sicore.RealSubset">RealSubset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sicore.SelectiveInference.alternative">
+<span class="sig-name descname"><span class="pre">alternative</span></span><a class="headerlink" href="#sicore.SelectiveInference.alternative" title="Link to this definition">¶</a></dt>
+<dd><p>Type of the alternative hypothesis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Literal[“two-sided”, “less”, “greater”]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sicore.SelectiveInference.limits">
+<span class="sig-name descname"><span class="pre">limits</span></span><a class="headerlink" href="#sicore.SelectiveInference.limits" title="Link to this definition">¶</a></dt>
+<dd><p>Limits of the search space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#sicore.RealSubset" title="sicore.RealSubset">RealSubset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sicore.SelectiveInference.inference">
-<span class="sig-name descname"><span class="pre">inference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algorithm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sicore.RealSubset" title="sicore.core.real_subset.RealSubset"><span class="pre">RealSubset</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_selector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alternative</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'two-sided'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'less'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'greater'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inference_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'parametric'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'exhaustive'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'over_conditioning'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'parametric'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_strategy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#sicore.RealSubset" title="sicore.core.real_subset.RealSubset"><span class="pre">RealSubset</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'pi1'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'pi2'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'pi3'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'pi3'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">termination_criterion</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#sicore.RealSubset" title="sicore.core.real_subset.RealSubset"><span class="pre">RealSubset</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#sicore.RealSubset" title="sicore.core.real_subset.RealSubset"><span class="pre">RealSubset</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tqdm</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'precision'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'decision'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'precision'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">significance_level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">progress</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#sicore.SelectiveInferenceResult" title="sicore.core.base.SelectiveInferenceResult"><span class="pre">SelectiveInferenceResult</span></a></span></span><a class="headerlink" href="#sicore.SelectiveInference.inference" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">inference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algorithm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sicore.RealSubset" title="sicore.core.real_subset.RealSubset"><span class="pre">RealSubset</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_selector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alternative</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'two-sided'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'less'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'greater'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inference_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'parametric'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'exhaustive'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'over_conditioning'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'parametric'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_strategy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#sicore.RealSubset" title="sicore.core.real_subset.RealSubset"><span class="pre">RealSubset</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'pi1'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'pi2'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'pi3'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'pi3'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">termination_criterion</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#sicore.RealSubset" title="sicore.core.real_subset.RealSubset"><span class="pre">RealSubset</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#sicore.RealSubset" title="sicore.core.real_subset.RealSubset"><span class="pre">RealSubset</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'precision'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'decision'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'precision'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">significance_level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">progress</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#sicore.SelectiveInferenceResult" title="sicore.core.base.SelectiveInferenceResult"><span class="pre">SelectiveInferenceResult</span></a></span></span><a class="headerlink" href="#sicore.SelectiveInference.inference" title="Link to this definition">¶</a></dt>
 <dd><p>Conduct selective inference.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -292,10 +380,9 @@ If ‘pi2’, the search strategy focuses on the searched intervals.
 If ‘pi3’, the search strategy focuses on the both of the truncated and searched intervals.
 This option is ignored when the <cite>inference_mode</cite> is ‘exhaustive’ or ‘over_conditioning’.
 Defaults to ‘pi3’.</p></li>
-<li><p><strong>termination_criterion</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="#sicore.RealSubset" title="sicore.RealSubset"><em>RealSubset</em></a><em>, </em><a class="reference internal" href="#sicore.RealSubset" title="sicore.RealSubset"><em>RealSubset</em></a><em>, </em><em>tqdm</em><em> | </em><em>None</em><em>]</em><em>, </em><em>bool</em><em>] </em><em>| </em><em>Literal</em><em>[</em><em>&quot;precision&quot;</em><em>, </em><em>&quot;decision&quot;</em><em>]</em><em>, </em><em>optional</em>) – Callable function which takes searched_intervals (RealSubset),
-truncated_intervals (RealSubset) and progress bar (tqdm, optional),
-updates the progress bar, and returns a boolean value, indicating
-whether the search should be terminated.
+<li><p><strong>termination_criterion</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="#sicore.RealSubset" title="sicore.RealSubset"><em>RealSubset</em></a><em>, </em><a class="reference internal" href="#sicore.RealSubset" title="sicore.RealSubset"><em>RealSubset</em></a><em>]</em><em>, </em><em>bool</em><em> | </em><em>float</em><em>] </em><em>| </em><em>Literal</em><em>[</em><em>&quot;precision&quot;</em><em>, </em><em>&quot;decision&quot;</em><em>]</em><em>, </em><em>optional</em>) – Callable function which takes searched_intervals (RealSubset) and truncated_intervals (RealSubset),
+and returns a boolean value, indicating whether the search should be terminated or
+a float between 0 and 1, indicating the search completion ratio, where 1 means the search is completed.
 If not callable, it must be one of ‘precision’ or ‘decision’.
 If ‘precision’, the termination criterion is based on the precision in the computation of the p-value.
 If ‘decision’, the termination criterion is based on the decision result by the p-value.
@@ -1333,6 +1420,14 @@ The shape of the basis should be (k, n), where n is the dimension of the data sp
 <li><a class="reference internal" href="#module-sicore">Module contents</a><ul>
 <li><a class="reference internal" href="#installation">Installation</a></li>
 <li><a class="reference internal" href="#sicore.SelectiveInference"><code class="docutils literal notranslate"><span class="pre">SelectiveInference</span></code></a><ul>
+<li><a class="reference internal" href="#sicore.SelectiveInference.stat"><code class="docutils literal notranslate"><span class="pre">SelectiveInference.stat</span></code></a></li>
+<li><a class="reference internal" href="#sicore.SelectiveInference.a"><code class="docutils literal notranslate"><span class="pre">SelectiveInference.a</span></code></a></li>
+<li><a class="reference internal" href="#sicore.SelectiveInference.b"><code class="docutils literal notranslate"><span class="pre">SelectiveInference.b</span></code></a></li>
+<li><a class="reference internal" href="#sicore.SelectiveInference.null_rv"><code class="docutils literal notranslate"><span class="pre">SelectiveInference.null_rv</span></code></a></li>
+<li><a class="reference internal" href="#sicore.SelectiveInference.mode"><code class="docutils literal notranslate"><span class="pre">SelectiveInference.mode</span></code></a></li>
+<li><a class="reference internal" href="#sicore.SelectiveInference.support"><code class="docutils literal notranslate"><span class="pre">SelectiveInference.support</span></code></a></li>
+<li><a class="reference internal" href="#sicore.SelectiveInference.alternative"><code class="docutils literal notranslate"><span class="pre">SelectiveInference.alternative</span></code></a></li>
+<li><a class="reference internal" href="#sicore.SelectiveInference.limits"><code class="docutils literal notranslate"><span class="pre">SelectiveInference.limits</span></code></a></li>
 <li><a class="reference internal" href="#sicore.SelectiveInference.inference"><code class="docutils literal notranslate"><span class="pre">SelectiveInference.inference()</span></code></a></li>
 </ul>
 </li>
@@ -1415,7 +1510,7 @@ The shape of the basis should be (k, n), where n is the dimension of the data sp
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=7a6bd5fc"></script>
+</div><script src="_static/documentation_options.js?v=3c4615cf"></script>
     <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=5fa4622c"></script>
