@@ -45,6 +45,42 @@ def symmetric_difference(intervals1: np.ndarray, intervals2: np.ndarray) -> np.n
     return union(difference(intervals1, intervals2), difference(intervals2, intervals1))
 
 
+def polynomial_iso_sign_interval(
+    poly_or_coef: Polynomial | np.ndarray | list[float],
+    z: float,
+) -> list[list[float]]:
+    """Compute intervals where a given polynomial is iso-sign of a given point.
+
+    This function outputs a single interval containing the point z where the given polynomial is iso-sign of z.
+    That is, it outputs a single interval [l, u] which satisfies [l, u] contains z and [l, u] is subset of {r in R | sign(poly(z)) * poly(r) > 0}.
+
+    Parameters
+    ----------
+    poly_or_coef : Polynomial | np.ndarray | list[float]
+        Polynomial or its coefficients e.g. [a, b, c] for a + b * z + c * z ** 2.
+    z : float
+        Point which determines the sign of the inequality.
+
+    Returns
+    -------
+    list[list[float]]
+        Interval where the polynomial is iso-sign.
+    """
+    if isinstance(poly_or_coef, Polynomial):
+        coef = poly_or_coef.coef.tolist()
+    else:
+        coef = np.array(poly_or_coef).tolist()
+
+    poly: Polynomial = Polynomial(coef).trim()
+    roots: list[complex] = poly.roots()
+    return [
+        [
+            np.max([*[root.real for root in roots if root.real < z], -np.inf]).item(),
+            np.min([*[root.real for root in roots if root.real > z], np.inf]).item(),
+        ],
+    ]
+
+
 def polynomial_below_zero(
     poly_or_coef: Polynomial | np.ndarray | list[float],
     tol: float = 1e-10,
@@ -70,7 +106,7 @@ def polynomial_below_zero(
         coef = np.array(poly_or_coef).tolist()
 
     coef = [0 if -tol < c_ < tol else c_ for c_ in coef]
-    poly = Polynomial(coef).trim()
+    poly: Polynomial = Polynomial(coef).trim()
 
     if poly.degree() == 0:
         if poly.coef[0] <= 0:

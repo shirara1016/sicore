@@ -11,6 +11,7 @@ from sicore.utils.intervals import (
     intersection,
     linear_polynomials_below_zero,
     polynomial_below_zero,
+    polynomial_iso_sign_interval,
     polytope_below_zero,
     symmetric_difference,
     union,
@@ -124,6 +125,28 @@ def test_symmetric_difference(
         symmetric_difference(np.array(intervals1), np.array(intervals2)),
         np.array(expected).reshape(-1, 2),
     )
+
+
+@pytest.mark.parametrize(
+    ("coef", "z", "expected"),
+    [
+        ([1.0], 0.0, [[-np.inf, np.inf]]),
+        ([-1.0, 0.0, 1.0], 0.5, [[-1.0, 1.0]]),
+        ([-1.0, 0.0, 1.0], 1.5, [[1.0, np.inf]]),
+        ([-2.0, 2.0, -1.0], 1.5, [[1.0, np.inf]]),
+        ([-6.0, 11.0, -6.0, 1.0], 2.5, [[2.0, 3.0]]),
+    ],
+)
+def test_polynomial_iso_sign_interval(
+    coef: list[float],
+    z: float,
+    expected: list[list[float]],
+) -> None:
+    """Test the polynomial iso-sign interval function."""
+    assert_allclose(polynomial_iso_sign_interval(coef, z), expected)
+
+    poly = Polynomial(coef)
+    assert_allclose(polynomial_iso_sign_interval(poly, z), expected)
 
 
 @pytest.mark.parametrize(
