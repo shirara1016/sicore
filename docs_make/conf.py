@@ -1,4 +1,4 @@
-"""Configuration file for the Sphinx documentation builder."""  # noqa: INP001
+"""Configuration file for the Sphinx documentation builder."""
 #
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
@@ -11,9 +11,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path("../").resolve()))
 
 project = "sicore"
-project_copyright = "2024, Takeuchi-Lab"
+project_copyright = "2025, Takeuchi-Lab"
 author = "Takeuchi-Lab"
-release = "2.5.0"
+release = "2.6.0"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

@@ -1,10 +1,10 @@
-"""Making the documentation for the project."""
+"""Make the documentation for the project."""
 
 import shutil
 import subprocess
 from pathlib import Path
 
-subprocess.run(["make", "html"], check=False)
+subprocess.run(["make", "html"], check=False)  # noqa: S603, S607
 
 path = Path("../docs")
 if path.exists():

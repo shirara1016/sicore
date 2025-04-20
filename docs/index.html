@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" />
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
-        <title>sicore 2.5.0 documentation</title>
+        <title>sicore 2.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
@@ -166,7 +166,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="#"><div class="brand">sicore 2.5.0 documentation</div></a>
+      <a href="#"><div class="brand">sicore 2.6.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -190,7 +190,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="#">
   
   
-  <span class="sidebar-brand-text">sicore 2.5.0 documentation</span>
+  <span class="sidebar-brand-text">sicore 2.6.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -1178,6 +1178,28 @@ and computation.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="sicore.polynomial_iso_sign_interval">
+<span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">polynomial_iso_sign_interval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">poly_or_coef</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Polynomial</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#sicore.polynomial_iso_sign_interval" title="Link to this definition">¶</a></dt>
+<dd><p>Compute intervals where a given polynomial is iso-sign of a given point.</p>
+<p>This function outputs a single interval containing the point z where the given polynomial is iso-sign of z.
+That is, it outputs a single interval [l, u] which satisfies [l, u] contains z and [l, u] is subset of {r in R | sign(poly(z)) * poly(r) &gt; 0}.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>poly_or_coef</strong> (<em>Polynomial</em><em> | </em><em>np.ndarray</em><em> | </em><em>list</em><em>[</em><em>float</em><em>]</em>) – Polynomial or its coefficients e.g. [a, b, c] for a + b * z + c * z ** 2.</p></li>
+<li><p><strong>z</strong> (<em>float</em>) – Point which determines the sign of the inequality.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Interval where the polynomial is iso-sign.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[list[float]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="sicore.polynomial_below_zero">
 <span class="sig-prename descclassname"><span class="pre">sicore.</span></span><span class="sig-name descname"><span class="pre">polynomial_below_zero</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">poly_or_coef</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Polynomial</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-10</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#sicore.polynomial_below_zero" title="Link to this definition">¶</a></dt>
 <dd><p>Compute intervals where a given polynomial is below zero.</p>
@@ -1390,7 +1412,7 @@ The shape of the basis should be (k, n), where n is the dimension of the data sp
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2024, Takeuchi-Lab
+                Copyright &#169; 2025, Takeuchi-Lab
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -1485,6 +1507,7 @@ The shape of the basis should be (k, n), where n is the dimension of the data sp
 <li><a class="reference internal" href="#sicore.intersection"><code class="docutils literal notranslate"><span class="pre">intersection()</span></code></a></li>
 <li><a class="reference internal" href="#sicore.difference"><code class="docutils literal notranslate"><span class="pre">difference()</span></code></a></li>
 <li><a class="reference internal" href="#sicore.symmetric_difference"><code class="docutils literal notranslate"><span class="pre">symmetric_difference()</span></code></a></li>
+<li><a class="reference internal" href="#sicore.polynomial_iso_sign_interval"><code class="docutils literal notranslate"><span class="pre">polynomial_iso_sign_interval()</span></code></a></li>
 <li><a class="reference internal" href="#sicore.polynomial_below_zero"><code class="docutils literal notranslate"><span class="pre">polynomial_below_zero()</span></code></a></li>
 <li><a class="reference internal" href="#sicore.polytope_below_zero"><code class="docutils literal notranslate"><span class="pre">polytope_below_zero()</span></code></a></li>
 <li><a class="reference internal" href="#sicore.linear_polynomials_below_zero"><code class="docutils literal notranslate"><span class="pre">linear_polynomials_below_zero()</span></code></a></li>
@@ -1510,7 +1533,7 @@ The shape of the basis should be (k, n), where n is the dimension of the data sp
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=3c4615cf"></script>
+</div><script src="_static/documentation_options.js?v=ae39cb24"></script>
     <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=5fa4622c"></script>
