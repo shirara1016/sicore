@@ -355,6 +355,8 @@ class SelectiveInference:
             if complation == 1.0 or complation is True:
                 break
 
+        searched_intervals = searched_intervals & self.support
+        truncated_intervals = truncated_intervals & self.support
         p_value = self._compute_pvalue(truncated_intervals)
         inf_p, sup_p = self._evaluate_pvalue_bounds(
             searched_intervals,
@@ -494,9 +496,7 @@ class SelectiveInference:
         match inference_mode:
             case "exhaustive", _:
                 return lambda searched_intervals: (
-                    self.limits[0][0]
-                    if searched_intervals.is_empty()
-                    else searched_intervals[0][1] + self.step
+                    np.mean((self.limits - searched_intervals)[0])
                 )
 
             case "over_conditioning":
@@ -606,11 +606,9 @@ class SelectiveInference:
                         return 1.0
                     if not self.progress:
                         return 0.0
-                    shift = 0.001
-                    start, end = 1.0, self.precision
-                    scale = 1.0 / np.log((end + shift) / (start + shift))
-                    bias = -scale * np.log(start + shift)
-                    return scale * np.log(np.max([value, end]) + shift) + bias
+                    return (
+                        searched_intervals & self.limits
+                    ).measure / self.limits.measure
 
                 return termination_criterion
 
@@ -630,11 +628,9 @@ class SelectiveInference:
                         return 1.0
                     if not self.progress:
                         return 0.0
-                    shift = 0.001
-                    start, end = np.min([alpha, 1.0 - alpha]), 0.0
-                    scale = 1.0 / np.log((end + shift) / (start + shift))
-                    bias = -scale * np.log(start + shift)
-                    return scale * np.log(np.max([value, end]) + shift) + bias
+                    return (
+                        searched_intervals & self.limits
+                    ).measure / self.limits.measure
 
                 return termination_criterion
 
