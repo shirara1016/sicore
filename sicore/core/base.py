@@ -389,12 +389,10 @@ class SelectiveInference:
         float
             The p-value from the truncated intervals.
         """
-        absolute = self.alternative == "two-sided"
         cdf_value = truncated_cdf(
             self.null_rv,
             self.stat,
             truncated_intervals,
-            absolute=absolute,
         )
         return self._convert_cdf_value_to_pvalue(cdf_value)
 
@@ -417,14 +415,8 @@ class SelectiveInference:
         tuple[float, float]
             The lower and upper bounds of the p-value.
         """
-        absolute = self.alternative == "two-sided"
-        if absolute:
-            mask_intervals = RealSubset([[-np.abs(self.stat), np.abs(self.stat)]])
-        else:
-            mask_intervals = RealSubset([[-np.inf, self.stat]])
-
+        mask_intervals = RealSubset([[-np.inf, self.stat]])
         unsearched_intervals = ~searched_intervals
-
         inf_intervals = truncated_intervals | (unsearched_intervals - mask_intervals)
         sup_intervals = truncated_intervals | (unsearched_intervals & mask_intervals)
 
@@ -435,13 +427,11 @@ class SelectiveInference:
             self.null_rv,
             self.stat,
             inf_intervals,
-            absolute=absolute,
         )
         sup_cdf = truncated_cdf(
             self.null_rv,
             self.stat,
             sup_intervals,
-            absolute=absolute,
         )
 
         p_value_from_inf = self._convert_cdf_value_to_pvalue(inf_cdf)
@@ -466,10 +456,12 @@ class SelectiveInference:
             The p-value.
         """
         match self.alternative:
-            case "two-sided" | "less":
+            case "less":
                 return float(1.0 - cdf_value)
             case "greater":
                 return float(cdf_value)
+            case "two-sided":
+                return float(2.0 * np.min([1.0 - cdf_value, cdf_value]))
 
     def _create_search_strategy(
         self,

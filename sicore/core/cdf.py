@@ -11,8 +11,6 @@ def truncated_cdf(
     rv: rv_continuous,
     z: float,
     intervals: np.ndarray | list[list[float]] | RealSubset,
-    *,
-    absolute: bool = False,
 ) -> float:
     """Compute the cdf value of the truncated distribution.
 
@@ -24,9 +22,6 @@ def truncated_cdf(
         The value at which to compute the cdf of the truncated distribution.
     intervals : np.ndarray | list[list[float]] | RealSubset
         The truncated intervals [[l1, u1], [l2, u2], ...].
-    absolute : bool, optional
-        Whether to compute the cdf for the distribution of the
-        absolute value of the random variable. Defaults to False.
 
     Returns
     -------
@@ -44,14 +39,8 @@ def truncated_cdf(
     if z not in intervals:
         raise NotBelongToSubsetError(z, intervals)
 
-    mask_intervals = (
-        RealSubset([[-np.abs(z), np.abs(z)]])
-        if absolute
-        else RealSubset([[-np.inf, z]])
-    )
-
-    inner_intervals = intervals & mask_intervals
-    outer_intervals = intervals - mask_intervals
+    inner_intervals = intervals & RealSubset([[-np.inf, z]])
+    outer_intervals = intervals - RealSubset([[-np.inf, z]])
 
     inner_log_area = _compute_log_area(rv, inner_intervals)
     outer_log_area = _compute_log_area(rv, outer_intervals)
@@ -115,8 +104,6 @@ def _log1mexp(z: np.ndarray) -> np.ndarray:
 def truncated_norm_cdf(
     z: float,
     intervals: np.ndarray | list[list[float]] | RealSubset,
-    *,
-    absolute: bool = False,
 ) -> float:
     """Compute the cdf value of the truncated normal distribution.
 
@@ -126,9 +113,6 @@ def truncated_norm_cdf(
         The value at which to compute the cdf of the truncated distribution.
     intervals : np.ndarray | list[list[float]] | RealSubset
         The truncated intervals [[l1, u1], [l2, u2], ...].
-    absolute : bool, optional
-        Whether to compute the cdf for the distribution of the
-        absolute value of the random variable. Defaults to False.
 
     Returns
     -------
@@ -140,15 +124,13 @@ def truncated_norm_cdf(
     ValueError
         If the value z is not belong to the truncated intervals.
     """
-    return truncated_cdf(norm(), z, intervals, absolute=absolute)
+    return truncated_cdf(norm(), z, intervals)
 
 
 def truncated_chi_cdf(
     z: float,
     df: int,
     intervals: np.ndarray | list[list[float]] | RealSubset,
-    *,
-    absolute: bool = False,
 ) -> float:
     """Compute the cdf value of the truncated normal distribution.
 
@@ -160,9 +142,6 @@ def truncated_chi_cdf(
         The degrees of freedom.
     intervals : np.ndarray | list[list[float]] | RealSubset
         The truncated intervals [[l1, u1], [l2, u2], ...].
-    absolute : bool, optional
-        Whether to compute the cdf for the distribution of the
-        absolute value of the random variable. Defaults to False.
 
     Returns
     -------
@@ -174,4 +153,4 @@ def truncated_chi_cdf(
     ValueError
         If the value z is not belong to the truncated intervals.
     """
-    return truncated_cdf(chi(df), z, intervals, absolute=absolute)
+    return truncated_cdf(chi(df), z, intervals)
