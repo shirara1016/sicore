@@ -1,5 +1,7 @@
 """Module containing classes for selective inference for the specific distributions."""
 
+from typing import Literal
+
 import numpy as np
 from scipy import sparse  # type: ignore[import]
 from scipy.stats import chi, norm  # type: ignore[import]
@@ -68,6 +70,8 @@ class SelectiveInferenceNorm(SelectiveInference):
         data: np.ndarray,
         var: float | np.ndarray | sparse.csr_array,
         eta: np.ndarray,
+        alternative: Literal["two-sided", "less", "greater"] = "two-sided",
+        null_value: float = 0.0,
         *,
         use_sparse: bool = False,
         use_tf: bool = False,
@@ -86,6 +90,10 @@ class SelectiveInferenceNorm(SelectiveInference):
             If 2D array, covariance matrix equals to the given array.
         eta : np.ndarray
             The direction of the test statistic in 1D array.
+        alternative : Literal["two-sided", "less", "greater"], optional
+            Type of the alternative hypothesis. Defaults to "two-sided".
+        null_value : float, optional
+            The null value of the hypothesis test. Defaults to 0.0.
         use_sparse : bool, optional
             Whether to use sparse matrix.
             If True, the `var` must be given as a sparse matrix. Defaults to False.
@@ -153,10 +161,10 @@ class SelectiveInferenceNorm(SelectiveInference):
         self.b = sigma_eta / sqrt_eta_sigma_eta
         self.a = data - self.stat * self.b
 
-        self.null_rv = norm()
-        self.mode = 0.0
+        self.null_rv = norm(loc=null_value)
+        self.mode = null_value
         self.support = RealSubset([[-np.inf, np.inf]])
-        self.alternative = "two-sided"
+        self.alternative = alternative
 
         self.limits = (
             RealSubset([[-10.0 - np.abs(self.stat), 10.0 + np.abs(self.stat)]])

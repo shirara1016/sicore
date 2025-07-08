@@ -199,7 +199,6 @@ class SelectiveInference:
             tuple[Any, list[list[float]] | RealSubset],
         ],
         model_selector: Callable[[Any], bool],
-        alternative: Literal["two-sided", "less", "greater"] | None = None,
         inference_mode: Literal[
             "parametric",
             "exhaustive",
@@ -232,13 +231,6 @@ class SelectiveInference:
         model_selector : Callable[[Any], bool]
             Callable function which takes a model (Any) and returns a boolean value,
             indicating whether the model is the same as the selected model.
-        alternative : Literal["two-sided", "less", "greater"] | None, optional
-            Must be one of 'two-sided', 'less', or 'greater' or None.
-            If 'two-sided', we consider the two-tailed test.
-            If 'less', we consider the right-tailed test.
-            If 'greater', we consider the left-tailed test.
-            If set to None, defaults to 'two-sided' for the normal distribution
-            and 'less' for the chi distribution. Defaults to None.
         inference_mode : Literal["parametric", "exhaustive", "over_conditioning"], optional
             Must be one of 'parametric', 'exhaustive',or 'over_conditioning'.
             Defaults to 'parametric'.
@@ -289,9 +281,6 @@ class SelectiveInference:
         self.significance_level = significance_level
         self.precision = precision
         self.progress = progress
-
-        if alternative is not None:
-            self.alternative = alternative
 
         if n_jobs > 1 or n_jobs == -1:
             return self._inference_parallel(
