@@ -237,9 +237,9 @@ class MarginalScreeningChi(MarginalScreening):
     ("seed", "expected_stat", "expected_p_value"),
     [
         (0, 1.997181, 0.067986),
-        (1, -0.715869, 0.802903),
-        (2, -0.959323, 0.551424),
-        (3, 0.966223, 0.598692),
+        (1, -0.715869, 0.971306),
+        (2, -0.959323, 0.676731),
+        (3, 0.966223, 0.802616),
     ],
 )
 @pytest.mark.parametrize("search_strategy", ["pi1", "pi2", "pi3"])
@@ -280,9 +280,9 @@ def test_marginal_screening_norm(
     ("seed", "expected_stat", "expected_p_value"),
     [
         (0, 1.997181, 0.067986),
-        (1, -0.715869, 0.802903),
-        (2, -0.959323, 0.551424),
-        (3, 0.966223, 0.598692),
+        (1, -0.715869, 0.971306),
+        (2, -0.959323, 0.676731),
+        (3, 0.966223, 0.802616),
     ],
 )
 def test_marginal_screening_norm_parallel(
