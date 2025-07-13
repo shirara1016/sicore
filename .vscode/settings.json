@@ -33,7 +33,6 @@
     // "git.openRepositoryInParentFolders": "never",
     // "git.ignoreLegacyWarning": true,
     // Copilotの設定
-    "github.copilot.editor.enableAutoCompletions": true,
     "github.copilot.enable": {
         "*": true,
     },
@@ -52,12 +51,14 @@
     },
     "notebook.defaultFormatter": "charliermarsh.ruff",
     // Ruffの設定
+    // "ruff.nativeServer": "auto",
+    // "ruff.lint.enable": true,
+    // "ruff.organizeImports": true,
+    // "ruff.importStrategy": "fromEnvironment",
     "ruff.lint.enable": true,
     "ruff.organizeImports": true,
-    "ruff.lint.args": [
-        "--config=pyproject.toml"
-    ],
     "ruff.importStrategy": "fromEnvironment",
+    "ruff.configuration": "pyproject.toml",
     // mypyの設定
     "mypy-type-checker.args": [
         "--config-file=pyproject.toml"
