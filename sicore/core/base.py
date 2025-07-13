@@ -426,6 +426,8 @@ class SelectiveInference:
         p_value_from_inf = self._convert_cdf_value_to_pvalue(inf_cdf)
         p_value_from_sup = self._convert_cdf_value_to_pvalue(sup_cdf)
         inf_p, sup_p = np.sort([p_value_from_inf, p_value_from_sup])
+        if self.alternative == "two-sided" and inf_cdf <= 1.0 / 2.0 <= sup_cdf:
+            sup_p = 1.0
         return inf_p, sup_p
 
     def _convert_cdf_value_to_pvalue(

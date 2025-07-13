@@ -54,6 +54,10 @@ class SelectiveInferenceNorm(SelectiveInference):
         If 2D array, covariance matrix equals to the given array.
     eta : np.ndarray
         The direction of the test statistic in 1D array.
+    alternative : Literal["two-sided", "less", "greater"], optional
+        Type of the alternative hypothesis. Defaults to "two-sided".
+    null_value : float, optional
+        The null value of the hypothesis test. Defaults to 0.0.
     use_sparse : bool, optional
         Whether to use sparse matrix.
         If True, the `var` must be given as a sparse matrix. Defaults to False.
