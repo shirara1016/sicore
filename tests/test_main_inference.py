@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_allclose
 
-from sicore.core.base import SelectiveInferenceResult
+from sicore.core.base import SelectiveInferenceResult, truncated_cdf
 from sicore.core.real_subset import NotBelongToSubsetError, RealSubset
 from sicore.main.inference import SelectiveInferenceChi, SelectiveInferenceNorm
 from sicore.utils.constructor import construct_projection_matrix
@@ -168,8 +168,8 @@ class MarginalScreeningNorm(MarginalScreening):
         SelectiveInferenceResult
             The result of the selective inference.
         """
-        eta = self.construct_eta(index)
-        si = SelectiveInferenceNorm(self.y, self.sigma, eta)
+        self.eta = self.construct_eta(index)
+        si = SelectiveInferenceNorm(self.y, self.sigma, self.eta)
         return si.inference(
             self.algorithm,
             self.model_selector,
@@ -273,7 +273,19 @@ def test_marginal_screening_norm(
         assert (result.p_value <= significance_level) == (
             expected_p_value <= significance_level
         )
-    assert_allclose(result.stat, expected_stat, rtol=1e-3, atol=1e-3)
+    pivot = truncated_cdf(result.null_rv, result.stat, result.truncated_intervals)
+    assert_allclose(
+        result.stat,
+        expected_stat * np.linalg.norm(ms.eta),
+        rtol=1e-3,
+        atol=1e-3,
+    )
+    assert_allclose(
+        result.p_value,
+        2 * min(pivot, 1 - pivot),
+        rtol=1e-3,
+        atol=1e-3,
+    )
 
 
 @pytest.mark.parametrize(
@@ -301,8 +313,20 @@ def test_marginal_screening_norm_parallel(
     ms = MarginalScreeningNorm(X, y, sigma, k)
 
     result = ms.inference(index, n_jobs=4)
+    pivot = truncated_cdf(result.null_rv, result.stat, result.truncated_intervals)
     assert_allclose(result.p_value, expected_p_value, rtol=1e-3, atol=1e-3)
-    assert_allclose(result.stat, expected_stat, rtol=1e-3, atol=1e-3)
+    assert_allclose(
+        result.stat,
+        expected_stat * np.linalg.norm(ms.eta),
+        rtol=1e-3,
+        atol=1e-3,
+    )
+    assert_allclose(
+        result.p_value,
+        2 * min(pivot, 1 - pivot),
+        rtol=1e-3,
+        atol=1e-3,
+    )
 
 
 @pytest.mark.parametrize(
@@ -345,7 +369,14 @@ def test_marginal_screening_chi(
         assert (result.p_value <= significance_level) == (
             expected_p_value <= significance_level
         )
+    pivot = truncated_cdf(result.null_rv, result.stat, result.truncated_intervals)
     assert_allclose(result.stat, expected_stat, rtol=1e-3, atol=1e-3)
+    assert_allclose(
+        result.p_value,
+        1.0 - pivot,
+        rtol=1e-3,
+        atol=1e-3,
+    )
 
 
 @pytest.mark.parametrize(
@@ -373,5 +404,12 @@ def test_marginal_screening_chi_parallel(
     ms = MarginalScreeningChi(X, y, sigma, k)
 
     result = ms.inference(indexes, n_jobs=4)
+    pivot = truncated_cdf(result.null_rv, result.stat, result.truncated_intervals)
     assert_allclose(result.p_value, expected_p_value, rtol=1e-3, atol=1e-3)
     assert_allclose(result.stat, expected_stat, rtol=1e-3, atol=1e-3)
+    assert_allclose(
+        result.p_value,
+        1.0 - pivot,
+        rtol=1e-3,
+        atol=1e-3,
+    )

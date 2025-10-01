@@ -127,6 +127,7 @@ class SelectiveInferenceNorm(SelectiveInference):
             eta_sigma_eta = tf.tensordot(eta, sigma_eta, axes=1)
             sqrt_eta_sigma_eta = tf.sqrt(eta_sigma_eta)
             self.stat = tf.tensordot(eta, data, axes=1) / sqrt_eta_sigma_eta
+            self.stat_scale = sqrt_eta_sigma_eta
 
         elif use_torch:
             import torch
@@ -145,6 +146,7 @@ class SelectiveInferenceNorm(SelectiveInference):
             eta_sigma_eta = torch.dot(eta, sigma_eta)
             sqrt_eta_sigma_eta = torch.sqrt(eta_sigma_eta)
             self.stat = torch.dot(eta, data) / sqrt_eta_sigma_eta
+            self.stat_scale = sqrt_eta_sigma_eta
 
         else:
             data, eta = np.array(data), np.array(eta)
@@ -159,8 +161,10 @@ class SelectiveInferenceNorm(SelectiveInference):
             eta_sigma_eta = eta @ sigma_eta
             sqrt_eta_sigma_eta = np.sqrt(eta_sigma_eta)
             self.stat = eta @ data / sqrt_eta_sigma_eta
+            self.stat_scale = sqrt_eta_sigma_eta
 
         self.stat = float(self.stat)
+        self.stat_scale = float(self.stat_scale)
 
         self.b = sigma_eta / sqrt_eta_sigma_eta
         self.a = data - self.stat * self.b
@@ -265,6 +269,7 @@ class SelectiveInferenceChi(SelectiveInference):
             self.stat = np.linalg.norm((var**-0.5) * projected_data, ord=2).item()
 
         self.stat = float(self.stat)
+        self.stat_scale = float(var**0.5)
 
         self.b = projected_data / self.stat
         self.a = data - self.stat * self.b

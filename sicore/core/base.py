@@ -181,6 +181,7 @@ class SelectiveInference:
     def __init__(self) -> None:
         """Initialize a SelectiveInference object."""
         self.stat: float
+        self.stat_scale: float
 
         self.a: np.ndarray
         self.b: np.ndarray
@@ -352,16 +353,23 @@ class SelectiveInference:
             truncated_intervals,
         )
 
+        kwds = self.null_rv.kwds.copy()
+        kwds.update(
+            {
+                "scale": kwds.get("scale", 1.0) * self.stat_scale,
+                "loc": kwds.get("loc", 0.0) * self.stat_scale,
+            },
+        )
         return SelectiveInferenceResult(
-            self.stat,
+            self.stat * self.stat_scale,
             p_value,
             inf_p,
             sup_p,
-            searched_intervals.tolist(),
-            truncated_intervals.tolist(),
+            (searched_intervals.intervals * self.stat_scale).tolist(),
+            (truncated_intervals.intervals * self.stat_scale).tolist(),
             search_count,
             detect_count,
-            self.null_rv,
+            self.null_rv.dist(*self.null_rv.args, **kwds),
             self.alternative,
         )
 
@@ -690,15 +698,22 @@ class SelectiveInference:
             search_count += search_count_
             detect_count += detect_count_
 
+        kwds = self.null_rv.kwds.copy()
+        kwds.update(
+            {
+                "scale": kwds.get("scale", 1.0) * self.stat_scale,
+                "loc": kwds.get("loc", 0.0) * self.stat_scale,
+            },
+        )
         return SelectiveInferenceResult(
-            self.stat,
+            self.stat * self.stat_scale,
             self._compute_pvalue(truncated_intervals),
             *self._evaluate_pvalue_bounds(searched_intervals, truncated_intervals),
-            searched_intervals.tolist(),
-            truncated_intervals.tolist(),
+            (searched_intervals.intervals * self.stat_scale).tolist(),
+            (truncated_intervals.intervals * self.stat_scale).tolist(),
             search_count,
             detect_count,
-            self.null_rv,
+            self.null_rv.dist(*self.null_rv.args, **kwds),
             self.alternative,
         )
 
