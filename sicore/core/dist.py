@@ -48,6 +48,42 @@ def truncated_cdf(
     return np.exp(-np.log1p(np.exp(outer_log_area - inner_log_area)))
 
 
+def truncated_pdf(
+    rv: rv_continuous,
+    z: float,
+    intervals: np.ndarray | list[list[float]] | RealSubset,
+) -> float:
+    """Compute the pdf value of the truncated distribution.
+
+    Parameters
+    ----------
+    rv : rv_continuous
+        The rv_continuous instance to be truncated.
+    z : float
+        The value at which to compute the cdf of the truncated distribution.
+    intervals : np.ndarray | list[list[float]] | RealSubset
+        The truncated intervals [[l1, u1], [l2, u2], ...].
+
+    Returns
+    -------
+    float
+        The pdf value at z.
+
+    Raises
+    ------
+    ValueError
+        If the value z is not belong to the truncated intervals.
+    """
+    if not isinstance(intervals, RealSubset):
+        intervals = RealSubset(intervals)
+
+    if z not in intervals:
+        raise NotBelongToSubsetError(z, intervals)
+
+    all_log_area = _compute_log_area(rv, intervals)
+    return np.exp(rv.logpdf(z) - all_log_area)
+
+
 def _compute_log_area(rv: rv_continuous, intervals: RealSubset) -> float:
     """Compute the logarithm of the integral of the pdf over the each interval.
 

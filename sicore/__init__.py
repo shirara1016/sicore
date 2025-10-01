@@ -25,7 +25,7 @@ from .core.base import (
     SelectiveInference,
     SelectiveInferenceResult,
 )
-from .core.cdf import truncated_cdf
+from .core.dist import truncated_cdf, truncated_pdf
 from .core.real_subset import RealSubset
 from .main.inference import SelectiveInferenceChi, SelectiveInferenceNorm
 from .utils.constructor import OneVector, construct_projection_matrix
@@ -70,6 +70,7 @@ __all__ = [
     "polytope_below_zero",
     "linear_polynomials_below_zero",
     "truncated_cdf",
+    "truncated_pdf",
     "generate_non_gaussian_rv",
     "uniformity_test",
     "OneVector",

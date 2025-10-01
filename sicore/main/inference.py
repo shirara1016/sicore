@@ -4,9 +4,14 @@ from typing import Literal
 
 import numpy as np
 from scipy import sparse  # type: ignore[import]
+from scipy.optimize import root_scalar  # type: ignore[import]
 from scipy.stats import chi, norm  # type: ignore[import]
 
-from sicore.core.base import SelectiveInference
+from sicore.core.base import (
+    SelectiveInference,
+    SelectiveInferenceResult,
+)
+from sicore.core.dist import truncated_cdf, truncated_pdf
 from sicore.core.real_subset import RealSubset
 
 
@@ -178,6 +183,71 @@ class SelectiveInferenceNorm(SelectiveInference):
             RealSubset([[-10.0 - np.abs(self.stat), 10.0 + np.abs(self.stat)]])
             & self.support
         )
+
+    def interval_estimate(
+        self,
+        result: SelectiveInferenceResult,
+        alpha: float,
+    ) -> tuple[float, float]:
+        """Compute the selective confidence interval.
+
+        Note that it has been pointed out that the interval length can theoretically become infinite.
+
+        Parameters
+        ----------
+        result : SelectiveInferenceResult
+            The result of inference method. It must be computed with `inference_mode="exhaustive"`.
+        alpha : float
+            Confidence level. The selective confidence interval has the coverage of 1 - alpha.
+
+        Returns
+        -------
+        tuple[float, float]
+            Lower and upper bounds of the selective confidence interval.
+        """
+        scale = result.null_rv.kwds.get("scale", 1.0)
+        z = result.stat / scale
+        lower_bound = root_scalar(
+            lambda mu: truncated_cdf(
+                norm(loc=mu),
+                z,
+                result.truncated_intervals,
+            )
+            - alpha / 2,
+        )
+        upper_bound = root_scalar(
+            lambda mu: truncated_cdf(
+                norm(loc=mu),
+                z,
+                result.truncated_intervals,
+            )
+            - (1 - alpha / 2),
+        )
+        return float(lower_bound * scale), float(upper_bound * scale)
+
+    def point_estimate(self, result: SelectiveInferenceResult) -> float:
+        """Compute the selective maximum likelihood estimate.
+
+        Parameters
+        ----------
+        result : SelectiveInferenceResult
+            The result of inference method. It must be computed with `inference_mode="exhaustive"`.
+
+        Returns
+        -------
+        float
+            The selective maximum likelihood estimate.
+        """
+        scale = result.null_rv.kwds.get("scale", 1.0)
+        z = result.stat / scale
+        point_estimate = root_scalar(
+            lambda mu: truncated_pdf(
+                norm(loc=mu),
+                z,
+                result.truncated_intervals,
+            ),
+        )
+        return float(point_estimate * scale)
 
 
 class SelectiveInferenceChi(SelectiveInference):

@@ -10,7 +10,7 @@ from joblib import Parallel, delayed  # type: ignore[import]
 from scipy.stats import rv_continuous  # type: ignore[import]
 from tqdm import tqdm  # type: ignore[import]
 
-from .cdf import truncated_cdf
+from .dist import truncated_cdf
 from .real_subset import RealSubset
 
 
