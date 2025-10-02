@@ -42,8 +42,8 @@ def truncated_cdf(
     inner_intervals = intervals & RealSubset([[-np.inf, z]])
     outer_intervals = intervals - RealSubset([[-np.inf, z]])
 
-    inner_log_area = _compute_log_area(rv, inner_intervals)
-    outer_log_area = _compute_log_area(rv, outer_intervals)
+    inner_log_area = compute_log_area(rv, inner_intervals)
+    outer_log_area = compute_log_area(rv, outer_intervals)
     # equal to 1.0 / (1.0 + np.exp(outer_log_area - inner_log_area))
     return np.exp(-np.log1p(np.exp(outer_log_area - inner_log_area)))
 
@@ -80,11 +80,11 @@ def truncated_pdf(
     if z not in intervals:
         raise NotBelongToSubsetError(z, intervals)
 
-    all_log_area = _compute_log_area(rv, intervals)
+    all_log_area = compute_log_area(rv, intervals)
     return np.exp(rv.logpdf(z) - all_log_area)
 
 
-def _compute_log_area(rv: rv_continuous, intervals: RealSubset) -> float:
+def compute_log_area(rv: rv_continuous, intervals: RealSubset) -> float:
     """Compute the logarithm of the integral of the pdf over the each interval.
 
     Parameters
