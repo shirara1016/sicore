@@ -22,12 +22,17 @@ This package requires python 3.10 or higher and automatically installs any depen
 
 from .core.base import (
     InfiniteLoopError,
+    RandomizedInferenceResult,
     SelectiveInference,
     SelectiveInferenceResult,
 )
 from .core.dist import truncated_cdf, truncated_pdf
 from .core.real_subset import RealSubset
-from .main.inference import SelectiveInferenceChi, SelectiveInferenceNorm
+from .main.inference import (
+    RandomizedSelectiveInference,
+    SelectiveInferenceChi,
+    SelectiveInferenceNorm,
+)
 from .utils.constructor import OneVector, construct_projection_matrix
 from .utils.evaluation import rejection_rate
 from .utils.figure import (
@@ -54,6 +59,8 @@ __all__ = [
     "SelectiveInferenceNorm",
     "SelectiveInferenceChi",
     "SelectiveInferenceResult",
+    "RandomizedSelectiveInference",
+    "RandomizedInferenceResult",
     "InfiniteLoopError",
     "rejection_rate",
     "pvalues_hist",

@@ -336,7 +336,7 @@ class SelectiveInference:
         *,
         progress: bool = False,
     ) -> SelectiveInferenceResult:
-        """Conduct selective inference.
+        """Conduct inference.
 
         Parameters
         ----------

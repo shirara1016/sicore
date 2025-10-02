@@ -237,9 +237,9 @@ class SelectiveInferenceNorm(SelectiveInference):
         Parameters
         ----------
         result : SelectiveInferenceResult
-            The result of inference method. It must be computed with `inference_mode="exhaustive"`.
+            The result of inference method. It should be computed with 'inference_mode="exhaustive"'.
         confidence_level : float
-            Confidence level. The selective confidence interval has the coverage of `confidence_level`.
+            Confidence level. The selective confidence interval has the coverage of 'confidence_level'.
 
         Returns
         -------
@@ -257,7 +257,7 @@ class SelectiveInferenceNorm(SelectiveInference):
         Parameters
         ----------
         result : SelectiveInferenceResult
-            The result of inference method. It must be computed with `inference_mode="exhaustive"`.
+            The result of inference method. It should be computed with 'inference_mode="exhaustive"'.
 
         Returns
         -------
@@ -379,7 +379,7 @@ class SelectiveInferenceChi(SelectiveInference):
 
 
 class RandomizedSelectiveInference:
-    """A class conducting selective inference for the normal distribution.
+    """A class conducting randomized selective inference for the normal distribution.
 
     Parameters
     ----------
@@ -550,7 +550,7 @@ class RandomizedSelectiveInference:
         *,
         progress: bool = False,
     ) -> RandomizedInferenceResult:
-        """Conduct selective inference.
+        """Conduct inference.
 
         Parameters
         ----------

@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path("../").resolve()))
 project = "sicore"
 project_copyright = "2025, Takeuchi-Lab"
 author = "Takeuchi-Lab"
-release = "2.6.0"
+release = "3.0.0"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
