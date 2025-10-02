@@ -130,6 +130,122 @@ class SelectiveInferenceResult:
         )
 
 
+@dataclass
+class RandomizedInferenceResult:
+    """A class containing the results of selective inference with randomization.
+
+    Attributes
+    ----------
+    stat : float
+        Test statistic value.
+    p_value : float
+        Selective p-value.
+    confidence_interval : tuple[float, float]
+        Selective confidence interval for the parameter of interest.
+    point_estimate : float
+        Selective maximum likelihood estimate for the parameter of interest.
+    searched_intervals : list[list[float]]
+        Intervals where the search was performed.
+    truncated_intervals : list[list[float]]
+        Intervals where the selected model is obtained.
+    search_count : int
+        Number of times the search was performed.
+    detect_count : int
+        Number of times the selected model was obtained.
+    null_rv : rv_continuous
+        Null distribution of the unconditional test statistic.
+    alternative : Literal["two-sided", "less", "greater"]
+        Type of the alternative hypothesis.
+    """
+
+    stat: float
+    p_value: float
+    confidence_interval: tuple[float, float]
+    point_estimate: float
+    searched_intervals: list[list[float]]
+    truncated_intervals: list[list[float]]
+    search_count: int
+    detect_count: int
+    null_rv: rv_continuous
+    alternative: Literal["two-sided", "less", "greater"]
+
+    def __post_init__(self) -> None:
+        """Compute the logarithm of the naive p-value and store it in the cache."""
+        match self.alternative:
+            case "two-sided":
+                self._log_naive_p_value = np.log(2.0) + self.null_rv.logcdf(
+                    -np.abs(self.stat),
+                )
+            case "less":
+                self._log_naive_p_value = self.null_rv.logsf(self.stat)
+            case "greater":
+                self._log_naive_p_value = self.null_rv.logcdf(self.stat)
+
+    def naive_p_value(self) -> float:
+        """Compute the naive p-value.
+
+        Returns
+        -------
+        float
+            The naive p-value.
+        """
+        return np.exp(self._log_naive_p_value)
+
+    def bonferroni_p_value(self, log_num_comparisons: float) -> float:
+        """Compute the Bonferroni-corrected p-value.
+
+        Parameters
+        ----------
+        log_num_comparisons : float
+            Logarithm of the number of comparisons.
+
+        Returns
+        -------
+        float
+            The Bonferroni-corrected p-value.
+        """
+        log_bonferroni_p_value = np.clip(
+            self._log_naive_p_value + log_num_comparisons,
+            -np.inf,
+            0.0,
+        )
+        return np.exp(log_bonferroni_p_value)
+
+    def __str__(self) -> str:
+        """Return a string representation of the SelectiveInferenceResult object.
+
+        Returns
+        -------
+        str
+            A string representation of the SelectiveInferenceResult object.
+        """
+        precision = 6
+
+        def _convert(intervals: list[list[float]], precision: float) -> str:
+            return (
+                "["
+                + ", ".join(
+                    [f"[{l:.{precision}f}, {u:.{precision}f}]" for l, u in intervals],
+                )
+                + "]"
+            )
+
+        return "\n".join(
+            [
+                f"stat: {self.stat:.{precision}f}",
+                f"p_value: {self.p_value:.{precision}f}",
+                f"confidence_interval: {self.confidence_interval}",
+                f"point_estimate: {self.point_estimate:.{precision}f}",
+                f"searched_intervals: {_convert(self.searched_intervals, precision)}",
+                f"truncated_intervals: {_convert(self.truncated_intervals, precision)}",
+                f"search_count: {self.search_count}",
+                f"detect_count: {self.detect_count}",
+                f"null_rv: {self.null_rv.dist.name}",
+                f"alternative: {self.alternative}",
+            ],
+        )
+
+
 class LoopType(Enum):
     """An enumeration class for loop types."""
 
