@@ -5,7 +5,7 @@ import pytest
 from numpy.testing import assert_allclose
 from scipy.stats import chi, norm, rv_continuous  # type: ignore[import]
 
-from sicore.core.cdf import truncated_cdf
+from sicore.core.dist import truncated_cdf
 
 
 @pytest.mark.parametrize(
